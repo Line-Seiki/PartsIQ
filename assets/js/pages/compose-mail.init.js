@@ -1,0 +1,1 @@
+function composeMail(){$("#compose-editor").length&&ClassicEditor.create(document.querySelector("#compose-editor")).then(function(o){}).catch(function(o){console.error("error",o)})}$(function(){composeMail()});

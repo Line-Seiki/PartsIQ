@@ -1,0 +1,28 @@
+# Ignore build and project artifacts
+/bin
+/obj
+/App_Data
+/Content/
+/App_Start/
+/Properties/
+/Scripts/
+/packages
+
+# Ignore Visual Studio user-specific files
+*.csproj.user
+
+# Ignore temp files, logs, and build results
+*.log
+*.db
+
+# Solution and project files should be tracked
+!PartsIq.sln
+!PartsIq.csproj
+
+# Ignore publish and build configurations
+Web.Debug.config
+Web.Release.config
+
+# Track Global.asax and favicon
+!Global.asax.cs
+!favicon.ico

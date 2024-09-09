@@ -1,0 +1,1 @@
+!function(i){"use strict";i('[data-plugin="dragula"]').each(function(){var a=i(this).data("containers"),t=[];if(a)for(var s=0;s<a.length;s++)t.push(i("#"+a[s])[0]);else t=[i(this)[0]];var n=i(this).data("handleclass");n?dragula(t,{moves:function(a,t,s){return s.classList.contains(n)}}):dragula(t)})}(jQuery);

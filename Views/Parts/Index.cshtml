@@ -1,0 +1,75 @@
+﻿@model IEnumerable<PartsIq.Models.Part>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .table-container {
+        height: 40vh;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="page-content">
+    <div class="page-title-box">
+        <div class="container-fluid">
+            <div class="page-title dflex-between-center">
+                <h3 class="mb-1 fw-bold">PIS</h3>
+                <ol class="breadcrumb mb-0 mt-1">
+                    <li class="breadcrumb-item">
+                        <a href="../index.html">
+                            <i class="bx bx-home fs-xs"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="ui-buttons.html">
+                            Components
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Accordian</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="page-content-wrapper mt--45">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12" id="pis-table-container">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end card-box-->
+                </div> <!-- end col -->
+            </div> <!-- end row -->
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '@Url.Action("GetPISTable", "Parts")',
+                method: "GET",
+                success: function (response) {
+
+                    $('#pis-table-container').append(response);
+
+                }
+
+            });
+        });
+
+    </script>
+
+}

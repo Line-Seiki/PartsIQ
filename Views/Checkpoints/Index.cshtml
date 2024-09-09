@@ -1,0 +1,100 @@
+﻿@model IEnumerable<PartsIq.Models.Checkpoint>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Part_ID)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Code)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.InspectionPart)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsActive)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsMeasurement)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LimitLower)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LimitUpper)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Note)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SamplingMethod)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Specification)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tools)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Part.Code)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Part_ID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Code)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.InspectionPart)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IsActive)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IsMeasurement)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.LimitLower)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.LimitUpper)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Note)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.SamplingMethod)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Specification)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Tools)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Part.Code)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.CheckpointId }) |
+            @Html.ActionLink("Details", "Details", new { id=item.CheckpointId }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.CheckpointId })
+        </td>
+    </tr>
+}
+
+</table>

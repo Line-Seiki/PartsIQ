@@ -1,0 +1,51 @@
+﻿@model IEnumerable<PartsIq.Models.ViewModels.UserGroupViewModel>
+
+@{
+    ViewBag.Title = "User Groups";
+}
+
+<div class="col-sm-4">
+    <div class="nav flex-column nav-pills nav-pills-tab" id="usergroup-pills-tab" role="tablist" aria-orientation="vertical">
+        @foreach (var group in Model)
+        {
+            <a class="nav-link mb-1 fw-bolder" data-group-id="@group.UserGroupId" data-bs-toggle="pill" href="#" role="tab">
+                @group.Name
+            </a>
+        }
+    </div>
+</div>
+
+<div class="col-sm-8">
+    <div class="tab-content" id="usergroup-pills-tabContent">
+        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+            <div id="userListContainer">   
+                @Html.Partial("_UserList", new List<PartsIq.Models.ViewModels.UserViewModel>())
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        $(document).ready(function () {
+  
+            $(document).on('click', ".nav-link", function (e) {        
+                e.preventDefault();
+                var groupId = $(this).data("group-id");
+
+                $.ajax({
+                    url: '@Url.Action("GetUsersInGroup", "UserGroupPermissions")',
+                    data: {groupId},
+                    type: 'GET',
+                    success: function (data) {
+                        console.log(data);
+                        var userListContainer = $("#userListContainer");
+                        userListContainer.empty();
+                        userListContainer.html(data);
+                    },
+                    error: function () {
+                        alert("An error occurred while fetching users.");
+                    }
+                });
+            });
+        });
+    </script>
+

@@ -1,0 +1,1 @@
+!function(e){"use strict";e.scrollIt({upKey:38,downKey:40,easing:"linear",scrollTime:300,activeClass:"active",onPageChange:null,topOffset:-100}),e(".stickyside").stick_in_parent({offset_top:100})}(jQuery);

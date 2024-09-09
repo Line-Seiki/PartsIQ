@@ -1,0 +1,1 @@
+!function(t){t(".wishlist-icon").on("click",function(){t(this).toggleClass("bg-light").toggleClass("bg-danger"),t(this).toggleClass("text-default").toggleClass("text-white")}),t('[data-icon="cart"]').on("click",function(){t(this).toggleClass("bg-primary").toggleClass("bg-success"),t(this).children(".bx").toggleClass("bx-cart").toggleClass("bx-check")})}(jQuery);

@@ -1,0 +1,1 @@
+var colors={primary:"#7859f4",secondary:"#1e2139",success:"#43d39e",info:"#25c2e3",danger:"#ff5c75",warning:"#ffbe0b",orange:"#f77e53",gray:"#f8f9fa",grayDark:"#343a40",indigo:"#564ab1",purple:"#6f42c1",pink:"#e83e8c",teal:"#1ce1ac",white:"#ffffff",gray300:"#e2e7f1",gray700:"#4B4B5A",gray400:"#ced4da",gridColor:"#eeeeee"};

@@ -1,0 +1,116 @@
+﻿@model IEnumerable<PartsIq.Models.Part>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table table-centered dt-responsive w-100 dataTable no-footer dtr-inline fs-12" id="pis-table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Code)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.dateMonitored)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.docNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.isMonitored)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.model)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.priority)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Version)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.FileAttachment.FilePath)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.dateMonitored)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.docNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.isMonitored)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.model)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.priority)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Version)
+                </td>
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.FileAttachment.FilePath)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.PartId }) |
+                    @Html.ActionLink("Checkpoints", "GetCheckpoints", "Checkpoints", new { id = item.PartId }, null) |
+                    @Html.ActionLink("Details", "Details", new { id = item.PartId }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.PartId })
+                </td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>
+
+<script>
+    var pisTable = $(document).find('#pis-table').DataTable({
+        response: true,
+        lengthChange: !1,
+        buttons: [
+            { extend: "copy", className: "btn-light" },
+            { extend: "csv", className: "btn-light" },
+        ],
+        scrollX: true,
+        scrollY: '300px',
+        responsive: true,
+        searching: false,
+        language: {
+            paginate: {
+                previous: "<i class='mdi mdi-chevron-left'>",
+                next: "<i class='mdi mdi-chevron-right'>",
+            },
+        },
+        drawCallback: function () {
+            $(".dataTables_paginate > .pagination").addClass(
+                "flat-rounded-pagination"
+            ),
+                $(".dataTables_filter")
+                    .find("label")
+                    .addClass("search-box d-inline-flex position-relative"),
+                $(".dataTables_filter")
+                    .find(".form-control")
+                    .attr("placeholder", "Search...");
+        },
+    });
+
+</script>

@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="page-content">
+    <div class="page-content-wrapper mt--45">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="calendar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- end card-box-->
+                </div> <!-- end col -->
+            </div> <!-- end row -->
+        </div>
+    </div>
+</div>
+    <div class="main-section">
+        
+    </div>
+
+
+    @section scripts
+{
+        <script src="~/assets/libs/fullcalendar/dist/index.global.min.js"></script>
+        <script>
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var calendarEl = document.getElementById('calendar');
+
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+
+                    schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                    timeZone: 'UTC',
+                    initialView: 'resourceTimelineDay',
+                    aspectRatio: 1.5,
+                    headerToolbar: {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'resourceTimelineDay,resourceTimelineWeek,resourceTimelineMonth'
+                    },
+                    editable: true,
+                    resourceAreaHeaderContent: 'Rooms',
+                    resources: 'https://fullcalendar.io/api/demo-feeds/resources.json?with-nesting&with-colors',
+                    events: 'https://fullcalendar.io/api/demo-feeds/events.json?single-day&for-resource-timeline'
+                });
+
+                calendar.render();
+            });
+
+        </script>
+    }

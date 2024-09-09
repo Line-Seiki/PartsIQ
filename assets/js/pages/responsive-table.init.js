@@ -1,0 +1,1 @@
+!function(){"use strict";(0,window.jQuery)(".table-rep-plugin").responsiveTable("update")}();

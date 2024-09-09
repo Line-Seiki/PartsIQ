@@ -1,0 +1,1 @@
+!function(u){u('[data-toggle="input-mask"]').each(function(a,e){var t=u(e).data("maskFormat"),r=u(e).data("reverse");null!=r?u(e).mask(t,{reverse:r}):u(e).mask(t)}),u(".autonumber").autoNumeric("init")}(jQuery);

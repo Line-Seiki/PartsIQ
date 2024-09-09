@@ -1,0 +1,100 @@
+﻿@model IEnumerable<PartsIq.Models.UserGroupPermission>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.AccessoriesPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AccountPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AlertPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DeliveryPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EvaluationPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.InspectionPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.MessagingPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.NotificationPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PisPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ReportPermission)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.VERSION)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.AccessoriesPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AccountPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AlertPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DeliveryPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EvaluationPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.InspectionPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MessagingPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.NotificationPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PisPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ReportPermission)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.VERSION)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.UserGroupId }) |
+            @Html.ActionLink("Details", "Details", new { id=item.UserGroupId }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.UserGroupId })
+        </td>
+    </tr>
+}
+
+</table>

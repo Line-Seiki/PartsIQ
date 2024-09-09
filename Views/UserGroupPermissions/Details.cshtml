@@ -1,0 +1,115 @@
+﻿@model PartsIq.Models.UserGroupPermission
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>UserGroupPermission</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.AccessoriesPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AccessoriesPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AccountPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AccountPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AlertPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AlertPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DeliveryPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DeliveryPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.EvaluationPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.EvaluationPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.InspectionPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.InspectionPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MessagingPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MessagingPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NotificationPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NotificationPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PisPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PisPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReportPermission)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReportPermission)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.VERSION)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.VERSION)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.UserGroupId }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
