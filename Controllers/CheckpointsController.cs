@@ -16,7 +16,7 @@ namespace PartsIq.Controllers
 {
     public class CheckpointsController : Controller
     {
-        private PartsIQEntities db = new PartsIQEntities();
+        private PartsIQ_Entities db = new PartsIQ_Entities();
 
         // GET: Checkpoints
         public async Task<ActionResult> Index()
