@@ -8,13 +8,12 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using PartsIq.Models;
-using PartsIq.Models.ViewModels;
 
 namespace PartsIq.Controllers
 {
     public class UserGroupPermissionsController : Controller
     {
-        private PartsIQ_Entities db = new PartsIQ_Entities();
+        private PartsIQEntities db = new PartsIQEntities();
 
         // GET: UserGroupPermissions
         public async Task<ActionResult> Index()
@@ -130,17 +129,37 @@ namespace PartsIq.Controllers
 
         public ActionResult GetUsersInGroup(int groupId)
         {
-            var users = db.Users
+            if (groupId != 0)
+            {
+                var users = db.Users
                           .Where(u => u.UserGroup_ID == groupId)
-                          .Select(u => new UserViewModel
+                          .Select(u => new
                           {
-                              UserId = u.UserId,
-                              Name = u.Name,
-                              Email = u.Email
+                              Username = u.Username.Trim(), // Trim username
+                              Name = (u.FirstName.Trim() + " " + u.LastName.Trim()), // Trim first and last names and add a space between them
+                              Email = u.Email.Trim(), // Trim email
+                              UserGroup = u.UserGroupPermission.Name.Trim(), // Trim user group name
+                              Status = u.IsActive == 1 ? "Active" : "InActive",
+                              UserID = u.UserID,
                           }).ToList();
-
-            return PartialView("_UserList", users);
+                return Json(users, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                var users = db.Users
+                         .Select(u => new
+                         {
+                             Username = u.Username.Trim(),
+                             Name = (u.FirstName.Trim() + " " + u.LastName.Trim()),
+                             Email = u.Email.Trim(),
+                             UserGroup = u.UserGroupPermission.Name.Trim(),
+                             Status = u.IsActive == 1 ? "Active" : "InActive",
+                             UserID = u.UserID,
+                         }).ToList();
+                return Json(users, JsonRequestBehavior.AllowGet);
+            }
         }
+
 
         protected override void Dispose(bool disposing)
         {

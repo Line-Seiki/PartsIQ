@@ -28,8 +28,10 @@ namespace PartsIq.Models
         }
     
         public virtual DbSet<Checkpoint> Checkpoints { get; set; }
+        public virtual DbSet<Delivery> Deliveries { get; set; }
         public virtual DbSet<FileAttachment> FileAttachments { get; set; }
         public virtual DbSet<Part> Parts { get; set; }
+        public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<UserGroupPermission> UserGroupPermissions { get; set; }
         public virtual DbSet<User> Users { get; set; }

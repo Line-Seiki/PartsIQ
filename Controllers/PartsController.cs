@@ -14,7 +14,7 @@ namespace PartsIq.Controllers
 {
     public class PartsController : Controller
     {
-        private PartsIQ_Entities db = new PartsIQ_Entities();
+        private PartsIQEntities db = new PartsIQEntities();
 
         // GET: Parts
         public async Task<ActionResult> Index()

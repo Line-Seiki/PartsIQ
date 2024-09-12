@@ -5,14 +5,18 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="523d023dd3f14148afb31eda262bd4df" Name="Diagram1" ZoomLevel="95">
-        <EntityTypeShape EntityType="PartsIQModel.Checkpoint" Width="1.5" PointX="5.25" PointY="1" />
-        <EntityTypeShape EntityType="PartsIQModel.FileAttachment" Width="1.5" PointX="0.75" PointY="1.875" />
-        <EntityTypeShape EntityType="PartsIQModel.Part" Width="1.5" PointX="3" PointY="1.125" />
-        <EntityTypeShape EntityType="PartsIQModel.sysdiagram" Width="1.5" PointX="5.75" PointY="5.75" />
-        <EntityTypeShape EntityType="PartsIQModel.UserGroupPermission" Width="1.5" PointX="0.75" PointY="6" />
-        <EntityTypeShape EntityType="PartsIQModel.User" Width="1.5" PointX="3" PointY="6.375" />
-        <EntityTypeShape EntityType="PartsIQModel.InspectionInfo" Width="1.5" PointX="7.75" PointY="0.75" />
+        <EntityTypeShape EntityType="PartsIQModel.Checkpoint" Width="1.5" PointX="5.25" PointY="8" />
+        <EntityTypeShape EntityType="PartsIQModel.Delivery" Width="1.5" PointX="5.25" PointY="3.125" />
+        <EntityTypeShape EntityType="PartsIQModel.FileAttachment" Width="1.5" PointX="0.75" PointY="4.875" />
+        <EntityTypeShape EntityType="PartsIQModel.Part" Width="1.5" PointX="3" PointY="4" />
+        <EntityTypeShape EntityType="PartsIQModel.Supplier" Width="1.5" PointX="3" PointY="0.75" />
+        <EntityTypeShape EntityType="PartsIQModel.sysdiagram" Width="1.5" PointX="0.75" PointY="8.5" />
+        <EntityTypeShape EntityType="PartsIQModel.UserGroupPermission" Width="1.5" PointX="7.75" PointY="1.75" />
+        <EntityTypeShape EntityType="PartsIQModel.User" Width="1.5" PointX="10" PointY="2" />
+        <EntityTypeShape EntityType="PartsIQModel.InspectionInfo" Width="1.5" PointX="7.75" PointY="6.5" />
         <AssociationConnector Association="PartsIQModel.FK_Checkpoints_Parts" />
+        <AssociationConnector Association="PartsIQModel.FK_Delivery_Parts" />
+        <AssociationConnector Association="PartsIQModel.FK_Delivery_Supplier" />
         <AssociationConnector Association="PartsIQModel.FK_Parts_File" />
         <AssociationConnector Association="PartsIQModel.FK_Users_UserGroupPermissions" />
       </Diagram>

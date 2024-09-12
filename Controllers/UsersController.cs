@@ -9,13 +9,13 @@ using System.Web;
 using System.Web.Mvc;
 using PartsIq.Models;
 using System.Diagnostics;
-using PartsIq.Models.ViewModels;
+using OfficeOpenXml.ConditionalFormatting.Contracts;
 
 namespace PartsIq.Controllers
 {
     public class UsersController : Controller
     {
-        private PartsIQ_Entities db = new PartsIQ_Entities();
+        private PartsIQEntities db = new PartsIQEntities();
 
         // GET: Users
         public async Task<ActionResult> Index()
@@ -127,7 +127,7 @@ namespace PartsIq.Controllers
         public ActionResult GetUserEditForm(int userId)
         {
             var user = db.Users
-                         .Where(u => u.UserId == userId)
+                         .Where(u => u.UserID == userId)
                          .FirstOrDefault();
 
             if (user == null)
@@ -144,6 +144,85 @@ namespace PartsIq.Controllers
             return PartialView("_UserEditForm", user);
         }
 
+        #region UsersCRUD
+
+        [HttpPost][ValidateAntiForgeryToken]
+        public ActionResult EditUser()
+        {
+            var form = Request.Form;
+            int userID;
+
+            if (!int.TryParse(form.Get("userID"), out userID))
+            {
+                return Json(new { success = false, message = "Invalid User ID" }, JsonRequestBehavior.AllowGet);
+            }
+
+            var user = db.Users.Find(userID);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found" }, JsonRequestBehavior.AllowGet);
+            }
+
+            try
+            {
+                user.LastUpdate = DateTime.Now;
+                user.Username = form.Get("username");
+
+                // Hash the password before saving it (assuming you're using a hash function)
+                string newPassword = form.Get("password");
+                if (!string.IsNullOrEmpty(newPassword))
+                {
+                    user.Password = newPassword; // Replace with actual hashing method
+                }
+
+                user.Email = form.Get("email");
+                user.FirstName = form.Get("firstname");
+                user.LastName = form.Get("lastname");
+
+                int userGroupID;
+                if (int.TryParse(form.Get("usergroup"), out userGroupID))
+                {
+                    user.UserGroup_ID = userGroupID;
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Invalid User Group" }, JsonRequestBehavior.AllowGet);
+                }
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "User updated successfully" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"An error occurred: {ex.Message}" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult ChangeUserStatus(int userID, byte status)
+        {
+            if (userID > 0)
+            {
+                var user = db.Users.Find(userID);
+                if (user != null) {
+                    user.IsActive = status;
+                    db.SaveChanges();
+                    return Json("success", JsonRequestBehavior.AllowGet);
+
+                }
+                else
+                {
+                    return HttpNotFound();
+                }
+            }
+            else
+            {
+                return HttpNotFound();
+            }
+        }
+
+        #endregion
         protected override void Dispose(bool disposing)
         {
             if (disposing)

@@ -44,6 +44,7 @@
                     </div> <!-- end card-box-->
                 </div> <!-- end col -->
             </div> <!-- end row -->
+            <!-- end row -->
         </div>
     </div>
     <!-- main content End -->
@@ -57,82 +58,97 @@
         <div class="modal-content">
         </div>
     </div>
+</div>
+
+<div id="inactive-user-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-danger">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="bx bx-notification-off fs-xl text-white"></i>
+                    <h4 class="mt-2 text-white">Oh snap!</h4>
+                    <p class="mt-3 text-white">
+                        Press continue to set User as Inactive.
+                    </p>
+                    <button type="button" class="btn btn-light my-2 inactive-btn" data-bs-dismiss="modal">Continue</button>
+                    <button type="button" class="btn btn-secondary my-2" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
-
-
-<h2>Index</h2>
-
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Email)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IsActive)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.IsLoggedIN)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.LastUpdate)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Password)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Username)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.UserGroupPermission.Name)
-        </th>
-        <th></th>
-    </tr>
-
-    @foreach (var item in Model)
-    {
+<!-- /.modal -->
+@*<p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+    <table class="table">
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsLoggedIN)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastUpdate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Password)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Username)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UserGroupPermission.Name)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id = item.UserId }) |
-                @Html.ActionLink("Details", "Details", new { id = item.UserId }) |
-                @Html.ActionLink("Delete", "Delete", new { id = item.UserId })
-            </td>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsLoggedIN)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastUpdate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Password)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Username)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserGroupPermission.Name)
+            </th>
+            <th></th>
         </tr>
-    }
 
-</table>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsActive)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsLoggedIN)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastUpdate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Password)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Username)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserGroupPermission.Name)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.UserId }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.UserId }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.UserId })
+                </td>
+            </tr>
+        }
+
+    </table>*@
 
 @section scripts {
+
     <script>
         $(document).ready(function () {
 
@@ -161,9 +177,76 @@
                 });
         });
 
+            $(document).on("click", ".btn-danger[data-bs-target='#inactive-user-modal']", function () {
+                let userID = $(this).data('user-id');
+                $('.inactive-btn').attr("data-id", userID);
+
+            });
+
             $(document).on('submit', '#edit-user-form', function () {
                 alert('test');
             });
+
+            $(document).on('click', '#edit-user-form-btn', function () {
+                let formData = new FormData();
+
+                // Collect form data
+                let username = $("#Username").val().trim();
+                let email = $("#Email").val().trim();
+                let password = $("#Password").val().trim();
+                let firstname = $("#FirstName").val().trim();
+                let lastname = $("#LastName").val().trim();
+                let usergroup = $('#UserGroup_ID').val();
+                let userID = $('#UserId').val();
+
+                // Append values to FormData
+                formData.append("username", username);
+                formData.append("email", email);
+                formData.append("password", password);
+                formData.append("firstname", firstname);
+                formData.append("lastname", lastname);
+                formData.append("usergroup", usergroup);
+                formData.append("userID", userID);
+                var token = $('input[name="__RequestVerificationToken"]').val();
+                formData.append("__RequestVerificationToken", token);
+                // AJAX request
+                $.ajax({
+                    url: '@Url.Action("EditUser", "Users")',
+                    method: "POST",
+                    data: formData,
+                    processData: false, // Prevent jQuery from automatically processing the data
+                    contentType: false, // Set to false to allow FormData to handle content type
+                    success: function (response) {
+                        alertify.success('Success.');
+                        $('#edit-user-modal').modal("toggle");
+                        var activeNavLink = $('.nav-link.active');
+                        activeNavLink.trigger('click');
+                       
+                    },
+                    error: function (err) {
+                        alertify.error(`Error occurred: ${err.responseText}`);
+                    }
+                });
+            });
+
+            $(document).on('click', '.inactive-btn' , function () {
+                let userID = $(this).data("id");
+                $.ajax({
+                    url: '@Url.Action("ChangeUserStatus", "Users")',
+                    method: "POST",
+                    data: {
+                        userID: userID,
+                        status : 0,
+                    },
+                    success: function (res) {
+                        alertify.success("Success")
+                    }, error: function (err) {
+                        alertify.error(`Error ${err} error occured.`)
+                    }
+                });
+            });
+
+
 
         });
     </script>
