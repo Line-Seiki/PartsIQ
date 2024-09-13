@@ -89,6 +89,12 @@ namespace PartsIq.Controllers
             });     
         }
 
+        // POST: /Scheduling/ArchiveDelivery
+        public JsonResult ArchiveDelivery(int deliveryDetailId, int version)
+        {
+            var response = _db.ArchiveDelivery(deliveryDetailId, version);
+            return Json(response, JsonRequestBehavior.AllowGet);
+        }
 
         #region HELPERS
         public List<SelectListItem> PartListItems()

@@ -13,12 +13,14 @@ namespace PartsIq.Models
     public class SchedulingData
     {
         public int DeliveryId { get; set; }
+        public int DeliveryDetailId { get; set; }
         public string Status { get; set; }
         public DateTime DateDelivered { get; set; }
         public string PartCode { get; set; }
         public string PartName { get; set; }
         public string Model { get; set; }
         public string Supplier { get; set; }
+        public int SupplierID { get; set; } // used for delivery duplication
         public string DRNumber { get; set; }
         public int TotalQuantity { get; set; }
         public string LotNumber { get; set; }
@@ -28,6 +30,7 @@ namespace PartsIq.Models
         public int RemainingDays { get; set; }
         public int Priority { get; set; }
         public int Version { get; set; }
+        public int DeliveryVersion { get; set; }
     }
 
     public class DeliveryFormData
@@ -42,6 +45,7 @@ namespace PartsIq.Models
     public class EditDeliveryFormData
     {
         public int DeliveryId { get; set; }
+        public int DeliveryDetailId { get; set; }
         public DateTime DateDelivered { get; set; }
         public string PartCode { get; set; }
         public int Supplier { get; set; }
@@ -52,6 +56,7 @@ namespace PartsIq.Models
         public int LotQuantity { get; set; }
         public string Model { get; set; }
         public int Version { get; set; }
+        public int DeliveryVersion { get; set; }
     }
 
     public class ResponseData

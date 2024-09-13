@@ -20,6 +20,7 @@ namespace PartsIq.Models
         ResponseData CreateDelivery(DeliveryFormData formData);
         ResponseData EditDelivery(EditDeliveryFormData formData);
         ResponseData DuplicateDelivery(List<EditDeliveryFormData> multipleFormData);
+        ResponseData ArchiveDelivery(int deliveryDetailId, int version);
         List<SchedulingData> GetSchedulingData();
         #endregion
     }

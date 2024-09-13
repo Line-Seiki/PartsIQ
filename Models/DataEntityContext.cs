@@ -68,24 +68,27 @@ namespace PartsIq.Models
         #region Scheduling
         public List<SchedulingData> GetSchedulingData()
         {
-            return db.Deliveries.Select(del => new SchedulingData
+            return db.DeliveryDetails.Where(d => !d.IsArchived).Select(del => new SchedulingData
             {
                 DeliveryId = del.DeliveryID,
+                DeliveryDetailId = del.DeliveryDetailID,
                 Status = "Available",
-                DateDelivered = del.DateDelivered,
-                PartCode = del.Part.Code,
-                PartName = del.Part.name,
-                Model = del.Part.model,
-                Supplier = del.Supplier.Name,
-                DRNumber = del.DRNumber,
-                TotalQuantity = del.Quantity,
-                LotQuantity = 0,
-                LotNumber = "LOT-1",
+                DateDelivered = del.Delivery.DateDelivered,
+                PartCode = del.Delivery.Part.Code,
+                PartName = del.Delivery.Part.name,
+                Model = del.Delivery.Part.model,
+                Supplier = del.Delivery.Supplier.Name,
+                SupplierID = del.Delivery.SupplierID,
+                DRNumber = del.Delivery.DRNumber,
+                TotalQuantity = del.Delivery.Quantity,
+                LotQuantity = del.LotQuantity,
+                LotNumber = del.LotNumber,
                 InspectionDeadline = null,
-                Inspector = " ",
+                Inspector = "",
                 RemainingDays = 0,
-                Priority = del.Part.priority.Value,
+                Priority = del.Delivery.Part.priority.Value,
                 Version = del.VERSION,
+                DeliveryVersion = del.Delivery.VERSION,
 
             }).ToList();
         }
@@ -96,7 +99,7 @@ namespace PartsIq.Models
             {
                 int partPriorityLevel = db.Parts.Where(p => p.PartId == formData.PartCode).FirstOrDefault().priority.Value;
 
-                db.Deliveries.Add(new Delivery
+                var newDelivery = new Delivery
                 {
                     DateDelivered = formData.DateDelivered,
                     DRNumber = formData.DRNumber,
@@ -104,6 +107,19 @@ namespace PartsIq.Models
                     Quantity = formData.TotalQuantity,
                     SupplierID = formData.Supplier,
                     PartID = formData.PartCode,
+                    VERSION = 1
+                };
+
+                db.Deliveries.Add(newDelivery);
+                db.SaveChanges();
+
+                int newDeliveryId = newDelivery.DeliveryID;
+
+                db.DeliveryDetails.Add(new DeliveryDetail
+                {
+                    LotNumber = "",
+                    LotQuantity = newDelivery.Quantity,
+                    DeliveryID = newDeliveryId,
                     VERSION = 1
                 });
                 db.SaveChanges();
@@ -131,19 +147,33 @@ namespace PartsIq.Models
             try
             {
                 var delivery = db.Deliveries.Find(formData.DeliveryId);
+                var deliveryDetail = db.DeliveryDetails.Find(formData.DeliveryDetailId);
 
                 if (delivery == null) return new ResponseData
                 {
+                    Success = false,
                     Status = "Failed",
                     Message = "Delivery Not Found",
                 };
+                if (deliveryDetail == null) return new ResponseData
+                {
+                    Success = false,
+                    Status = "Failed",
+                    Message = "DeliveryDetail Not Found"
+                };
 
+                if (deliveryDetail.VERSION != formData.Version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
                 if (delivery.VERSION != formData.Version) return new ResponseData
                 {
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
                 };
 
+                // Delivery
                 if (delivery.SupplierID != formData.Supplier)
                 {
                     delivery.SupplierID = formData.Supplier;
@@ -154,10 +184,23 @@ namespace PartsIq.Models
                     delivery.Quantity = formData.TotalQuantity;
                     db.Entry(delivery).Property(d => d.Quantity).IsModified = true;
                 }
-
                 delivery.VERSION++;
-
                 db.SaveChanges();
+
+                // DeliveryDetail
+                if (deliveryDetail.LotNumber != formData.LotNumber)
+                {
+                    deliveryDetail.LotNumber = formData.LotNumber;
+                    db.Entry(deliveryDetail).Property(d => d.LotNumber).IsModified = true;
+                }
+                if (deliveryDetail.LotQuantity != formData.LotQuantity)
+                {
+                    deliveryDetail.LotQuantity = formData.LotQuantity;
+                    db.Entry(deliveryDetail).Property(d => d.LotQuantity).IsModified = true;
+                }
+                deliveryDetail.VERSION++;
+                db.SaveChanges();
+
                 return new ResponseData
                 {
                     Success = true,
@@ -190,18 +233,15 @@ namespace PartsIq.Models
                 };
 
 
-                var deliveries = multipleFormData.Select(d => new Delivery
+                var deliveries = multipleFormData.Select(d => new DeliveryDetail
                 {
-                    DateDelivered = d.DateDelivered,
-                    DRNumber = d.DRNumber,
-                    PriorityLevel = part.priority.Value,
-                    Quantity = d.TotalQuantity,
-                    SupplierID = d.Supplier,
-                    PartID = part.PartId,
+                    DeliveryID = d.DeliveryId,
+                    LotNumber = d.LotNumber,
+                    LotQuantity = d.LotQuantity,
                     VERSION = 1
                 });
 
-                db.Deliveries.AddRange(deliveries);
+                db.DeliveryDetails.AddRange(deliveries);
                 db.SaveChanges();
                 return new ResponseData
                 {
@@ -213,6 +253,39 @@ namespace PartsIq.Models
             catch (Exception ex)
             {
 
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong | Error({ex.Message})"
+                };
+            }
+        }
+
+        public ResponseData ArchiveDelivery(int deliveryDetailId, int version)
+        {
+            try
+            {
+                var deliveryDetail = db.DeliveryDetails.Find(deliveryDetailId);
+
+                if (deliveryDetail.VERSION != version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                deliveryDetail.IsArchived = true;
+                db.Entry(deliveryDetail).Property(d => d.IsArchived).IsModified = true;
+                deliveryDetail.VERSION++;
+                db.SaveChanges();
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = "Item Archived!"
+                };
+
+            }
+            catch (Exception ex)
+            {
                 return new ResponseData
                 {
                     Status = "Failed",

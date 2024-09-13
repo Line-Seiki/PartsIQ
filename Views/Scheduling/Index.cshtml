@@ -323,19 +323,32 @@
             archiveInfo.innerHTML = "";
 
             archiveInfo.innerHTML = `<b>DR-Number:</b> ${rowData.DRNumber}  <b>Model:</b> ${rowData.Model}`;
-            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button">Yes, Archive it!</button>
+            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button" onclick="approveArchive(${rowData.DeliveryDetailId}, ${rowData.Version})">Yes, Archive it!</button>
                                      <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>`;
         }
         // When Modal Accepted
-        function approveArchive(id) {
+        function approveArchive(id, version) {
             // AJAX function here
+            $.ajax({
+                url: "/Scheduling/ArchiveDelivery",
+                type: 'POST',
+                data: {
+                    deliveryDetailId: id,
+                    version
+                },
+                success(res) {
+                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                    else alertify.error(`${res.Status}: ${res.Message}`);
+                    schedulingTable.ajax.reload();
+                    $('#archiveModal').modal('hide');
+                },
+                error(err) {
+                    alertify.error(`${err}`);
+                }
+            })
         }
 
         // FUNCTIONALITY for Adding Deliveries
-        function addDelivery() {
-
-        }
-
         // flatpickr DATE PICKER
         flatpickr("#DateDelivered", {
             dateFormat: "Y-m-d",
@@ -367,8 +380,10 @@
             document.getElementById('left-column').classList.replace('col-12', 'col-6');
             document.getElementById('right-column').classList.remove('d-none');
 
-            const id = `${rowData.DeliveryId}`;
+            const id = `${rowData.DeliveryDetailId}`;
+            const deliveryId = `${rowData.DeliveryId}`;
             const version = rowData.Version;
+            const deliveryVersion = rowData.DeliveryVersion;
             const tabId = `tab-${rowData.DeliveryId}-${rowData.Model}`;
             const tabTitle = `
                                 <li class="nav-item">
@@ -379,7 +394,7 @@
                                 </li>
                             `;
             const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
-                                    <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}',${version},'${tabId}');">
+                                    <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}',${version},'${deliveryVersion}','${tabId}','${deliveryId}');">
                                         <div class="mb-3">
                                             <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
                                             <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
@@ -416,11 +431,11 @@
                                         </div>
                                         <div class="mb-3">
                                             <label for="LotNumber-${id}" class="form-label">Lot Number</label>
-                                            <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value="">
+                                            <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber}>
                                          </div>
                                          <div class="mb-3">
                                             <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
-                                            <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="0">
+                                            <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="${rowData.LotQuantity}">
                                          </div>
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </form>
@@ -435,13 +450,15 @@
             tabTrigger.show();
         }
 
-        function editChanges(id,version,tabId) {
+        function editChanges(id,version, deliveryVersion, tabId, deliveryId) {
             const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
             const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
             const formData = new FormData(dynamicForm);
             formData.append("Supplier", supplierSelected);
-            formData.append("DeliveryId", id);
-            formData.append("Version", version)
+            formData.append("DeliveryDetailId", id);
+            formData.append("DeliveryId", deliveryId);
+            formData.append("Version", version);
+            formData.append("DeliveryVersion", deliveryVersion);
             const data = Object.fromEntries(formData);
             console.log(data);
 
@@ -475,7 +492,6 @@
             const newLotEl = document.createElement('div');
             newLotEl.innerHTML = createLotHTML(currentLotNumber, newQty, id, data);
             lotContainer.appendChild(newLotEl.firstElementChild);
-            initializeDynamicSelectize(identifier);
             redistributeQuantities(id);
         }
 
@@ -500,11 +516,11 @@
                                         <div class="row align-items-center mb-3">
                                             <div class="col-md-3">
                                                 <label for="reqQty-${id}" class="form-label">Required Qty</label>
-                                                <input type="number" id="reqQty-${id}" class="form-control" value="${addRowData.TotalQuantity}" readonly />
+                                                <input type="number" id="reqQty-${id}" class="form-control" value="${addRowData.LotQuantity}" readonly />
                                             </div>
                                             <div class="col-md-3">
                                                 <label for="setQty-${id}" class="form-label">Current Set Qty</label>
-                                                <input type="number" id="setQty-${id}" class="form-control" value="${addRowData.TotalQuantity}" readonly />
+                                                <input type="number" id="setQty-${id}" class="form-control" value="${addRowData.LotQuantity}" readonly />
                                             </div>
                                             <div class="col-md-3"></div>
                                             <div class="col-md-3 d-flex gap-2">
@@ -538,14 +554,17 @@
         }
 
         function createLotHTML(lotNumber, qty, id, data) {
+            console.log(data);
             return `
                 <div id="lotInfo-${lotNumber}-${id}" class="col-md-6 mb-3">
                     <div class="card text-white bg-secondary">
                         <div class="card-body">
                             <div class="d-flex justify-content-md-end">
                                 ${lotNumber !== 1 ? `<button class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
-                                <input type="hidden" class="version-${id}" value="${data.Version}">
-                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryId}">
+                                <input type="hidden" class="version-${id}" value="${data.Version}"/>
+                                <input type="hidden" class="deliveryVersion-${id}" value="${data.DeliveryVersion}" />
+                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryId}"/>
+                                <input type="hidden" class="deliveryDetailId-${id}" value="${data.DeliveryDetailId}"/>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
@@ -573,11 +592,12 @@
                                 <div class="col-md-6">
                                     <div class="mb-2">
                                         <label for="Supplier-${id}-${lotNumber}" class="form-label">Supplier</label>
-                                        <select id="Supplier-${id}-${lotNumber}" class="form-control supplier-${id}" placeholder="Select Supplier..." required/></select>
+                                        <input id="Supplier-${id}-${lotNumber}" class="form-control supplier-${id}" value="${data.Supplier}" readonly/>
+                                        <input type="hidden" id="SupplierID-${id}-${lotNumber}" class="form-control supplierId-${id}" value="${data.SupplierID}" />
                                     </div>
                                     <div class="mb-2">
                                         <label for="qty-${lotNumber}" class="form-label">Total Quantity</label>
-                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${qty}" onchange="updateSetQty('${id}')" required/>
+                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${data.LotQuantity}" readonly/>
                                     </div>
                                     <div class="mb-2">
                                         <label for="lot-${lotNumber}" class="form-label">Lot Number</label>
@@ -585,7 +605,7 @@
                                     </div>
                                     <div class="mb-2">
                                         <label for="lotQty-${lotNumber}" class="form-label">Lot Quantity</label>
-                                        <input type="number" id="lotQty-${lotNumber}" class="form-control lot-qty-${id}" value="" />
+                                        <input type="number" id="lotQty-${lotNumber}" class="form-control lot-qty-${id}" value="${qty}" onchange="updateSetQty('${id}')" />
                                     </div>
                                 </div>
                             </div>
@@ -605,7 +625,7 @@
         function redistributeQuantities(id) {
             let { reqQtyEl, setQtyEl } = qtyInputs.find(input => input.id === id);
             const reqQty = parseInt(reqQtyEl.value);
-            const lotQtyInputs = document.querySelectorAll(`.total-qty-${id}`);
+            const lotQtyInputs = document.querySelectorAll(`.lot-qty-${id}`);
 
             if (lotQtyInputs.length === 0) {
                 setQtyEl.value = reqQty;
@@ -629,7 +649,7 @@
 
         function updateSetQty(id) {
             let { setQtyEl } = qtyInputs.find(input => input.id === id);
-            const lotQtyInputs = document.querySelectorAll(`.total-qty-${id}`);
+            const lotQtyInputs = document.querySelectorAll(`.lot-qty-${id}`);
             let totalQty = 0;
 
             lotQtyInputs.forEach(input => {
@@ -650,27 +670,31 @@
                 lots.forEach((lot, index) => {
                     if (index === 0) savedLots.push({
                         DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
+                        DeliveryDetailId: lot.querySelector(`.deliveryDetailId-${id}`).value,
                         DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
                         PartCode: lot.querySelector(`.partCode-${id}`).value,
                         PartName: lot.querySelector(`.part-name-${id}`).value,
                         Model: lot.querySelector(`.model-${id}`).value,
                         DRNumber: lot.querySelector(`.drNum-${id}`).value,
-                        Supplier: lot.querySelector(`.supplier-${id}`).value,
+                        Supplier: lot.querySelector(`.supplierId-${id}`).value,
                         TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
                         LotNumber: lot.querySelector(`.lot-code-${id}`).value,
                         LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
-                        Version: lot.querySelector(`.version-${id}`).value
+                        Version: lot.querySelector(`.version-${id}`).value,
+                        DeliveryVersion: lot.querySelector(`.deliveryVersion-${id}`).value
                     });
                     else savedLots.push({
                         DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
+                        DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
                         PartCode: lot.querySelector(`.partCode-${id}`).value,
                         PartName: lot.querySelector(`.part-name-${id}`).value,
                         Model: lot.querySelector(`.model-${id}`).value,
                         DRNumber: lot.querySelector(`.drNum-${id}`).value,
-                        Supplier: lot.querySelector(`.supplier-${id}`).value,
+                        Supplier: lot.querySelector(`.supplierId-${id}`).value,
                         TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
                         LotNumber: lot.querySelector(`.lot-code-${id}`).value,
                         LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
+                        DeliveryVersion: lot.querySelector(`.deliveryVersion-${id}`).value
                     });
                 }); // TODO: Separate the first lot. the first is always the original which will only be edited not posted as a new item
                 const [firstLot, ...otherLots] = savedLots;
