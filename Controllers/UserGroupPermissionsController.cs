@@ -14,7 +14,7 @@ namespace PartsIq.Controllers
 {
     public class UserGroupPermissionsController : Controller
     {
-        private PartsIQ_Entities db = new PartsIQ_Entities();
+        private PartsIQEntities db = new PartsIQEntities();
 
         // GET: UserGroupPermissions
         public async Task<ActionResult> Index()
@@ -134,8 +134,8 @@ namespace PartsIq.Controllers
                           .Where(u => u.UserGroup_ID == groupId)
                           .Select(u => new UserViewModel
                           {
-                              UserId = u.UserId,
-                              Name = u.Name,
+                              UserId = u.UserID,
+                              Name = u.Username,
                               Email = u.Email
                           }).ToList();
 

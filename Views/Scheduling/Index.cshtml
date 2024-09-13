@@ -1,0 +1,762 @@
+﻿<!--
+    TODO:
+        SCHEDULING PAGE COMPONENTS
+      ♦ 1. Create Table for Scheduling - DONE
+      ♦ 2. Create Partial for Adding Lots - DONE
+      ♦ 3. Create Partial for Editing - DONE
+      ♦ 4. Create Popup for Delete Confirmation(Modal) - DONE
+      ♦ 5. Create Legend for Color Coding Priority and Status - DONE
+      ♦ 6. Create Modal for New Delivery - DONE
+      ♦ 7. Create Button for reloading table - DONE
+
+        INSPECTION PAGE COMPONENTS
+        1. Create Table For Inspection - Available
+        2. Create Table for Inspection - Finished
+        3. Create Table for Inspection - Pending
+        4. Create Button and Functionality for Start Inspection
+        5. Create Button and Functionality for Adding Inspector
+-->
+
+@section styles{
+    <style>
+        .badge-block {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #4B4B5A;
+            border-radius: 5px;
+        }
+
+        .low-priority {
+            background-color: #CDFAD5;
+        }
+
+        .normal-priority {
+            background-color: #F6FDC3;
+        }
+
+        .high-priority {
+            background-color: #FF9B9B;
+        }
+
+        .priority-started {
+        }
+
+        .priority-paused {
+        }
+
+        input:read-only {
+            background-color: #d4d4d4;
+        }
+
+        #DateDelivered {
+            background-color: transparent;
+        }
+    </style>
+}
+
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Scheduling</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Scheduling</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!--Scheduling DataTable Card-->
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Left Content (Table) -->
+                        <div id="left-column" class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-content-center">
+                                    <div class="float-left d-flex justify-content-start gap-3">
+                                        <div><b>Legend: </b></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block low-priority"></span><p>Low Priority</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block normal-priority"></span><p>Normal Priority</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block high-priority"></span><p>High Priority</p></div>
+
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNewDelivery"><i class="mdi mdi-text-box-plus-outline"></i></button>
+                                        <button class="btn btn-secondary" id="refreshTable"><i class="mdi mdi-refresh"></i></button>
+                                    </div>
+
+                                </div>
+                                <div class="card-body">
+                                    <!--Scheduling DataTable-->
+                                    <div class="table-responsive">
+                                        <table id="scheduling-data-table" class="table table-centered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Date Delivered</th>
+                                                    <th>Part Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Model</th>
+                                                    <th>Supplier</th>
+                                                    <th>DR Number</th>
+                                                    <th>Total Quantity</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Inspection Deadline</th>
+                                                    <th>Inspector</th>
+                                                    <th>Remaining Days</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody><!--CONTENT HERE--></tbody>
+                                        </table>
+                                    </div> <!-- end Scheduling DataTable-->
+                                </div>
+                            </div> <!-- end card-box-->
+                        </div> <!-- end col -->
+                        <div id="right-column" class="col-6 d-none">
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul id="tab-list" class="nav nav-tabs">
+                                    </ul>
+                                    <div class="tab-content" id="tab-content">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end row -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--MODALS-->
+<!-- Add New Delivery-->
+<div class="modal modal-lg fade" id="addNewDelivery" tabindex="-1" aria-labelledby="addNewDeliveryLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-5">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deliveryLabelTitle">Add New Delivery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row align-items-center mb-3">
+                    <form id="addDeliveryForm">
+                        <div class="mb-3">
+                            <label for="DateDelivered" class="form-label">Date Delivered</label>
+                            <input type="text" class="form-control" id="DateDelivered" name="DateDelivered" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="PartCode" class="form-label">Part Code</label>
+                            <select class="form-control" id="PartCode" placeholder="Choose a Part..." required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Supplier" class="form-label">Supplier</label>
+                            <select class="form-control" id="Supplier" placeholder="Choose a Supplier..." required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="DRNumber" class="form-label">DR Number</label>
+                            <input type="text" class="form-control" id="DRNumber" name="DRNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="TotalQuantity" class="form-label">Total Quantity</label>
+                            <input type="number" min="1" class="form-control" id="TotalQuantity" name="TotalQuantity" required>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" id="addDelivery" class="btn btn-success">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- end AddLot Modal-->
+<!-- Archive Modal -->
+<div class="modal fade" id="archiveModal" tabindex="-1" style="display: none;" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header justify-content-end">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body align-content-center text-center">
+                <h3>Are you sure?</h3>
+                <p class="lead">You are about to archive this delivery</p>
+                <p id="archiveInfo" class="card-subtitle"></p>
+                <div id="archiveBtns" class="d-grid gap-2 d-md-flex justify-content-center mt-3"></div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /archive modal-->
+
+@section Scripts {
+    <script>
+
+        let partsList = @Html.Raw(Json.Encode(ViewBag.PartsList));
+        let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
+        console.log('Lists', partsList, suppliersList);
+
+        const addLotBtn = document.getElementById('addLot');
+        const saveLotBtn = document.getElementById('saveLots');
+        const refreshBtn = document.getElementById('refreshTable');
+        const addDeliveryModal = document.getElementById('addNewDelivery');
+        const addDeliveryForm = document.getElementById('addDeliveryForm');
+        const qtyInputs = []; // Contains Created Tabs
+        let schedulingTable; // DataTable Variable
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // DATA TABLE
+            schedulingTable = $('#scheduling-data-table').DataTable({
+                ajax: {
+                    url: '/Scheduling/GetScheduledParts',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: "Status", orderable: false },
+                    {
+                        data: "DateDelivered", render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`;
+                        }
+                    },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    { data: "Model" },
+                    { data: "Supplier" },
+                    { data: "DRNumber" },
+                    { data: "TotalQuantity" },
+                    { data: "LotNumber" },
+                    { data: "LotQuantity" },
+                    {
+                        data: "InspectionDeadline", render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    { data: "Inspector" },
+                    { data: "RemainingDays" },
+                    {
+                        data: null, orderable: false, render: function (data, type, row, meta) {
+                            return `
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})"><i class="mdi mdi-pencil"></i></button>
+                                <button class="btn btn-sm btn-primary waves-effect waves-light mb-1" onclick="addRow(${meta.row})"><i class="mdi mdi-content-duplicate"></i></button>
+                                <button class="btn btn-sm btn-danger waves-effect waves-light mb-1" onclick=archiveDelivery(${meta.row}) data-bs-toggle="modal" data-bs-target="#archiveModal"><i class="mdi mdi-archive-arrow-down"></i></button>
+                            </div>
+                            `;
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    if (data.Priority === null);
+                    else $(row).css('background-color', getColorAccordingToPriorityLevel(data.Priority));
+                }
+            });
+
+            // DataTable Edit Functionality
+            document.getElementById('scheduling-data-table').addEventListener('click', function (e) {
+                const target = e.target;
+
+            });
+
+            // Refetch Data from DataTable
+            refreshBtn.addEventListener('click', function () {
+                console.log('refresh');
+                schedulingTable.ajax.reload();
+            });
+
+            // Add Delivery Event Trigger
+            addDeliveryForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const partSelected = document.getElementById('PartCode').selectize.getValue();
+                const supplierSelected = document.getElementById('Supplier').selectize.getValue();
+                const formData = new FormData(addDeliveryForm);
+                formData.append('PartCode', partSelected);
+                formData.append('Supplier', supplierSelected);
+                const data = Object.fromEntries(formData);
+                console.log(data);
+                $.ajax({
+                    url: '/Scheduling/AddDelivery',
+                    type: 'POST',
+                    data,
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        schedulingTable.ajax.reload();
+                        $('#addNewDelivery').modal('hide');
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            })
+
+            // Reset Add Delivery Form When Closing Modal
+            addDeliveryModal.addEventListener('hidden.bs.modal', function () {
+                addDeliveryForm.reset();
+                document.getElementById('PartCode').selectize.clear();
+                document.getElementById('Supplier').selectize.clear();
+            })
+        });
+
+        // FUNCTIONALITY for Archiving
+        function archiveDelivery(rowIndex) {
+            const rowData = schedulingTable.row(rowIndex).data();
+
+            const archiveInfo = document.getElementById('archiveInfo');
+            const archiveBtns = document.getElementById('archiveBtns');
+
+            archiveBtns.innerHTML = "";
+            archiveInfo.innerHTML = "";
+
+            archiveInfo.innerHTML = `<b>DR-Number:</b> ${rowData.DRNumber}  <b>Model:</b> ${rowData.Model}`;
+            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button">Yes, Archive it!</button>
+                                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>`;
+        }
+        // When Modal Accepted
+        function approveArchive(id) {
+            // AJAX function here
+        }
+
+        // FUNCTIONALITY for Adding Deliveries
+        function addDelivery() {
+
+        }
+
+        // flatpickr DATE PICKER
+        flatpickr("#DateDelivered", {
+            dateFormat: "Y-m-d",
+        })
+
+        // selectize PartCode
+        const partsSelectize = $('#PartCode').selectize({
+            valueField: 'Value',
+            labelField: 'Text',
+            searchField: 'Text',
+            options: partsList,
+            create: false,
+        });
+
+        const supplierSelectize = $('#Supplier').selectize({
+            valueField: 'Value',
+            labelField: 'Text',
+            searchField: 'Text',
+            options: suppliersList,
+            create: false,
+        });
+
+
+        // FUNCTIONALITY for Editing Deliveries
+        function editDelivery(rowIndex) {
+            const rowData = schedulingTable.row(rowIndex).data();
+            console.log(rowData);
+
+            document.getElementById('left-column').classList.replace('col-12', 'col-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const id = `${rowData.DeliveryId}`;
+            const version = rowData.Version;
+            const tabId = `tab-${rowData.DeliveryId}-${rowData.Model}`;
+            const tabTitle = `
+                                <li class="nav-item">
+                                    <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">
+                                        ${rowData.Model}
+                                        <span class="close-tab" onclick="removeTab('${tabId}')">&times;</span>
+                                    </a>
+                                </li>
+                            `;
+            const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
+                                    <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}',${version},'${tabId}');">
+                                        <div class="mb-3">
+                                            <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
+                                            <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="PartCode-${id}" class="form-label">Part Code</label>
+                                            <input type="text" class="form-control" id="PartCode-${id}" name="PartCode" value="${rowData.PartCode}" readonly>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="PartName-${id}" class="form-label">Part Name</label>
+                                            <input type="text" class="form-control" id="PartName-${id}" name="PartName" value="${rowData.PartName}" readonly>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="Model-${id}" class="form-label">Model</label>
+                                            <input type="text" class="form-control" id="Model-${id}" name="Model" value="${rowData.Model}" readonly>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="DRNumber-${id}" class="form-label">DR Number</label>
+                                            <input type="text" class="form-control" id="DRNumber-${id}" name="DRNumber" value="${rowData.DRNumber}" readonly>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="Supplier-${id}" class="form-label">Supplier</label>
+                                            <select type="text" class="form-control" id="Supplier-${id}" placeholder="Select a supplier" required></select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="TotalQuantity-${id}" class="form-label">Total Quantity</label>
+                                            <input type="number" class="form-control" id="TotalQuantity-${id}" name="TotalQuantity" value="${rowData.TotalQuantity}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="LotNumber-${id}" class="form-label">Lot Number</label>
+                                            <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value="">
+                                         </div>
+                                         <div class="mb-3">
+                                            <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
+                                            <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="0">
+                                         </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                </div>`;
+
+            document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
+            document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
+
+            initializeDynamicSelectize(id)
+
+            const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
+            tabTrigger.show();
+        }
+
+        function editChanges(id,version,tabId) {
+            const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
+            const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
+            const formData = new FormData(dynamicForm);
+            formData.append("Supplier", supplierSelected);
+            formData.append("DeliveryId", id);
+            formData.append("Version", version)
+            const data = Object.fromEntries(formData);
+            console.log(data);
+
+            $.ajax({
+                url: '/Scheduling/EditDelivery',
+                type: 'POST',
+                data,
+                success(res) {
+                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                    else alertify.error(`${res.Status}: ${res.Message}`);
+                    schedulingTable.ajax.reload();
+                    removeTab(tabId);
+                },
+                error(err) {
+                    alertify.error(`${err}`);
+                }
+            });
+        }
+
+        // FUNCTIONALITY for Adding Lots
+        function addLot(id, rowData) {
+            let data;
+            if (typeof rowData === "string") data = JSON.parse(decodeURIComponent(rowData));
+            else data = rowData;
+            let { reqQtyEl, lotContainer } = qtyInputs.find(input => input.id === id);
+            const rowObj = qtyInputs.find(input => input.id === id);
+            let currentLotNumber = rowObj.currentLotNumber++;
+            const reqQty = parseInt(reqQtyEl.value);
+            const newQty = Math.floor(reqQty / currentLotNumber);
+            const identifier = `${id}-${currentLotNumber}`;
+            const newLotEl = document.createElement('div');
+            newLotEl.innerHTML = createLotHTML(currentLotNumber, newQty, id, data);
+            lotContainer.appendChild(newLotEl.firstElementChild);
+            initializeDynamicSelectize(identifier);
+            redistributeQuantities(id);
+        }
+
+        function addRow(rowIndex) {
+            const addRowData = schedulingTable.row(rowIndex).data(); // get clicked row data
+
+            document.getElementById('left-column').classList.replace('col-12', 'col-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const tabId = `tab-${Date.now()}-${addRowData.Model}`;
+            const id = `${Date.now()}`;
+            const tabTitle = `
+                    <li class="nav-item">
+                        <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">
+                            ${addRowData.Model}
+                            <span class="close-tab" onclick="removeTab('${tabId}')">&times;</span>
+                        </a>
+                    </li>
+                `;
+            const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
+                                    <form id="lot-forms-${id}" onsubmit="event.preventDefault(); saveLotChanges('${id}','${tabId}');">
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-md-3">
+                                                <label for="reqQty-${id}" class="form-label">Required Qty</label>
+                                                <input type="number" id="reqQty-${id}" class="form-control" value="${addRowData.TotalQuantity}" readonly />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="setQty-${id}" class="form-label">Current Set Qty</label>
+                                                <input type="number" id="setQty-${id}" class="form-control" value="${addRowData.TotalQuantity}" readonly />
+                                            </div>
+                                            <div class="col-md-3"></div>
+                                            <div class="col-md-3 d-flex gap-2">
+                                                <button type="button" id="addLot-${id}" class="btn btn-primary" onclick="addLot('${id}', '${encodeURIComponent(JSON.stringify(addRowData))}')">Add Lot</button>
+                                                <button type="submit" id="saveChanges" class="btn btn-success">Save</button>
+                                            </div>
+                                        </div>
+                                        <div id="lot-container-${id}" class="row"></div>
+                                    </form>
+                                </div>`;
+
+            document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
+            document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
+
+            const qtyInput = {
+                id,
+                currentLotNumber: 1,
+                savedLots: [],
+                reqQtyEl: document.getElementById(`reqQty-${id}`),
+                setQtyEl: document.getElementById(`setQty-${id}`),
+                lotContainer: document.getElementById(`lot-container-${id}`),
+            }
+
+            qtyInputs.push(qtyInput);
+
+            // initial add lot
+            addLot(id, addRowData);
+
+            const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
+            tabTrigger.show();
+        }
+
+        function createLotHTML(lotNumber, qty, id, data) {
+            return `
+                <div id="lotInfo-${lotNumber}-${id}" class="col-md-6 mb-3">
+                    <div class="card text-white bg-secondary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-md-end">
+                                ${lotNumber !== 1 ? `<button class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
+                                <input type="hidden" class="version-${id}" value="${data.Version}">
+                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryId}">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label for="dateDelivered-${lotNumber}" class="form-label">Date Delivered</label>
+                                        <input type="text" id="dateDelivered-${lotNumber}" class="form-control dateDelivered-${id}" value="${convertDateStringToFormattedString(data.DateDelivered)}" readonly />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="partCode-${lotNumber}" class="form-label">Part Code</label>
+                                        <input type="text" id="partCode-${lotNumber}" class="form-control partCode-${id}" value="${data.PartCode}" readonly />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="part-${lotNumber}" class="form-label">Part Name</label>
+                                        <input type="text" id="part-${lotNumber}" class="form-control part-name-${id}" value="${data.PartName}" readonly />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="model-${lotNumber}" class="form-label">Model</label>
+                                        <input type="text" id="model-${lotNumber}" class="form-control model-${id}" value="${data.Model}" readonly />
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="drNum-${lotNumber}" class="form-label">DR Number</label>
+                                        <input type="text" id="drNum-${lotNumber}" class="form-control drNum-${id}" value="${data.DRNumber}" readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label for="Supplier-${id}-${lotNumber}" class="form-label">Supplier</label>
+                                        <select id="Supplier-${id}-${lotNumber}" class="form-control supplier-${id}" placeholder="Select Supplier..." required/></select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="qty-${lotNumber}" class="form-label">Total Quantity</label>
+                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${qty}" onchange="updateSetQty('${id}')" required/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="lot-${lotNumber}" class="form-label">Lot Number</label>
+                                        <input type="text" id="lot-${lotNumber}" class="form-control lot-code-${id}" value="${lotNumber !== 1 ? `` : `${data.LotNumber}`}"/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label for="lotQty-${lotNumber}" class="form-label">Lot Quantity</label>
+                                        <input type="number" id="lotQty-${lotNumber}" class="form-control lot-qty-${id}" value="" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function removeLot(lotNumber, id) {
+            const rowObj = qtyInputs.find(input => input.id === id);
+            let currentLotNumber = rowObj.currentLotNumber--;
+            document.getElementById(`lotInfo-${lotNumber}-${id}`).remove();
+            redistributeQuantities(id);
+        }
+
+        function redistributeQuantities(id) {
+            let { reqQtyEl, setQtyEl } = qtyInputs.find(input => input.id === id);
+            const reqQty = parseInt(reqQtyEl.value);
+            const lotQtyInputs = document.querySelectorAll(`.total-qty-${id}`);
+
+            if (lotQtyInputs.length === 0) {
+                setQtyEl.value = reqQty;
+                return;
+            }
+
+            const baseQty = Math.floor(reqQty / lotQtyInputs.length);
+            let remainder = reqQty % lotQtyInputs.length;
+
+            lotQtyInputs.forEach((input, index) => {
+                let qty = baseQty;
+                if (remainder > 0) {
+                    qty++;
+                    remainder--;
+                }
+                input.value = qty;
+            });
+
+            updateSetQty(id);
+        }
+
+        function updateSetQty(id) {
+            let { setQtyEl } = qtyInputs.find(input => input.id === id);
+            const lotQtyInputs = document.querySelectorAll(`.total-qty-${id}`);
+            let totalQty = 0;
+
+            lotQtyInputs.forEach(input => {
+                totalQty += parseInt(input.value) || 0;
+            });
+
+            setQtyEl.value = totalQty;
+        }
+
+        function saveLotChanges(id, tabId) {
+            const reqQty = document.getElementById(`reqQty-${id}`);
+            const setQty = document.getElementById(`setQty-${id}`);
+            if (reqQty.value !== setQty.value) {
+                alertify.error('Current set quantity is not equal to the required quantity!');
+            } else {
+                const savedLots = qtyInputs.find(input => input.id === id).savedLots;
+                const lots = document.querySelectorAll(`#lot-container-${id} > div`);
+                lots.forEach((lot, index) => {
+                    if (index === 0) savedLots.push({
+                        DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
+                        DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
+                        PartCode: lot.querySelector(`.partCode-${id}`).value,
+                        PartName: lot.querySelector(`.part-name-${id}`).value,
+                        Model: lot.querySelector(`.model-${id}`).value,
+                        DRNumber: lot.querySelector(`.drNum-${id}`).value,
+                        Supplier: lot.querySelector(`.supplier-${id}`).value,
+                        TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
+                        LotNumber: lot.querySelector(`.lot-code-${id}`).value,
+                        LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
+                        Version: lot.querySelector(`.version-${id}`).value
+                    });
+                    else savedLots.push({
+                        DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
+                        PartCode: lot.querySelector(`.partCode-${id}`).value,
+                        PartName: lot.querySelector(`.part-name-${id}`).value,
+                        Model: lot.querySelector(`.model-${id}`).value,
+                        DRNumber: lot.querySelector(`.drNum-${id}`).value,
+                        Supplier: lot.querySelector(`.supplier-${id}`).value,
+                        TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
+                        LotNumber: lot.querySelector(`.lot-code-${id}`).value,
+                        LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
+                    });
+                }); // TODO: Separate the first lot. the first is always the original which will only be edited not posted as a new item
+                const [firstLot, ...otherLots] = savedLots;
+                console.log('First Lot', firstLot);
+                console.log('Rest of the Lots', otherLots);
+                // TODO: send as a list and add as range (only send the rest not the first)
+                $.ajax({
+                    url: '/Scheduling/DuplicateDelivery',
+                    type: 'POST',
+                    data: {
+                        firstLot,
+                        otherLots
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        schedulingTable.ajax.reload();
+                        removeTab(tabId);
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+                // Clear Lots After Saving
+                savedLots.splice(0, savedLots.length);
+            }
+        }
+
+        // FUNCTIONALITY on right column tabs
+        function removeTab(tabId) {
+            const tabElement = document.getElementById(tabId);
+            const tabNavElement = document.getElementById(`${tabId}-tab`);
+
+            if (tabElement && tabNavElement) {
+                // Remove the tab content
+                tabElement.remove();
+                tabNavElement.remove();
+
+                const firstTab = document.querySelector('#tab-list .nav-link');
+                if (firstTab) {
+                    const firstTabTrigger = new bootstrap.Tab(firstTab);
+                    firstTabTrigger.show();
+                } else {
+                    // No tabs left, hide the right column and expand the left column
+                    document.getElementById('right-column').classList.add('d-none');
+                    document.getElementById('left-column').classList.replace('col-6', 'col-12');
+                }
+            }
+        }
+
+        // HELPER get certain color according to data priority level
+        function getColorAccordingToPriorityLevel(priorityID) {
+            switch (priorityID) {
+                case 1:
+                    return '#CDFAD5';
+                case 2:
+                    return '#F6FDC3';
+                case 3:
+                    return '#FF9B9B';
+                default:
+                    return '';
+            }
+        }
+
+        // HELPER convert date to date string
+        function convertDateStringToFormattedString(date) {
+            let dateObj;
+            if (typeof date === 'string' && date !== null) dateObj = date.substring(6, date.length - 2);
+            else return '';
+            dateObj = new Date(parseInt(dateObj))
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        // HELPER initializing selectize dynamically
+        function initializeDynamicSelectize(id) {
+            $(`#Supplier-${id}`).selectize({
+                valueField: 'Value',
+                labelField: 'Text',
+                searchField: 'Text',
+                options: suppliersList,
+                create: false,
+            });
+        }
+    </script>
+}

@@ -15,7 +15,7 @@ namespace PartsIq.Controllers
 {
     public class UsersController : Controller
     {
-        private PartsIQ_Entities db = new PartsIQ_Entities();
+        private PartsIQEntities db = new PartsIQEntities();
 
         // GET: Users
         public async Task<ActionResult> Index()
@@ -127,7 +127,7 @@ namespace PartsIq.Controllers
         public ActionResult GetUserEditForm(int userId)
         {
             var user = db.Users
-                         .Where(u => u.UserId == userId)
+                         .Where(u => u.UserID == userId)
                          .FirstOrDefault();
 
             if (user == null)
