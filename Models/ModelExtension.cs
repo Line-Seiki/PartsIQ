@@ -16,6 +16,7 @@ namespace PartsIq.Models
         public int DeliveryDetailId { get; set; }
         public string Status { get; set; }
         public DateTime DateDelivered { get; set; }
+        public DateTime Deadline {  get; set; }
         public string PartCode { get; set; }
         public string PartName { get; set; }
         public string Model { get; set; }
@@ -27,10 +28,11 @@ namespace PartsIq.Models
         public int LotQuantity { get; set; }
         public DateTime? InspectionDeadline { get; set; }
         public string Inspector { get; set; }
-        public int RemainingDays { get; set; }
         public int Priority { get; set; }
         public int Version { get; set; }
         public int DeliveryVersion { get; set; }
+        public bool IsUrgent { get; set; }
+        public int RemainingDays => (Deadline - DateDelivered).Days;
     }
 
     public class DeliveryFormData

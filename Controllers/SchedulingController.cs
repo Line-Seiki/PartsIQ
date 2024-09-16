@@ -51,6 +51,14 @@ namespace PartsIq.Controllers
             return Json(suppliersList, JsonRequestBehavior.AllowGet);
         }
 
+        // GET: /Scheduling/GetSuppliersAndPartsList
+        public JsonResult GetSuppliersAndPartsList()
+        {
+            var partsList = PartListItems();
+            var suppliersList = SupplierListItems();
+            return Json(new { suppliersList, partsList }, JsonRequestBehavior.AllowGet);
+        }
+
         // POST: /Scheduling/AddDelivery
         public JsonResult AddDelivery(DeliveryFormData formData)
         {
@@ -71,7 +79,7 @@ namespace PartsIq.Controllers
         public JsonResult DuplicateDelivery(EditDeliveryFormData firstLot, List<EditDeliveryFormData> otherLots)
         {
             var addBulkResponse = _db.DuplicateDelivery(otherLots);
-            var editResponse = addBulkResponse.Status == "Success" ? _db.EditDelivery(firstLot) : new ResponseData
+            var editResponse = addBulkResponse.Success ? _db.EditDelivery(firstLot) : new ResponseData
             {
                 Message = "Something went wrong",
                 Status = "Failed"
@@ -79,6 +87,7 @@ namespace PartsIq.Controllers
 
             if (editResponse.Status == addBulkResponse.Status) return Json(new ResponseData
             {
+                Success = true,
                 Status = "Success",
                 Message = "Item Duplication Successful",
             });
@@ -87,6 +96,13 @@ namespace PartsIq.Controllers
                 Status = "Failed",
                 Message = "Item Duplication Failed",
             });     
+        }
+
+        // POST: /Scheduling/PrioritizeDelivery
+        public JsonResult PrioritizeDelivery(int deliveryDetailId, bool isUrgent, int version)
+        {
+            var response = _db.PrioritizeDelivery(deliveryDetailId, isUrgent, version);
+            return Json(response, JsonRequestBehavior.AllowGet);
         }
 
         // POST: /Scheduling/ArchiveDelivery
@@ -101,7 +117,7 @@ namespace PartsIq.Controllers
         {
             return _db.GetParts().Select(p => new SelectListItem
             {
-                Value = p.PartId.ToString(),
+                Value = p.PartID.ToString(),
                 Text = p.Code,
             }).ToList();
         }

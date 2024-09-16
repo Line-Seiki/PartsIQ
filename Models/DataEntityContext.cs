@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer.Server;
+﻿using Microsoft.Ajax.Utilities;
+using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -72,32 +73,33 @@ namespace PartsIq.Models
             {
                 DeliveryId = del.DeliveryID,
                 DeliveryDetailId = del.DeliveryDetailID,
-                Status = "Available",
+                Status = del.InspectionID.HasValue ? "" : del.Delivery.Status.StatusName, // Inspection.Status.Name
                 DateDelivered = del.Delivery.DateDelivered,
+                Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
                 PartCode = del.Delivery.Part.Code,
-                PartName = del.Delivery.Part.name,
-                Model = del.Delivery.Part.model,
+                PartName = del.Delivery.Part.Name,
+                Model = del.Delivery.Part.Model,
                 Supplier = del.Delivery.Supplier.Name,
                 SupplierID = del.Delivery.SupplierID,
                 DRNumber = del.Delivery.DRNumber,
                 TotalQuantity = del.Delivery.Quantity,
                 LotQuantity = del.LotQuantity,
                 LotNumber = del.LotNumber,
-                InspectionDeadline = null,
-                Inspector = "",
-                RemainingDays = 0,
-                Priority = del.Delivery.Part.priority.Value,
+                InspectionDeadline = null, // Inspection Table CONDITION: If no value was found return null
+                Inspector = del.InspectionID.HasValue ? "" : "",
+                Priority = del.Delivery.PriorityLevel,
                 Version = del.VERSION,
                 DeliveryVersion = del.Delivery.VERSION,
+                IsUrgent = del.IsUrgent,
 
-            }).ToList();
+            }).OrderByDescending(d => d.Status).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.Priority).ToList();
         }
 
         public ResponseData CreateDelivery(DeliveryFormData formData)
         {
             try
             {
-                int partPriorityLevel = db.Parts.Where(p => p.PartId == formData.PartCode).FirstOrDefault().priority.Value;
+                int partPriorityLevel = db.Parts.Where(p => p.PartID == formData.PartCode).FirstOrDefault().Priority.Value;
 
                 var newDelivery = new Delivery
                 {
@@ -107,6 +109,7 @@ namespace PartsIq.Models
                     Quantity = formData.TotalQuantity,
                     SupplierID = formData.Supplier,
                     PartID = formData.PartCode,
+                    StatusID = 1,
                     VERSION = 1
                 };
 
@@ -137,7 +140,7 @@ namespace PartsIq.Models
                 return new ResponseData
                 {
                     Status = "Failed",
-                    Message = $"Something went wrong | Error({ex.Message})"
+                    Message = $"Something went wrong | Error( {ex.Message} )"
                 };
             }
         }
@@ -167,7 +170,7 @@ namespace PartsIq.Models
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
                 };
-                if (delivery.VERSION != formData.Version) return new ResponseData
+                if (delivery.VERSION != formData.DeliveryVersion) return new ResponseData
                 {
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
@@ -223,6 +226,12 @@ namespace PartsIq.Models
         {
             try
             {
+                if (multipleFormData == null) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "No Lot Added"
+                }; 
+                    
                 var partCode = multipleFormData.First().PartCode;
                 var part = db.Parts.Where(p => p.Code == partCode).FirstOrDefault();
 
@@ -248,6 +257,38 @@ namespace PartsIq.Models
                     Success = true,
                     Status = "Success",
                     Message = "Items Successfully Added"
+                };
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong | Error({ex.Message})"
+                };
+            }
+        }
+
+        public ResponseData PrioritizeDelivery(int deliveryDetailId, bool isUrgent, int version)
+        {
+            try
+            {
+                var deliveryDetail = db.DeliveryDetails.Find(deliveryDetailId);
+                if (deliveryDetail.VERSION != version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                deliveryDetail.IsUrgent = isUrgent;
+                db.Entry(deliveryDetail).Property(d => d.IsUrgent).IsModified = true;
+                deliveryDetail.VERSION++;
+                db.SaveChanges();
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = "Item Prioritized!"
                 };
             }
             catch (Exception ex)

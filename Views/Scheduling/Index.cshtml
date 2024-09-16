@@ -40,9 +40,13 @@
         }
 
         .priority-started {
+            background-color: #EEEEEE;
         }
 
+
+
         .priority-paused {
+            background-color: #FDFAD9;
         }
 
         input:read-only {
@@ -80,7 +84,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <!-- Left Content (Table) -->
-                        <div id="left-column" class="col-12">
+                        <div id="left-column" class="col-md-12">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-content-center">
                                     <div class="float-left d-flex justify-content-start gap-3">
@@ -124,7 +128,7 @@
                                 </div>
                             </div> <!-- end card-box-->
                         </div> <!-- end col -->
-                        <div id="right-column" class="col-6 d-none">
+                        <div id="right-column" class="col-md-6 d-none">
                             <div class="card">
                                 <div class="card-body">
                                     <ul id="tab-list" class="nav nav-tabs">
@@ -209,7 +213,6 @@
 
         let partsList = @Html.Raw(Json.Encode(ViewBag.PartsList));
         let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
-        console.log('Lists', partsList, suppliersList);
 
         const addLotBtn = document.getElementById('addLot');
         const saveLotBtn = document.getElementById('saveLots');
@@ -242,27 +245,46 @@
                     { data: "LotNumber" },
                     { data: "LotQuantity" },
                     {
-                        data: "InspectionDeadline", render: function (data, type, row) {
+                        data: "InspectionDeadline",
+                        render: function (data, type, row) {
                             return `${convertDateStringToFormattedString(data)}`
                         }
                     },
                     { data: "Inspector" },
-                    { data: "RemainingDays" },
                     {
-                        data: null, orderable: false, render: function (data, type, row, meta) {
+                        data: "RemainingDays",
+                        render: function (data, type, row, meta) {
+                            return `${data < 0 ? 0 : data}`;
+                        }
+                    },
+                    {
+                        data: "IsUrgent", orderable: false,
+                        render: function (data, type, row, meta) {
                             return `
-                            <div class="d-flex gap-1">
-                                <button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})"><i class="mdi mdi-pencil"></i></button>
-                                <button class="btn btn-sm btn-primary waves-effect waves-light mb-1" onclick="addRow(${meta.row})"><i class="mdi mdi-content-duplicate"></i></button>
-                                <button class="btn btn-sm btn-danger waves-effect waves-light mb-1" onclick=archiveDelivery(${meta.row}) data-bs-toggle="modal" data-bs-target="#archiveModal"><i class="mdi mdi-archive-arrow-down"></i></button>
+                            <div class="d-flex gap-1 col-md-6">
+                                <div class="d-flex flex-column">
+                                    <button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})"><i class="mdi mdi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-primary waves-effect waves-light mb-1" onclick="addRow(${meta.row})"><i class="mdi mdi-content-duplicate"></i></button>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <button class="btn btn-sm btn-danger waves-effect waves-light mb-1" onclick="archiveDelivery(${meta.row})" data-bs-toggle="modal" data-bs-target="#archiveModal"><i class="mdi mdi-archive-arrow-down"></i></button>
+                                    ${data ? `<button class="btn btn-sm btn-warning waves-effect waves-light mb-1" onclick="prioritizeDelivery(${meta.row},${data})"><i class="mdi mdi-chevron-triple-down"></i></button>` :
+                                    `<button class="btn btn-sm btn-success waves-effect waves-light mb-1" onclick="prioritizeDelivery(${meta.row}, ${data})"><i class="mdi mdi-chevron-triple-up"></i></button>`}
+                                </div>
                             </div>
                             `;
                         }
                     }
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    if (data.Priority === null);
-                    else $(row).css('background-color', getColorAccordingToPriorityLevel(data.Priority));
+                    if (data.IsUrgent) $(row).css({
+                        "background-color": getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent),
+                        "color": "white",
+                    })
+                    else $(row).css({
+                        'background-color': getColorAccordingToPriorityLevel(data.Priority),
+                        "color": "black"
+                });
                 }
             });
 
@@ -274,8 +296,19 @@
 
             // Refetch Data from DataTable
             refreshBtn.addEventListener('click', function () {
-                console.log('refresh');
                 schedulingTable.ajax.reload();
+                $.ajax({
+                    url: '/Scheduling/GetSuppliersAndPartsList',
+                    type: 'POST',
+                    success(res) {
+                        partsList = res.partsList;
+                        suppliersList = res.suppliersList;
+                        alertify.success('Reloaded!')
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                })
             });
 
             // Add Delivery Event Trigger
@@ -311,6 +344,29 @@
                 document.getElementById('Supplier').selectize.clear();
             })
         });
+
+        // FUNCTIONALITY for Prioritizing
+        function prioritizeDelivery(rowIndex, isUrgent) {
+            const rowData = schedulingTable.row(rowIndex).data();
+            console.log(rowData);
+            $.ajax({
+                url: '/Scheduling/PrioritizeDelivery',
+                type: 'POST',
+                data: {
+                    deliveryDetailId: rowData.DeliveryDetailId,
+                    version: rowData.Version,
+                    isUrgent: !isUrgent,
+                },
+                success(res) {
+                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                    else alertify.error(`${res.Status}: ${res.Message}`);
+                    schedulingTable.ajax.reload();
+                },
+                error(err) {
+                    alertify.error(`${err}`);
+                }
+            });
+        }
 
         // FUNCTIONALITY for Archiving
         function archiveDelivery(rowIndex) {
@@ -377,10 +433,11 @@
             const rowData = schedulingTable.row(rowIndex).data();
             console.log(rowData);
 
-            document.getElementById('left-column').classList.replace('col-12', 'col-6');
+            document.getElementById('left-column').classList.replace('col-md-12', 'col-md-6');
             document.getElementById('right-column').classList.remove('d-none');
 
-            const id = `${rowData.DeliveryDetailId}`;
+            const id = `${Date.now()}`
+            const deliveryDetailId = `${rowData.DeliveryDetailId}`;
             const deliveryId = `${rowData.DeliveryId}`;
             const version = rowData.Version;
             const deliveryVersion = rowData.DeliveryVersion;
@@ -394,7 +451,7 @@
                                 </li>
                             `;
             const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
-                                    <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}',${version},'${deliveryVersion}','${tabId}','${deliveryId}');">
+                                    <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}','${deliveryDetailId}',${version},'${deliveryVersion}','${tabId}','${deliveryId}');">
                                         <div class="mb-3">
                                             <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
                                             <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
@@ -444,38 +501,46 @@
             document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
             document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
 
-            initializeDynamicSelectize(id)
+            const $select = initializeDynamicSelectize(id);
+            $select[0].selectize.setValue(rowData.SupplierID)
 
             const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
             tabTrigger.show();
         }
 
-        function editChanges(id,version, deliveryVersion, tabId, deliveryId) {
-            const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
-            const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
-            const formData = new FormData(dynamicForm);
-            formData.append("Supplier", supplierSelected);
-            formData.append("DeliveryDetailId", id);
-            formData.append("DeliveryId", deliveryId);
-            formData.append("Version", version);
-            formData.append("DeliveryVersion", deliveryVersion);
-            const data = Object.fromEntries(formData);
-            console.log(data);
+        function editChanges(id, deliveryDetailId, version, deliveryVersion, tabId, deliveryId) {
+            const totalQty = document.getElementById(`TotalQuantity-${id}`).value;
+            const lotQty = document.getElementById(`LotQuantity-${id}`).value;
+            if (totalQty <= lotQty) {
+                const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
+                const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
+                const formData = new FormData(dynamicForm);
+                formData.append("Supplier", supplierSelected);
+                formData.append("DeliveryDetailId", deliveryDetailId);
+                formData.append("DeliveryId", deliveryId);
+                formData.append("Version", version);
+                formData.append("DeliveryVersion", deliveryVersion);
+                const data = Object.fromEntries(formData);
+                console.log(data);
 
-            $.ajax({
-                url: '/Scheduling/EditDelivery',
-                type: 'POST',
-                data,
-                success(res) {
-                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                    else alertify.error(`${res.Status}: ${res.Message}`);
-                    schedulingTable.ajax.reload();
-                    removeTab(tabId);
-                },
-                error(err) {
-                    alertify.error(`${err}`);
-                }
-            });
+                $.ajax({
+                    url: '/Scheduling/EditDelivery',
+                    type: 'POST',
+                    data,
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        schedulingTable.ajax.reload();
+                        removeTab(tabId);
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            } else {
+                alertify.error(`The Quantity in the lot exceeded the total quantity.`)
+            }
+            
         }
 
         // FUNCTIONALITY for Adding Lots
@@ -498,7 +563,7 @@
         function addRow(rowIndex) {
             const addRowData = schedulingTable.row(rowIndex).data(); // get clicked row data
 
-            document.getElementById('left-column').classList.replace('col-12', 'col-6');
+            document.getElementById('left-column').classList.replace('col-md-12', 'col-md-6');
             document.getElementById('right-column').classList.remove('d-none');
 
             const tabId = `tab-${Date.now()}-${addRowData.Model}`;
@@ -700,26 +765,30 @@
                 const [firstLot, ...otherLots] = savedLots;
                 console.log('First Lot', firstLot);
                 console.log('Rest of the Lots', otherLots);
-                // TODO: send as a list and add as range (only send the rest not the first)
-                $.ajax({
-                    url: '/Scheduling/DuplicateDelivery',
-                    type: 'POST',
-                    data: {
-                        firstLot,
-                        otherLots
-                    },
-                    success(res) {
-                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                        else alertify.error(`${res.Status}: ${res.Message}`);
-                        schedulingTable.ajax.reload();
-                        removeTab(tabId);
-                    },
-                    error(err) {
-                        alertify.error(`${err}`);
-                    }
-                });
-                // Clear Lots After Saving
-                savedLots.splice(0, savedLots.length);
+                if (otherLots.length <= 0) {
+                    alertify.error("Add lot/s to duplcate item");
+                } else {
+                    // TODO: send as a list and add as range (only send the rest not the first)
+                    $.ajax({
+                        url: '/Scheduling/DuplicateDelivery',
+                        type: 'POST',
+                        data: {
+                            firstLot,
+                            otherLots
+                        },
+                        success(res) {
+                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                            else alertify.error(`${res.Status}: ${res.Message}`);
+                            schedulingTable.ajax.reload();
+                            removeTab(tabId);
+                        },
+                        error(err) {
+                            alertify.error(`${err}`);
+                        }
+                    });
+                    // Clear Lots After Saving
+                    savedLots.splice(0, savedLots.length);
+                }
             }
         }
 
@@ -740,13 +809,14 @@
                 } else {
                     // No tabs left, hide the right column and expand the left column
                     document.getElementById('right-column').classList.add('d-none');
-                    document.getElementById('left-column').classList.replace('col-6', 'col-12');
+                    document.getElementById('left-column').classList.replace('col-md-6', 'col-md-12');
                 }
             }
         }
 
         // HELPER get certain color according to data priority level
-        function getColorAccordingToPriorityLevel(priorityID) {
+        function getColorAccordingToPriorityLevel(priorityID, isUrgent) {
+            if (isUrgent) return '#FF0000';
             switch (priorityID) {
                 case 1:
                     return '#CDFAD5';
@@ -774,13 +844,14 @@
 
         // HELPER initializing selectize dynamically
         function initializeDynamicSelectize(id) {
-            $(`#Supplier-${id}`).selectize({
+            const $select = $(`#Supplier-${id}`).selectize({
                 valueField: 'Value',
                 labelField: 'Text',
                 searchField: 'Text',
                 options: suppliersList,
                 create: false,
             });
+            return $select;
         }
     </script>
 }

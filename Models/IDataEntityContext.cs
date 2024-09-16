@@ -21,6 +21,7 @@ namespace PartsIq.Models
         ResponseData EditDelivery(EditDeliveryFormData formData);
         ResponseData DuplicateDelivery(List<EditDeliveryFormData> multipleFormData);
         ResponseData ArchiveDelivery(int deliveryDetailId, int version);
+        ResponseData PrioritizeDelivery(int deliveryDetailId, bool isUrgent, int version);
         List<SchedulingData> GetSchedulingData();
         #endregion
     }
