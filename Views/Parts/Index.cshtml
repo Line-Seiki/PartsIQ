@@ -38,12 +38,22 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-
+                            <h5 class="card-title">Accounts</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-12" id="pis-table-container">
-
+                                <div class="col-md-12">
+                                    <table class="table table-centered dt-responsive w-100 dataTable no-footer dtr-inline " id="pis-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                                <th>Model</th>
+                                                <th>Document Number</th>
+                                                <th>Action</th>
+                                            </tr>                                           
+                                        </thead>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -62,8 +72,63 @@
                 url: '@Url.Action("GetPISTable", "Parts")',
                 method: "GET",
                 success: function (response) {
+                    var pisTable = $(document).find('#pis-table').DataTable({
+                        data: response,  
+                        columns: [
+                            { data: "Code" },
+                            { data: "Name" },
+                            { data: "Model" },
+                            { data: "FilePath" },
+                            {
+                                data: "PartID",
+                                render: function (data, type, row) {
+                                    return ` <div>
+                                                <button class="btn btn-success brand-btn waves-effect waves-light" data-effect="wave" type="button">
+                                                    <span class="brand-icon">
+                                                    <i class="mdi mdi-file-edit fs-xs align-middle"></i>
+                                                    </span>
+                                                    <span class="align-middle">Edit</span>
+                                                </button>
+                                                <button class="btn btn-danger brand-btn waves-effect waves-light" data-effect="wave" type="button">
+                                                    <span class="brand-icon">
+                                                    <i class="mdi mdi-delete fs-xs align-middle"></i>
+                                                    </span>
+                                                    <span class="align-middle">Delete</span>
+                                                </button>
+                                                   </div>`;
+                                },
+                            }
+                        ],
+                        lengthChange: !1,
+                        buttons: [
+                            { extend: "copy", className: "btn-light" },
+                            { extend: "csv", className: "btn-light" },
+                        ],
+                        scrollX: true,
+                        rowId: "PartID",
+                        scrollY: '300px',
+                        responsive: false,
+                        searching: true,
+                        language: {
+                            paginate: {
+                                previous: "<i class='mdi mdi-chevron-left'>",
+                                next: "<i class='mdi mdi-chevron-right'>",
+                            },
+                        },
+                        drawCallback: function () {
+                            $(".dataTables_paginate > .pagination").addClass(
+                                "flat-rounded-pagination"
+                            ),
+                                $(".dataTables_filter")
+                                    .find("label")
+                                    .addClass("search-box d-inline-flex position-relative"),
+                                $(".dataTables_filter")
+                                    .find(".form-control")
+                                    .attr("placeholder", "Search...");
+                        },
+                    });
 
-                    $('#pis-table-container').append(response);
+                    
 
                 }
 

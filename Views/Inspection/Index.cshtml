@@ -1,0 +1,142 @@
+﻿@section styles{
+    <style>
+        .badge-block {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #4B4B5A;
+            border-radius: 5px;
+        }
+
+        .low-priority {
+            background-color: #CDFAD5;
+        }
+
+        .normal-priority {
+            background-color: #F6FDC3;
+        }
+
+        .high-priority {
+            background-color: #FF9B9B;
+        }
+
+        .priority-started {
+        }
+
+        .priority-paused {
+        }
+    </style>
+}
+
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Inspection</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    PartsIQ
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Inspection</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inspection Cards -->
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Inspection</h4>
+                            </div>
+                            <div class="card-body">
+                                <!-- Inspection - Available -->
+                                <div class="mb-4">
+                                    <h5>Available</h5>
+                                </div>
+                                <div class="table-responsive">
+                                    <table id="inspection-available" class="table table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Priority</th>
+                                                <th>Status</th>
+                                                <th>Lot Number</th>
+                                                <th>Lot Quantity</th>
+                                                <th>Inspector</th>
+                                                <th>Pard Code</th>
+                                                <th>Part Name</th>
+                                                <th>Date Delivered</th>
+                                                <th>DR Number</th>
+                                                <th>Total Quantity</th>
+                                                <th>Supplier</th>
+                                                <th>Deadline</th>
+                                                <th>Date Started</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div class="my-4">
+                                    <h5>Finished</h5>
+                                </div>
+                                <div class="table-responsive">
+                                    <table id="inspection-finished" class="table table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Date Finished</th>
+                                                <th>Decision</th>
+                                                <th>Control Number</th>
+                                                <th>DR Number</th>
+                                                <th>Pard Code</th>
+                                                <th>Part Name</th>
+                                                <th>Lot Number</th>
+                                                <th>Lot Quantity</th>
+                                                <th>Comments</th>
+                                                <th>Inspector Comments</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div class="my-4">
+                                    <h5>Pending</h5>
+                                </div>
+                                <div class="table-responsive">
+                                    <table id="inspection-pending" class="table table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                                <th>DR Number</th>
+                                                <th>Lot Number</th>
+                                                <th>Part Code</th>
+                                                <th>Part Name</th>
+                                                <th>Lot Quantity</th>
+                                                <th>Sample Size</th>
+                                                <th>Deadline</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div class="d-flex justify-content-start mt-4">
+                                    <button class="btn btn-primary"><i class="mdi mdi-magnify"></i> Start Inspection</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -10,17 +10,17 @@
                 </a>
                 <ul aria-expanded="false" class="nav-second-level mm-collapse">
                     <li class="side-nav-item">
-                        <a class="side-nav-link" href='@Url.Action("Index", "Users") '>
+                        <a class="side-nav-link" href='@Url.Action("Index", "Users")'>
                             <i class="bx bx-chat"></i>
                             <span>Users</span>
                         </a>
                     </li>
                     <li class="side-nav-item">
-                        <a class="side-nav-link" href="ecommerce-product.html">Add User</a>
+                        <a class="side-nav-link" href='@Url.Action("Create", "Users")'>Add User</a>
                     </li>
-                    <li class="side-nav-item">
+                    @*<li class="side-nav-item">
                         <a class="side-nav-link" href="ecommerce-product.html">Add User Group</a>
-                    </li>
+                    </li>*@
                 </ul>
             </li>
 
@@ -32,14 +32,20 @@
             </li>
             <li>
                 <a class="side-nav-link" href='@Url.Action("Index", "Parts") '>
-                    <i class="bx bx-chat"></i>
-                    <span>Parts</span>
+                    <i class="bx bx-wrench"></i>
+                    <span>PIS</span>
                 </a>
             </li>
             <li>
                 <a class="side-nav-link" href='@Url.Action("Index", "Checkpoints") '>
                     <i class="bx bx-chat"></i>
                     <span>Checkpoints</span>
+                </a>
+            </li>
+            <li>
+                <a class="side-nav-link" href='@Url.Action("Index", "Scheduling") '>
+                    <i class="bx bx-calendar-edit"></i>
+                    <span>Scheduling</span>
                 </a>
             </li>
 

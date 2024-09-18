@@ -18,11 +18,12 @@ namespace PartsIq.Models
         public byte IsActive { get; set; }
         public byte IsLoggedIN { get; set; }
         public Nullable<System.DateTime> LastUpdate { get; set; }
-        public string Name { get; set; }
+        public string FirstName { get; set; }
         public string Password { get; set; }
         public string Username { get; set; }
-        public int UserId { get; set; }
+        public int UserID { get; set; }
         public Nullable<int> UserGroup_ID { get; set; }
+        public string LastName { get; set; }
     
         public virtual UserGroupPermission UserGroupPermission { get; set; }
     }

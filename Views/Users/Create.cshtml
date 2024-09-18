@@ -5,88 +5,186 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Create</h2>
-
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>User</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.IsActive, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.IsLoggedIN, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.IsLoggedIN, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.IsLoggedIN, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.LastUpdate, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.LastUpdate, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.LastUpdate, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Password, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Username, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Username, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.UserGroup_ID, "UserGroup_ID", htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("UserGroup_ID", null, htmlAttributes: new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.UserGroup_ID, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+<div class="page-content">
+    <!-- page header -->
+    <div class="page-title-box">
+        <div class="container-fluid">
+            <div class="page-title dflex-between-center">
+                <h3 class="mb-1 fw-bold">Users</h3>
+                <ol class="breadcrumb mb-0 mt-1">
+                    <li class="breadcrumb-item">
+                        <a href="../index.html">
+                            <i class="bx bx-home fs-xs"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="ui-buttons.html">
+                            Components
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Accordian</li>
+                </ol>
             </div>
         </div>
     </div>
-}
+    <!-- page content -->
+    <div class="page-content-wrapper mt--45">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card mb-0">
+                        <div class="card-header">
+                            <h5 class="card-title">Add Your Member Account</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-9 col-xl-8 mt-2">
+                                    <form action="#" novalidate="novalidate" id="addprofileform">
+                                        @Html.AntiForgeryToken()
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <input class="form-control" id="username" name="validation-firstname" type="text">
+                                                    <label for="username">Username<span class="text-danger">*</span></label>
+                                                    <div class="validation-error d-none fs-13">
+                                                        First name can not be blank.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <input class="form-control" id="email" name="validation-email" type="text" placeholder="example@example.com">
+                                                    <label for="email">Email Address<span class="text-danger">*</span></label>
+                                                    <div class="validation-error d-none fs-13">
+                                                        Please enter valid Email
+                                                    </div>
+                                                </div>
+                                            </div>
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <input class="form-control" id="firstname" name="validation-firstname" type="text" placeholder="John">
+                                                    <label for="firstname">First Name<span class="text-danger">*</span></label>
+                                                    <div class="validation-error d-none fs-13">
+                                                        First name can not be blank.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <input class="form-control" id="lastname" name="validation-lastname" type="text" placeholder="Doe">
+                                                    <label for="lastname">Last Name</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <input class="form-control" id="password"  type="password" >
+                                                    <label for="password">Password<span class="text-danger">*</span></label>
+                                                    <div class="validation-error d-none fs-13">
+                                                        Please enter valid number
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <input class="form-control" id="cpassword" type="password" >
+                                                    <label for="cpassword">Confirm Password<span class="text-danger">*</span></label>
+                                                    <div class="validation-error d-none fs-13">
+                                                        Please enter valid number
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group floating-label enable-floating-label show-label">
+                                                    <label for="UserGroup_ID">User Group<span class="text-danger">*</span></label>
+                                                    <div class="validation-error d-none fs-13">
+                                                        This field is required
+                                                    </div>
+                                                    @Html.DropDownList("UserGroup_ID", (SelectList)ViewBag.ProductGroupID, "Select User Group", new { @class = "form-control" })
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="clearfix">
+                                            <button class="btn btn-primary ms-1 waves-effect waves-light" data-effect="wave" type="button" id="save-user-btn">Save User</button>
+                                            <button class="btn btn-secondary waves-effect waves-light" data-effect="wave" type="button" id="reset-profile-form">Reset</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-lg-3 col-xl-4 ">
+                                   
+                                        <img src="~/assets/images/account.svg" alt="Lettstart Admin">
+                                        <div class="px-3 mx-xl-3 px-xl-5 text-center">
+                                            <h5>
+                                                One account. Works for all the Applications.
+                                            </h5>
+                                        </div>
+                                  
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- end col -->
+            </div> <!-- end row -->
+            <!-- end row -->
+        </div>
+    </div>
+    <!-- main content End -->
 </div>
+ @section scripts 
+{
+    <script>
+        $(document).ready(function (e) {
+
+            $(document).on('click', '#save-user-btn', function (e) {
+                var token = $('input[name="__RequestVerificationToken"]').val();
+                let username = $('#username').val();
+                let email = $('#email').val();
+                let firstname = $('#firstname').val();
+                let lastname = $('#lastname').val();
+                let password = $('#password').val();
+                let cpassword = $('#cpassword').val();
+                let usergroup = $('#UserGroup_ID').val();
+
+                // Check if passwords match
+                if (password !== cpassword) {
+                    alertify.error("Passwords are not equal");
+                    return; // Stop the process if passwords do not match
+                }
+
+                let formData = new FormData();
+                formData.append("__RequestVerificationToken", token);
+                formData.append("username", username);
+                formData.append("email", email);
+                formData.append("firstname", firstname);
+                formData.append("lastname", lastname);
+                formData.append("password", password);
+                formData.append("usergroup", usergroup);
+
+                $.ajax({
+                    url: '@Url.Action("CreateUser", "Users")',
+                    processData: false,
+                    contentType: false,
+                    method: "POST",
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            alertify.success(response.message);
+                        } else {
+                            alertify.error(response.message);
+                        }
+                    }, error: function (err) {
+                        alertify.error(`Error ${err} occured.`)
+                    }
+
+                });
+
+            });
+       
+        });
+     </script>
+} 
