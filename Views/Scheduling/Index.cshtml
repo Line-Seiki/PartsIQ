@@ -215,7 +215,6 @@
 
         let partsList = @Html.Raw(Json.Encode(ViewBag.PartsList));
         let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
-
         const addLotBtn = document.getElementById('addLot');
         const saveLotBtn = document.getElementById('saveLots');
         const refreshBtn = document.getElementById('refreshTable');
@@ -350,7 +349,6 @@
                 document.getElementById('Supplier').selectize.clear();
             })
         });
-
         // FUNCTIONALITY for Prioritizing
         function prioritizeDelivery(rowIndex, isUrgent) {
             const rowData = schedulingTable.row(rowIndex).data();

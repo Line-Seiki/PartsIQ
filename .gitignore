@@ -410,6 +410,9 @@ data/mockData.csv
 /Models/PartsIQModel.Context.cs
 /Models/PartsIQModel.Designer.cs
 /Models/PartsIQModel.edmx
+
 /Models/PartsIQModel.edmx.diagram
 README.md
 LSMES.csproj
+
+

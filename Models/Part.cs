@@ -18,21 +18,27 @@ namespace PartsIq.Models
         public Part()
         {
             this.Checkpoints = new HashSet<Checkpoint>();
+            this.Deliveries = new HashSet<Delivery>();
+            this.Inspections = new HashSet<Inspection>();
         }
     
-        public int PartId { get; set; }
+        public int PartID { get; set; }
         public string Code { get; set; }
-        public System.DateTime dateMonitored { get; set; }
-        public string docNumber { get; set; }
-        public byte isMonitored { get; set; }
-        public string model { get; set; }
-        public string name { get; set; }
-        public Nullable<int> priority { get; set; }
+        public System.DateTime DateMonitored { get; set; }
+        public string DocNumber { get; set; }
+        public byte IsMonitored { get; set; }
+        public string Model { get; set; }
+        public string Name { get; set; }
+        public Nullable<int> Priority { get; set; }
         public Nullable<int> Version { get; set; }
         public Nullable<int> FileAtttachment_ID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Checkpoint> Checkpoints { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Delivery> Deliveries { get; set; }
         public virtual FileAttachment FileAttachment { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Inspection> Inspections { get; set; }
     }
 }

@@ -51,6 +51,7 @@ namespace PartsIq.Controllers
             return Json(suppliersList, JsonRequestBehavior.AllowGet);
         }
 
+
         // GET: /Scheduling/GetSuppliersAndPartsList
         public JsonResult GetSuppliersAndPartsList()
         {
@@ -80,6 +81,7 @@ namespace PartsIq.Controllers
         {
             var addBulkResponse = _db.DuplicateDelivery(otherLots);
             var editResponse = addBulkResponse.Success ? _db.EditDelivery(firstLot) : new ResponseData
+
             {
                 Message = "Something went wrong",
                 Status = "Failed"
@@ -88,8 +90,6 @@ namespace PartsIq.Controllers
             if (editResponse.Status == addBulkResponse.Status) return Json(new ResponseData
             {
                 Success = true,
-                Status = "Success",
-                Message = "Item Duplication Successful",
             });
             else return Json(new ResponseData
             {
@@ -98,12 +98,15 @@ namespace PartsIq.Controllers
             });     
         }
 
+
         // POST: /Scheduling/PrioritizeDelivery
         public JsonResult PrioritizeDelivery(int deliveryDetailId, bool isUrgent, int version)
         {
             var response = _db.PrioritizeDelivery(deliveryDetailId, isUrgent, version);
             return Json(response, JsonRequestBehavior.AllowGet);
         }
+
+
 
         // POST: /Scheduling/ArchiveDelivery
         public JsonResult ArchiveDelivery(int deliveryDetailId, int version)
