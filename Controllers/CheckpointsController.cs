@@ -19,20 +19,20 @@ namespace PartsIq.Controllers
         private PartsIQEntities db = new PartsIQEntities();
 
         // GET: Checkpoints
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            var checkpoints = db.Checkpoints.Include(c => c.Part);
-            return View(await checkpoints.ToListAsync());
+            var checkpoints =  db.Checkpoints.ToList();
+            return View( checkpoints);
         }
 
         // GET: Checkpoints/Details/5
-        public async Task<ActionResult> Details(int? id)
+        public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
             if (checkpoint == null)
             {
                 return HttpNotFound();
@@ -52,12 +52,12 @@ namespace PartsIq.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
+        public ActionResult Create([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
         {
             if (ModelState.IsValid)
             {
                 db.Checkpoints.Add(checkpoint);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
@@ -66,14 +66,14 @@ namespace PartsIq.Controllers
         }
 
         // GET: Checkpoints/Edit/5
-        public async Task<ActionResult> Edit(int? id)
+        public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
-            if (checkpoint == null)
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
+            if (checkpoint== null)
             {
                 return HttpNotFound();
             }
@@ -86,12 +86,12 @@ namespace PartsIq.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
+        public ActionResult Edit([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
         {
             if (ModelState.IsValid)
             {
                 db.Entry(checkpoint).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
             ViewBag.CheckpointId = new SelectList(db.Parts, "PartId", "Code", checkpoint.CheckpointId);
@@ -99,13 +99,13 @@ namespace PartsIq.Controllers
         }
 
         // GET: Checkpoints/Delete/5
-        public async Task<ActionResult> Delete(int? id)
+        public  ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
+            Checkpoint checkpoint =  db.Checkpoints.Find(id);
             if (checkpoint == null)
             {
                 return HttpNotFound();
@@ -116,21 +116,21 @@ namespace PartsIq.Controllers
         // POST: Checkpoints/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id)
         {
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
             db.Checkpoints.Remove(checkpoint);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
             return RedirectToAction("Index");
         }
 
-        public async Task<ActionResult> GetCheckpoints(int? id)
+        public ActionResult GetCheckpoints(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            List<Checkpoint> checkpoint = await db.Checkpoints.Where(c => c.Part_ID == id).ToListAsync();
+            List<Checkpoint> checkpoint = db.Checkpoints.Where(c => c.Part_ID == id).ToList();
             if (checkpoint == null)
             {
                 return HttpNotFound();

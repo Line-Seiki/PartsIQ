@@ -135,12 +135,9 @@ namespace PartsIq.Controllers
                           .Where(u => u.UserGroup_ID == groupId)
                           .Select(u => new
                           {
-                              Username = u.Username.Trim(), // Trim username
-                              Name = (u.FirstName.Trim() + " " + u.LastName.Trim()), // Trim first and last names and add a space between them
-                              Email = u.Email.Trim(), // Trim email
-                              UserGroup = u.UserGroupPermission.Name.Trim(), // Trim user group name
-                              Status = u.IsActive == 1 ? "Active" : "InActive",
-                              UserID = u.UserID,
+                              UserId = u.UserID,
+                              Name = u.Username,
+                              Email = u.Email
                           }).ToList();
                 return Json(users, JsonRequestBehavior.AllowGet);
             }
