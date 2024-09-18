@@ -24,5 +24,11 @@ namespace PartsIq.Models
         ResponseData PrioritizeDelivery(int deliveryDetailId, bool isUrgent, int version);
         List<SchedulingData> GetSchedulingData();
         #endregion
+
+        #region Suppliers
+        List<SupplierData> GetAllSuppliers();
+        ResponseData EditSupplier(SupplierData formData);
+        ResponseData CreateSupplier(SupplierData formData);
+        #endregion
     }
 }

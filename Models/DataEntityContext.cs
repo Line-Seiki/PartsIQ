@@ -6,6 +6,7 @@ using System.Data.Entity;
 using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Validation;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Web;
 
 namespace PartsIq.Models
@@ -73,7 +74,8 @@ namespace PartsIq.Models
             {
                 DeliveryId = del.DeliveryID,
                 DeliveryDetailId = del.DeliveryDetailID,
-                Status = del.InspectionID.HasValue ? "" : del.Delivery.Status.StatusName, // Inspection.Status.Name
+                Status = del.InspectionID.HasValue ? "" : del.Status.StatusName, // Inspection.Status.Name
+                StatusID = del.InspectionID.HasValue ? 1 : del.StatusID,
                 DateDelivered = del.Delivery.DateDelivered,
                 Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
                 PartCode = del.Delivery.Part.Code,
@@ -109,7 +111,6 @@ namespace PartsIq.Models
                     Quantity = formData.TotalQuantity,
                     SupplierID = formData.Supplier,
                     PartID = formData.PartCode,
-                    StatusID = 1,
                     VERSION = 1
                 };
 
@@ -123,6 +124,7 @@ namespace PartsIq.Models
                     LotNumber = "",
                     LotQuantity = newDelivery.Quantity,
                     DeliveryID = newDeliveryId,
+                    StatusID = 1,
                     VERSION = 1
                 });
                 db.SaveChanges();
@@ -247,6 +249,7 @@ namespace PartsIq.Models
                     DeliveryID = d.DeliveryId,
                     LotNumber = d.LotNumber,
                     LotQuantity = d.LotQuantity,
+                    StatusID = 1,
                     VERSION = 1
                 });
 
@@ -327,6 +330,90 @@ namespace PartsIq.Models
             }
             catch (Exception ex)
             {
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong | Error({ex.Message})"
+                };
+            }
+        }
+        #endregion
+
+        #region Suppliers
+        public List<SupplierData> GetAllSuppliers()
+        {
+            return db.Suppliers.Select(s => new SupplierData
+            {
+                SupplierID = s.SupplierID,
+                InCharge = s.InCharge,
+                Name = s.Name,
+                Version = s.VERSION
+            }).ToList();
+        }
+
+        public ResponseData EditSupplier(SupplierData formData)
+        {
+            try
+            {
+                var supplier = db.Suppliers.Find(formData.SupplierID);
+                if (supplier.VERSION != formData.Version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                if (supplier.InCharge != formData.InCharge)
+                {
+                    supplier.InCharge = formData.InCharge;
+                    db.Entry(supplier).Property(s => s.InCharge).IsModified = true;
+                }
+                if (supplier.Name != formData.Name)
+                {
+                    supplier.Name = formData.Name;
+                    db.Entry(supplier).Property(s => s.Name).IsModified = true;
+                }
+                supplier.VERSION++;
+                db.SaveChanges();
+
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = $"{supplier.Name}: Edited"
+                };
+
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong | Error({ex.Message})"
+                };
+            }
+        }
+
+        public ResponseData CreateSupplier(SupplierData formData)
+        {
+            try
+            {
+                db.Suppliers.Add(new Supplier
+                {
+                    Name = formData.Name,
+                    InCharge = formData.InCharge,
+                    VERSION = 1,
+                });
+                db.SaveChanges();
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = $"Supplier Created!"
+                };
+            }
+            catch (Exception ex)
+            {
+
                 return new ResponseData
                 {
                     Status = "Failed",
