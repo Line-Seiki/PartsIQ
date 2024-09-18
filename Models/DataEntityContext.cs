@@ -114,6 +114,10 @@ namespace PartsIq.Models
                     VERSION = 1
                 };
 
+                if (newDelivery.PriorityLevel == 3) newDelivery.Deadline = newDelivery.DateDelivered.AddDays(3);
+                else if (newDelivery.PriorityLevel == 2) newDelivery.Deadline = newDelivery.DateDelivered.AddDays(5);
+                else newDelivery.Deadline = newDelivery.DateDelivered.AddDays(7);
+
                 db.Deliveries.Add(newDelivery);
                 db.SaveChanges();
 
