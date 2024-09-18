@@ -20,40 +20,42 @@
             <div class="page-content-wrapper mt--45">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-lg-6 col-md-12">
-                                        <div class="table-responsive">
-                                            <table id="supplier-table" class="table table-centered mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th>In Charge</th>
-                                                        <th>Supplier</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="supplier-table" class="table table-centered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>In Charge</th>
+                                                    <th>Supplier</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <form id="SupplierForm" data-type="add" data-id="" data-version="">
+                                        <div class="mb-3">
+                                            <label for="InCharge" class="form-label">In Charge</label>
+                                            <input type="text" class="form-control" id="InCharge" name="InCharge" required>
                                         </div>
-                                    </div>
-                                    <div class="col-lg-6 col-md-12 p-4">
-                                        <form id="SupplierForm" data-type="add" data-id="" data-version="">
-                                            <div class="mb-3">
-                                                <label for="InCharge" class="form-label">In Charge</label>
-                                                <input type="text" class="form-control" id="InCharge" name="InCharge" required>
-                                            </div>
 
-                                            <div class="mb-3">
-                                                <label for="Name" class="form-label">Supplier</label>
-                                                <input type="text" class="form-control" id="Name" name="Name" required/>
-                                            </div>
-                                            <div id="supplierBtns" class="d-flex justify-content-end gap-2 mt-4">
-                                                <button type="reset" class="btn btn-secondary">Reset</button>
-                                                <button type="submit" id="formBtn" class="btn btn-success">Add Supplier</button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                        <div class="mb-3">
+                                            <label for="Name" class="form-label">Supplier</label>
+                                            <input type="text" class="form-control" id="Name" name="Name" required />
+                                        </div>
+                                        <div id="supplierBtns" class="d-flex justify-content-end gap-2 mt-4">
+                                            <button type="reset" class="btn btn-secondary">Reset</button>
+                                            <button type="submit" id="formBtn" class="btn btn-success">Add Supplier</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -206,10 +208,18 @@
                     id: e.target.dataset.id
                 },
                 success(res) {
+                    if (res.Success) {
+                        alertify.success(`${res.Status}: ${res.Message}`);
+                        supplierDataTable.ajax.reload();
+
+                    } else {
+                        alertify.error(`${res.Status}: ${res.Message}`);
+                    }
                     console.log(res);
                 },
                 error(err) {
                     console.error(err);
+                    alertify.error(`Something went wrong! ${err}`);
                 }
             })
         })
