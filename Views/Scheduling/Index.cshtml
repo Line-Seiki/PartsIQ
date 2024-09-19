@@ -56,6 +56,8 @@
         #DateDelivered {
             background-color: transparent;
         }
+       
+
     </style>
 }
 
@@ -105,7 +107,7 @@
                                 <div class="card-body">
                                     <!--Scheduling DataTable-->
                                     <div class="table-responsive">
-                                        <table id="scheduling-data-table" class="table table-centered mb-0">
+                                        <table id="scheduling-data-table" class="table table-centered mb-0 fs-12">
                                             <thead>
                                                 <tr>
                                                     <th>Status</th>
@@ -230,6 +232,7 @@
                     url: '/Scheduling/GetScheduledParts',
                     dataSrc: 'data'
                 },
+                responsive: true,
                 columns: [
                     { data: "Status"},
                     {
