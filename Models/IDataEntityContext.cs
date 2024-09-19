@@ -30,5 +30,9 @@ namespace PartsIq.Models
         ResponseData EditSupplier(SupplierData formData);
         ResponseData CreateSupplier(SupplierData formData);
         #endregion
+
+        #region Inspection
+        List<InspectionData> GetAvailableInspections();
+        #endregion
     }
 }
