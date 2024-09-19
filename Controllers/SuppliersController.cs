@@ -67,19 +67,29 @@ namespace PartsIq.Controllers
         // POST: Suppliers/Delete/
         public JsonResult Delete(int id)
         {
-            var supplier = db.Suppliers.Find(id);
             var response = new ResponseData();
-            if (supplier == null) 
+            try
             {
-                response.Status = "Failed";
-                response.Message = "Failed to find supplier";
-            };
-            db.Suppliers.Remove(supplier);
-            db.SaveChanges();
+                var supplier = db.Suppliers.Find(id);
+                if (supplier == null)
+                {
+                    response.Status = "Failed";
+                    response.Message = "Failed to find supplier";
+                };
+                db.Suppliers.Remove(supplier);
+                db.SaveChanges();
 
-            response.Success = true;
-            response.Status = "Success";
-            response.Message = "Supplier Deleted";
+                response.Success = true;
+                response.Status = "Success";
+                response.Message = "Supplier Deleted";
+            }
+            catch (Exception ex)
+            {
+
+                response.Status = "Failed";
+                response.Message = $"{ex.Message}";
+            }
+            
 
             return Json(response, JsonRequestBehavior.AllowGet);
         }

@@ -10,20 +10,44 @@
 
         .low-priority {
             background-color: #CDFAD5;
+            color: black;
         }
 
         .normal-priority {
             background-color: #F6FDC3;
+            color: black;
         }
 
         .high-priority {
             background-color: #FF9B9B;
+            color: black;
         }
 
         .priority-started {
+            background-color: #EEEEEE;
+            color: black;
         }
 
         .priority-paused {
+            background-color: #FFF0D1;
+            color: black;
+        }
+        .urgent {
+            background-color: #FF0000;
+            color: white;
+        }
+
+        input:read-only {
+            background-color: #d4d4d4;
+        }
+
+        #DateDelivered {
+            background-color: transparent;
+        }
+
+        .selected-row {
+            background-color: #343131;
+            color: white;
         }
     </style>
 }
@@ -57,88 +81,452 @@
             <div class="page-content-wrapper mt--45">
                 <div class="container-fluid">
                     <div class="row">
-                        <!-- Inspection - Available -->
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="mb-4 d-flex justify-content-between align-items-center">
-                                    <div class="d-flex">
-                                        <h5>Available</h5>
-                                    </div>
-                                    <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-pencil"></i></button>
-                                        <button id="memberBtn" class="btn btn-primary"><i class="mdi mdi-account-arrow-right"></i></button>
-                                        <button id="refreshBtn" class="btn btn-success"><i class="mdi mdi-reload"></i></button>
+                        <div id="left-column" class="col-lg-12">
+                            <!-- Inspection - Available -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                                        <div class="d-flex">
+                                            <h5>Available</h5>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <button id="editBtn" class="btn btn-secondary" data-index=""><i class="mdi mdi-pencil"></i></button>
+                                            <button id="memberBtn" class="btn btn-primary"><i class="mdi mdi-account-arrow-right"></i></button>
+                                            <button id="refreshBtn" class="btn btn-success"><i class="mdi mdi-reload"></i></button>
+                                            <button id="devAssign" class="btn btn-warning text-black"><i class="mdi mdi-account"></i> DEV Assign</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table id="inspection-available" class="table table-centered mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Priority</th>
-                                                <th>Status</th>
-                                                <th>Lot Number</th>
-                                                <th>Lot Quantity</th>
-                                                <th>Inspector</th>
-                                                <th>Pard Code</th>
-                                                <th>Part Name</th>
-                                                <th>Date Delivered</th>
-                                                <th>DR Number</th>
-                                                <th>Total Quantity</th>
-                                                <th>Supplier</th>
-                                                <th>Deadline</th>
-                                                <th>Date Started</th>
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between">
-                                    <div class="d-flex">
-                                        <h5>Finished</h5>
-                                    </div>
-                                    <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-pencil"></i></button>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="inspection-available" class="table table-centered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Priority</th>
+                                                    <th>Status</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Inspector</th>
+                                                    <th>Pard Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Date Delivered</th>
+                                                    <th>DR Number</th>
+                                                    <th>Total Quantity</th>
+                                                    <th>Supplier</th>
+                                                    <th>Deadline</th>
+                                                    <th>Date Started</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-
-                                <div class="my-4">
-                                    <h5>Finished</h5>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between">
-                                    <div class="d-flex">
-                                        <h5>Pending</h5>
-                                    </div>
-                                    <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-file-pdf-outline"></i></button>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex">
+                                            <h5>Finished</h5>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-pencil"></i></button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="my-4">
-                                    <h5>Pending</h5>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="inspection-finished" class="table table-centered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Date Finished</th>
+                                                    <th>Decision</th>
+                                                    <th>Control Number</th>
+                                                    <th>DR Number</th>
+                                                    <th>Pard Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Comments</th>
+                                                    <th>Inspector Comments</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
                                 </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex">
+                                            <h5>Pending</h5>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-file-pdf-outline"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="inspection-finished" class="table table-centered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Priority</th>
+                                                    <th>DR Number</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Pard Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Sample Size</th>
+                                                    <th>Deadline</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
                                     <button id="inspection-btn" class="btn btn-primary"><i class="mdi mdi-magnify"></i> Start Inspection</button>
+                                    <button id="dev-inspection" class="btn btn-warning"><i class="mdi mdi-magnify"></i> DEV Start Inspection</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="right-column" class="col-lg-6 col-md-12 d-none">
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul id="tab-list" class="nav nav-tabs">
+                                    </ul>
+                                    <div class="tab-content" id="tab-content">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section scripts {
     <script>
+
+        let availableTable;
+        let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
+        const editBtn = document.getElementById('editBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
         const inspectionBtn = document.getElementById('inspection-btn');
-        document.addEventListener('DOMContentLoaded', function () {
+        const devInspect = document.getElementById('dev-inspection');
+        const devAssign = document.getElementById('devAssign');
+
+        document.addEventListener("DOMContentLoaded", function () {
+            availableTable = $('#inspection-available').DataTable({
+                ajax: {
+                    url: '/Inspection/GetAvailableInspections',
+                    dataSrc: 'data'
+                },
+                ordering: false,
+                columns: [
+                    { data: "Priority", orderable: false },
+                    { data: "Status", orderable: false },
+                    { data: "LotNumber" },
+                    { data: "LotQuantity" },
+                    { data: "Inspector" },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    {
+                        data: "DateDelivered", render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`;
+                        }
+                    },
+                    { data: "DRNumber" },
+                    { data: "TotalQuantity" },
+                    { data: "Supplier" },
+                    {
+                        data: "Deadline",
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    {
+                        data: "DateStarted",
+                        render: function (data, type, row) {
+                            if (!data) return "";
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    {
+                        data: null, orderable: false,
+                        render: function (data, type, row, meta) {
+                            return `<button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})"><i class="mdi mdi-pencil"></i></button>`
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent));
+                    else if (data.StatusID !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                    else $(row).css(getColorAccordingToPriorityLevel(data.PriorityLevel));
+                }
+            });
+
+            // FUNCTIONALITY: Available Table Row Selection
+            availableTable.on('click', 'tbody tr', function (e) {
+                let classList = e.currentTarget.classList;
+                const rowIndex = availableTable.row(this).index();
+
+                if (classList.contains('selected-row')) {
+                    classList.remove('selected-row');
+                    editBtn.dataset.index = '';
+                }
+                else {
+                    availableTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));
+                    classList.add('selected-row');
+                    editBtn.dataset.index = rowIndex;
+                }
+            });
+
+            // Refetch Data from DataTable
+            refreshBtn.addEventListener('click', function () {
+                availableTable.ajax.reload();
+                $.ajax({
+                    url: '/Inspection/GetAvailableInspections',
+                    type: 'POST',
+                    success(res) {
+                        alertify.success('Reloaded!')
+                        editBtn.dataset.index = '';
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                        editBtn.dataset.index = '';
+                    }
+                })
+            });
+
+            // Start Inspection
             inspectionBtn.addEventListener('click', startInspection);
+
+            // Start Dev Inspection
+            devInspect.addEventListener('click', devInspection);
+
+            // Dev Assign (ASSIGN TO USER(FIXED))
+            devAssign.addEventListener('click', devAssignDelivery);
+
+            // FUNCTIONALITY: Edit Currently Selected Row
+            editBtn.addEventListener('click', function (e) {
+                if (!e.target.closest('#editBtn').dataset.index) {
+                    console.log('no index');
+                } else {
+                    console.log(e.target.closest('#editBtn').dataset.index);
+                    const rowIndex = e.target.closest('#editBtn').dataset.index;
+                    editDelivery(rowIndex);
+                }
+            })
         });
 
+
+        // FUNCTIONALITY: Start Inspection
         function startInspection() {
             console.log('start inspection');
+        }
+
+        // DEV-FUNCTIONALITY: Start Inspection
+        function devInspection() {
+            console.log('dev inspection');
+            const dataAvailable = availableTable.data().toArray();
+            const selectedData = dataAvailable.find(item => item.PriorityLevel === 1)
+            console.log(selectedData);
+        }
+
+        // DEV-FUNCTIONALITY: Assign to Delivery
+        function devAssignDelivery() {
+            console.log('assigned');
+            const dataAvailable = availableTable.data().toArray();
+            const selectedData = dataAvailable.find(item => item)
+        }
+
+        // FUNCTIONALITY for Editing Deliveries
+        function editDelivery(rowIndex) {
+            const rowData = availableTable.row(rowIndex).data();
+            console.log(rowData);
+
+            document.getElementById('left-column').classList.remove('col-lg-12');
+            document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const id = `${Date.now()}`
+            const deliveryDetailId = `${rowData.DeliveryDetailID}`;
+            const deliveryId = `${rowData.DeliveryID}`;
+            const version = rowData.DeliveryDetailVersion;
+            const deliveryVersion = rowData.DeliveryVersion;
+            const tabId = `tab-${rowData.DeliveryId}-${rowData.Model}`;
+            const tabTitle = `
+                        <li class="nav-item">
+                            <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">
+                                ${rowData.DRNumber}
+                                <span class="close-tab" onclick="removeTab('${tabId}')">&times;</span>
+                            </a>
+                        </li>
+                    `;
+            const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
+                            <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}','${deliveryDetailId}',${version},'${deliveryVersion}','${tabId}','${deliveryId}');">
+                                <div class="mb-3">
+                                    <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
+                                    <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="PartCode-${id}" class="form-label">Part Code</label>
+                                    <input type="text" class="form-control" id="PartCode-${id}" name="PartCode" value="${rowData.PartCode}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="PartName-${id}" class="form-label">Part Name</label>
+                                    <input type="text" class="form-control" id="PartName-${id}" name="PartName" value="${rowData.PartName}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Model-${id}" class="form-label">Model</label>
+                                    <input type="text" class="form-control" id="Model-${id}" name="Model" value="${rowData.Model}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="DRNumber-${id}" class="form-label">DR Number</label>
+                                    <input type="text" class="form-control" id="DRNumber-${id}" name="DRNumber" value="${rowData.DRNumber}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="Supplier-${id}" class="form-label">Supplier</label>
+                                    <select type="text" class="form-control" id="Supplier-${id}" placeholder="Select a supplier" required></select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="TotalQuantity-${id}" class="form-label">Total Quantity</label>
+                                    <input type="number" class="form-control" id="TotalQuantity-${id}" name="TotalQuantity" value="${rowData.TotalQuantity}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="LotNumber-${id}" class="form-label">Lot Number</label>
+                                    <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber}>
+                                 </div>
+                                 <div class="mb-3">
+                                    <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
+                                    <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="${rowData.LotQuantity}">
+                                 </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>`;
+
+            document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
+            document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
+
+            const $select = initializeDynamicSelectize(id);
+            $select[0].selectize.setValue(rowData.SupplierID)
+
+            const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
+            tabTrigger.show();
+        }
+
+        function editChanges(id, deliveryDetailId, version, deliveryVersion, tabId, deliveryId) {
+            const totalQty = document.getElementById(`TotalQuantity-${id}`).value;
+            const lotQty = document.getElementById(`LotQuantity-${id}`).value;
+            if (totalQty <= lotQty) {
+                const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
+                const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
+                const formData = new FormData(dynamicForm);
+                formData.append("Supplier", supplierSelected);
+                formData.append("DeliveryDetailId", deliveryDetailId);
+                formData.append("DeliveryId", deliveryId);
+                formData.append("Version", version);
+                formData.append("DeliveryVersion", deliveryVersion);
+                const data = Object.fromEntries(formData);
+                console.log(data);
+
+                $.ajax({
+                    url: '/Scheduling/EditDelivery',
+                    type: 'POST',
+                    data,
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        availableTable.ajax.reload();
+                        removeTab(tabId);
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            } else {
+                alertify.error(`The Quantity in the lot exceeded the total quantity.`)
+            }
+
+        }
+
+        // FUNCTIONALITY on right column tabs
+        function removeTab(tabId) {
+            const tabElement = document.getElementById(tabId);
+            const tabNavElement = document.getElementById(`${tabId}-tab`);
+
+            if (tabElement && tabNavElement) {
+                // Remove the tab content
+                tabElement.remove();
+                tabNavElement.remove();
+
+                const firstTab = document.querySelector('#tab-list .nav-link');
+                if (firstTab) {
+                    const firstTabTrigger = new bootstrap.Tab(firstTab);
+                    firstTabTrigger.show();
+                } else {
+                    // No tabs left, hide the right column and expand the left column
+                    document.getElementById('right-column').classList.add('d-none');
+                    document.getElementById('left-column').classList.remove('col-lg-6', 'col-md-12');
+                    document.getElementById('left-column').classList.add('col-lg-12');
+                }
+            }
+        }
+
+        // HELPER get certain color according to data priority level
+        function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
+            if (isUrgent) return 'urgent';
+            if (statusID !== 1) switch (statusID) {
+                case 2:
+                    return 'priority-paused';
+                case 4:
+                    return 'priority-started';
+                default:
+                    return 'priority-started';
+            }
+            switch (priorityID) {
+                case 1:
+                    return 'low-priority';
+                case 2:
+                    return 'normal-priority';
+                case 3:
+                    return 'high-priority';
+                default:
+                    return '';
+            }
+        }
+
+        // HELPER convert date to date string
+        function convertDateStringToFormattedString(date) {
+            let dateObj;
+            if (typeof date === 'string' && date !== null) dateObj = date.substring(6, date.length - 2);
+            else return '';
+            dateObj = new Date(parseInt(dateObj))
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        // HELPER initializing selectize dynamically
+        function initializeDynamicSelectize(id) {
+            const $select = $(`#Supplier-${id}`).selectize({
+                valueField: 'Value',
+                labelField: 'Text',
+                searchField: 'Text',
+                options: suppliersList,
+                create: false,
+            });
+            return $select;
         }
     </script>
 }
