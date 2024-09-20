@@ -113,7 +113,7 @@
                                 <div class="card-body">
                                     <!--Scheduling DataTable-->
                                     <div class="table-responsive">
-                                        <table id="scheduling-data-table" class="table table-centered mb-0">
+                                        <table id="scheduling-data-table" class="table table-centered mb-0 fs-13">
                                             <thead>
                                                 <tr>
                                                     <th>Status</th>
@@ -260,7 +260,7 @@
                             return `${convertDateStringToFormattedString(data)}`
                         }
                     },
-                    { data: "Inspector" },
+                    { data: "UserName" },
                     {
                         data: "RemainingDays",
                         render: function (data, type, row, meta) {
@@ -446,7 +446,7 @@
             const deliveryId = `${rowData.DeliveryId}`;
             const version = rowData.Version;
             const deliveryVersion = rowData.DeliveryVersion;
-            const tabId = `tab-${rowData.DeliveryId}-${rowData.Model}`;
+            const tabId = `tab-${rowData.DeliveryId}-${Date.now()}`;
             const tabTitle = `
                                 <li class="nav-item">
                                     <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">

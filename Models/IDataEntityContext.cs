@@ -33,6 +33,12 @@ namespace PartsIq.Models
 
         #region Inspection
         List<InspectionData> GetAvailableInspections();
+        List<InspectionData> GetPendingInspections(int userID);
+        ResponseData UnAssignInspector(int delDetailID, int version, int userID);
+        ResponseData CreateInspection(InspectionFormData formData, List<string> cavityList);
+        ResponseData PauseUnpause(int StatusID, int DeliveryDetailID, int DeliveryDetailVersion);
+        //DEV FUNCTIONALITY
+        ResponseData DevAssignInspector(int id, int version);
         #endregion
     }
 }

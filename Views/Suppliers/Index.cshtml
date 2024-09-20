@@ -178,8 +178,11 @@
             supplierForm.dataset.type = "edit";
             supplierForm.dataset.id = id;
             supplierForm.dataset.version = supplierObj.Version;
-            stopEditBtnEl = `<button id="cancelBtn" class="btn btn-danger" onclick="cancelEdit()">Cancel Edit</button>`
-            document.getElementById('supplierBtns').insertAdjacentHTML('beforeend', stopEditBtnEl);
+            if (!document.getElementById('cancelBtn')) {
+                const stopEditBtnEl = `<button id="cancelBtn" class="btn btn-danger" onclick="cancelEdit()">Cancel Edit</button>`
+                document.getElementById('supplierBtns').insertAdjacentHTML('beforeend', stopEditBtnEl);
+            }
+            
         }
 
         function cancelEdit() {
