@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Web;
 
@@ -21,6 +22,9 @@ namespace PartsIq.Models
         public DateTime Deadline { get; set; }
         public string PartCode { get; set; }
         public string PartName { get; set; }
+        public int? UserID { get; set; }
+        public string UserName { get; set; }
+        public int? InspectionID { get; set; }
         public string Model { get; set; }
         public string Supplier { get; set; }
         public int SupplierID { get; set; } // used for delivery duplication
@@ -29,12 +33,11 @@ namespace PartsIq.Models
         public string LotNumber { get; set; }
         public int LotQuantity { get; set; }
         public DateTime? InspectionDeadline { get; set; }
-        public string Inspector { get; set; }
         public int Priority { get; set; }
         public int Version { get; set; }
         public int DeliveryVersion { get; set; }
         public bool IsUrgent { get; set; }
-        public int RemainingDays => (Deadline - DateDelivered).Days;
+        public int RemainingDays => (Deadline - DateTime.Now).Days;
     }
 
     public class DeliveryFormData
@@ -80,6 +83,7 @@ namespace PartsIq.Models
         public bool Success { get; set; }
         public string Status { get; set; }
         public string Message { get; set; }
+        public int RouteInspectionID { get; set; }
     }
     #endregion
 
@@ -102,14 +106,15 @@ namespace PartsIq.Models
     #region Inspection
     public class InspectionData
     {
-        public int PartID { get; set; }
         public int DeliveryID { get; set; }
         public int DeliveryDetailID { get; set; }
-        public int InspectionID { get; set; }
+        public int? InspectionID { get; set; }
         public int StatusID { get; set; }
         public string Status { get; set; }
         public int SupplierID { get; set; }
         public string Supplier { get; set; }
+        public int? UserID { get; set; }
+        public string UserName { get; set; }
         public DateTime DateDelivered { get; set; }
         public DateTime Deadline { get; set; }
         public DateTime? DateStarted { get; set; }
@@ -120,7 +125,7 @@ namespace PartsIq.Models
         public string Model { get; set; }
         public int TotalQuantity { get; set; }
         public string DRNumber { get; set; }
-        public string Inspector { get; set; }
+        public string SampleSize { get; set; }
         public int PriorityLevel { get; set; }
         public string Priority
         {
@@ -145,6 +150,18 @@ namespace PartsIq.Models
         public int InspectionVersion { get; set; }
         public bool IsUrgent { get; set; }
 
+    }
+
+    public class InspectionFormData
+    {
+        public decimal Humidity { get; set; }
+        public decimal Temperature { get; set; }
+        public int SampleSize { get; set; }
+        public int NumberOfCavities { get; set; }
+        public int UserID { get; set; }
+        public int DeliveryDetailID { get; set; }
+        public int DeliveryDetailVersion { get; set; }
+        public string CavityList { get; set; }
     }
     #endregion
 }
