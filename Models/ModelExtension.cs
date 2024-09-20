@@ -10,7 +10,7 @@ namespace PartsIq.Models
     {
 
     }
-
+    #region Scheduling
     public class SchedulingData
     {
         public int DeliveryId { get; set; }
@@ -18,7 +18,7 @@ namespace PartsIq.Models
         public string Status { get; set; }
         public int StatusID { get; set; }
         public DateTime DateDelivered { get; set; }
-        public DateTime Deadline {  get; set; }
+        public DateTime Deadline { get; set; }
         public string PartCode { get; set; }
         public string PartName { get; set; }
         public string Model { get; set; }
@@ -62,14 +62,9 @@ namespace PartsIq.Models
         public int Version { get; set; }
         public int DeliveryVersion { get; set; }
     }
+    #endregion
 
-    public class ResponseData
-    {
-        public bool Success { get; set; }
-        public string Status { get; set; }
-        public string Message { get; set; }
-    }
-
+    #region Supplier
     public class SupplierData
     {
         public int SupplierID { get; set; }
@@ -77,6 +72,16 @@ namespace PartsIq.Models
         public string Name { get; set; }
         public int Version { get; set; }
     }
+    #endregion
+
+    #region Response Return
+    public class ResponseData
+    {
+        public bool Success { get; set; }
+        public string Status { get; set; }
+        public string Message { get; set; }
+    }
+    #endregion
 
     #region Users
     public class UserGroupViewModel
@@ -91,6 +96,55 @@ namespace PartsIq.Models
         public int UserId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
+    }
+    #endregion
+
+    #region Inspection
+    public class InspectionData
+    {
+        public int PartID { get; set; }
+        public int DeliveryID { get; set; }
+        public int DeliveryDetailID { get; set; }
+        public int InspectionID { get; set; }
+        public int StatusID { get; set; }
+        public string Status { get; set; }
+        public int SupplierID { get; set; }
+        public string Supplier { get; set; }
+        public DateTime DateDelivered { get; set; }
+        public DateTime Deadline { get; set; }
+        public DateTime? DateStarted { get; set; }
+        public string LotNumber { get; set; }
+        public int LotQuantity { get; set; }
+        public string PartCode { get; set; }
+        public string PartName { get; set; }
+        public string Model { get; set; }
+        public int TotalQuantity { get; set; }
+        public string DRNumber { get; set; }
+        public string Inspector { get; set; }
+        public int PriorityLevel { get; set; }
+        public string Priority
+        {
+            get
+            {
+                switch (PriorityLevel)
+                {
+                    case 1:
+                        return "Low";
+                    case 2:
+                        return "Normal";
+                    case 3:
+                        return "High";
+                    default:
+                        return "Low";
+                }
+            }
+        }
+        
+        public int DeliveryDetailVersion { get; set; }
+        public int DeliveryVersion { get; set; }
+        public int InspectionVersion { get; set; }
+        public bool IsUrgent { get; set; }
+
     }
     #endregion
 }

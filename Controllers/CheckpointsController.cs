@@ -130,13 +130,34 @@ namespace PartsIq.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            List<Checkpoint> checkpoint = db.Checkpoints.Where(c => c.Part_ID == id).ToList();
-            if (checkpoint == null)
+
+            // Fetch the checkpoints for the specified Part_ID
+            var query = db.Checkpoints.Where(c => c.Part_ID == id);
+
+            // Check if there are no results
+            if (!query.Any())
             {
                 return HttpNotFound();
             }
-            return PartialView("_PartCheckpoints",checkpoint);
+
+            var checkpoints = query.Select(c => new
+            {
+                c.Code,
+                c.CheckpointId,
+                c.InspectionPart,
+                VariableType = c.IsMeasurement == 1 ? "Measurement" : "Attribute",
+                c.Specification,
+                c.LimitUpper,
+                c.LimitLower,
+                c.SamplingMethod,
+                c.Tools,
+                Status = c.IsActive == 1 ? "Active" : "Inactive",
+            }).ToList();
+
+            return Json(new { success = true, data = checkpoints }, JsonRequestBehavior.AllowGet);
         }
+
+
         [HttpGet]
         public ActionResult Upload()
         {

@@ -7,6 +7,7 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Validation;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace PartsIq.Models
@@ -94,7 +95,7 @@ namespace PartsIq.Models
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
 
-            }).OrderByDescending(d => d.Status).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.Priority).ToList();
+            }).OrderByDescending(d => d.IsUrgent).ThenByDescending(d => d.StatusID).ThenByDescending(d => d.Priority).ToList();
         }
 
         public ResponseData CreateDelivery(DeliveryFormData formData)
@@ -113,6 +114,10 @@ namespace PartsIq.Models
                     PartID = formData.PartCode,
                     VERSION = 1
                 };
+
+                if (newDelivery.PriorityLevel == 3) newDelivery.Deadline = newDelivery.DateDelivered.AddDays(3);
+                else if (newDelivery.PriorityLevel == 2) newDelivery.Deadline = newDelivery.DateDelivered.AddDays(5);
+                else newDelivery.Deadline = newDelivery.DateDelivered.AddDays(7);
 
                 db.Deliveries.Add(newDelivery);
                 db.SaveChanges();
@@ -420,6 +425,38 @@ namespace PartsIq.Models
                     Message = $"Something went wrong | Error({ex.Message})"
                 };
             }
+        }
+        #endregion
+
+        #region Inspection
+        public List<InspectionData> GetAvailableInspections()
+        {
+            return db.DeliveryDetails.Where(d => !d.IsArchived).Select(del => new InspectionData
+            {
+                DeliveryID = del.DeliveryID,
+                DeliveryDetailID = del.DeliveryDetailID,
+                Status = del.InspectionID.HasValue ? "" : del.Status.StatusName, // Inspection.Status.Name
+                StatusID = del.InspectionID.HasValue ? 1 : del.StatusID,
+                DateDelivered = del.Delivery.DateDelivered,
+                Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
+                DateStarted = del.InspectionID.HasValue ? del.Inspection.DateStart : null,
+                PartID = del.Delivery.PartID,
+                PartCode = del.Delivery.Part.Code,
+                PartName = del.Delivery.Part.Name,
+                Model = del.Delivery.Part.Model,
+                Supplier = del.Delivery.Supplier.Name,
+                SupplierID = del.Delivery.SupplierID,
+                DRNumber = del.Delivery.DRNumber,
+                TotalQuantity = del.Delivery.Quantity,
+                LotQuantity = del.LotQuantity,
+                LotNumber = del.LotNumber,
+                Inspector = del.InspectionID.HasValue ? "" : "",
+                PriorityLevel = del.Delivery.PriorityLevel,
+                DeliveryDetailVersion = del.VERSION,
+                DeliveryVersion = del.Delivery.VERSION,
+                IsUrgent = del.IsUrgent,
+                // TODO: Add Version For Inspection
+            }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.PriorityLevel).ToList();
         }
         #endregion
     }

@@ -29,24 +29,32 @@
 
         .low-priority {
             background-color: #CDFAD5;
+            color: black;
         }
 
         .normal-priority {
             background-color: #F6FDC3;
+            color: black;
         }
 
         .high-priority {
             background-color: #FF9B9B;
+            color: black;
         }
 
         .priority-started {
             background-color: #EEEEEE;
+            color: black;
         }
-
-
 
         .priority-paused {
             background-color: #FFF0D1;
+            color: black;
+        }
+
+        .urgent {
+            background-color: #FF0000;
+            color: white;
         }
 
         input:read-only {
@@ -232,7 +240,7 @@
                     url: '/Scheduling/GetScheduledParts',
                     dataSrc: 'data'
                 },
-                responsive: true,
+                ordering: false,
                 columns: [
                     { data: "Status"},
                     {
@@ -281,18 +289,9 @@
                     }
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    if (data.IsUrgent) $(row).css({
-                        "background-color": getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent),
-                        "color": "white",
-                    });
-                    else if (data.StatusID !== "Available") $(row).css({
-                        'background-color': getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID),
-                        "color": "black"
-                    });
-                    else $(row).css({
-                        'background-color': getColorAccordingToPriorityLevel(data.Priority),
-                        "color": "black"
-                });
+                    if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent));
+                    else if (data.StatusID !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
+                    else $(row).css(getColorAccordingToPriorityLevel(data.Priority));
                 }
             });
 
@@ -827,22 +826,22 @@
 
         // HELPER get certain color according to data priority level
         function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
-            if (isUrgent) return '#FF0000';
+            if (isUrgent) return 'urgent';
             if (statusID !== 1) switch (statusID) {
                 case 2:
-                    return '#FFF0D1';
+                    return 'priority-paused';
                 case 4:
-                    return '#EEEEEE';
+                    return 'priority-started';
                 default:
-                    return '#EEEEEE';
+                    return 'priority-started';
             }
             switch (priorityID) {
                 case 1:
-                    return '#CDFAD5';
+                    return 'low-priority';
                 case 2:
-                    return '#F6FDC3';
+                    return 'normal-priority';
                 case 3:
-                    return '#FF9B9B';
+                    return 'high-priority';
                 default:
                     return '';
             }

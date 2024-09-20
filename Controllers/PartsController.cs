@@ -23,26 +23,32 @@ namespace PartsIq.Controllers
         }
 
         //// GET: Parts/Details/5
-        //public async Task<ActionResult> Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-        //    }
-        //    Part part = await db.Parts.FindAsync(id);
-        //    if (part == null)
-        //    {
-        //        return HttpNotFound();
-        //    }
-        //    return View(part);
-        //}
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
 
-        //// GET: Parts/Create
-        //public ActionResult Create()
-        //{
-        //    ViewBag.FileAtttachment_ID = new SelectList(db.FileAttachments, "FileId", "FilePath");
-        //    return View();
-        //}
+            // Fetch the part with the specified ID, including its FileAttachment (if any)
+            Part part = db.Parts.Include(s => s.FileAttachment)
+                                .FirstOrDefault(p => p.PartID == id);
+          
+            if (part == null)
+            {
+                return HttpNotFound();
+            }
+
+            return View(part);
+        }
+
+
+        // GET: Parts/Create
+        public ActionResult Create()
+        {
+            ViewBag.FileAtttachment_ID = new SelectList(db.FileAttachments, "FileId", "FilePath");
+            return View();
+        }
 
         //// POST: Parts/Create
         //// To protect from overposting attacks, enable the specific properties you want to bind to, for 
