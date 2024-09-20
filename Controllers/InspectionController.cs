@@ -30,73 +30,11 @@ namespace PartsIq.Controllers
         // GET: Inspection/Details/5
         public ActionResult Details(int id)
         {
-            return View();
-        }
+            var inspection = db.Inspections.Find(id);
 
-        // GET: Inspection/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
+            if (inspection == null) return HttpNotFound();
 
-        // POST: Inspection/Create
-        [HttpPost]
-        public ActionResult Create(FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add insert logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Inspection/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: Inspection/Edit/5
-        [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: Inspection/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: Inspection/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+            return View("Details", inspection);
         }
 
         // GET: /Inspection/GetAvailableInspections
@@ -105,6 +43,46 @@ namespace PartsIq.Controllers
             var data = dbContext.GetAvailableInspections();
             return Json(new { data }, JsonRequestBehavior.AllowGet);
         }
+
+        // GET: /Inspection/GetPendingInspections
+        public JsonResult GetPendingInspections()
+        {
+            int userID = 4; //CHANGE TO SESSION USER ID
+            var data = dbContext.GetPendingInspections(userID);
+            return Json(new {data}, JsonRequestBehavior.AllowGet);
+        }
+
+        // POST: /Inspection/UnAssignInspector
+        public JsonResult UnAssignInspector(int DeliveryDetailID, int DeliveryDetailVersion, int UserID)
+        {
+            var response = dbContext.UnAssignInspector(DeliveryDetailID, DeliveryDetailVersion, UserID);
+            return Json(response, JsonRequestBehavior.AllowGet);
+        }
+
+        // POST: /Inspection/CreateInspection
+        public JsonResult CreateInspection(InspectionFormData data)
+        {
+            var cavityList = data.CavityList.Split(',').ToList();
+            var response = dbContext.CreateInspection(data, cavityList);
+
+            return Json(response, JsonRequestBehavior.AllowGet);
+        }
+
+        // POST: /Inspection/PauseUnPause
+        public JsonResult PauseUnPause(int StatusID, int DeliveryDetailID, int DeliveryDetailVersion)
+        {
+            var response = dbContext.PauseUnpause(StatusID, DeliveryDetailID, DeliveryDetailVersion);
+            return Json(response, JsonRequestBehavior.AllowGet);
+        }
+
+        #region DEV Controller Actions
+        // POST: /Inspection/DevAssign
+        public JsonResult DevAssignInspector(int delDetailID, int delDetailVersion)
+        {
+            var response = dbContext.DevAssignInspector(delDetailID, delDetailVersion);
+            return Json(response, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         #region HELPERS
         public List<SelectListItem> PartListItems()

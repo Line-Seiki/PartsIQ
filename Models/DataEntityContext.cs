@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Web;
+using System.Windows.Input;
 
 namespace PartsIq.Models
 {
@@ -81,6 +82,8 @@ namespace PartsIq.Models
                 Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
                 PartCode = del.Delivery.Part.Code,
                 PartName = del.Delivery.Part.Name,
+                UserID = del.UserID.HasValue ? del.UserID.Value : 0,
+                UserName = del.UserID.HasValue ? del.User.FirstName + " " + del.User.LastName : "",
                 Model = del.Delivery.Part.Model,
                 Supplier = del.Delivery.Supplier.Name,
                 SupplierID = del.Delivery.SupplierID,
@@ -89,7 +92,7 @@ namespace PartsIq.Models
                 LotQuantity = del.LotQuantity,
                 LotNumber = del.LotNumber,
                 InspectionDeadline = null, // Inspection Table CONDITION: If no value was found return null
-                Inspector = del.InspectionID.HasValue ? "" : "",
+                InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : 0,
                 Priority = del.Delivery.PriorityLevel,
                 Version = del.VERSION,
                 DeliveryVersion = del.Delivery.VERSION,
@@ -435,28 +438,259 @@ namespace PartsIq.Models
             {
                 DeliveryID = del.DeliveryID,
                 DeliveryDetailID = del.DeliveryDetailID,
-                Status = del.InspectionID.HasValue ? "" : del.Status.StatusName, // Inspection.Status.Name
-                StatusID = del.InspectionID.HasValue ? 1 : del.StatusID,
+                Status = del.Status.StatusName, // Inspection.Status.Name
+                StatusID = del.StatusID,
                 DateDelivered = del.Delivery.DateDelivered,
                 Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
                 DateStarted = del.InspectionID.HasValue ? del.Inspection.DateStart : null,
-                PartID = del.Delivery.PartID,
                 PartCode = del.Delivery.Part.Code,
                 PartName = del.Delivery.Part.Name,
                 Model = del.Delivery.Part.Model,
                 Supplier = del.Delivery.Supplier.Name,
                 SupplierID = del.Delivery.SupplierID,
+                UserID = del.UserID.HasValue ? del.UserID.Value : 0,
+                UserName = del.UserID.HasValue ? del.User.FirstName + " " + del.User.LastName : "",
                 DRNumber = del.Delivery.DRNumber,
                 TotalQuantity = del.Delivery.Quantity,
                 LotQuantity = del.LotQuantity,
                 LotNumber = del.LotNumber,
-                Inspector = del.InspectionID.HasValue ? "" : "",
+                InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : 0,
                 PriorityLevel = del.Delivery.PriorityLevel,
                 DeliveryDetailVersion = del.VERSION,
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
                 // TODO: Add Version For Inspection
             }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.PriorityLevel).ToList();
+        }
+
+        public List<InspectionData> GetPendingInspections(int userID)
+        {
+            return db.DeliveryDetails.Where(d => d.UserID == userID).Select(del => new InspectionData
+            {
+                DeliveryID = del.DeliveryID,
+                DeliveryDetailID = del.DeliveryDetailID,
+                Status = del.Status.StatusName, // Inspection.Status.Name
+                StatusID = del.StatusID,
+                DateDelivered = del.Delivery.DateDelivered,
+                Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
+                PartCode = del.Delivery.Part.Code,
+                PartName = del.Delivery.Part.Name,
+                Model = del.Delivery.Part.Model,
+                Supplier = del.Delivery.Supplier.Name,
+                SupplierID = del.Delivery.SupplierID,
+                UserID = del.UserID.HasValue ? del.UserID.Value : 0,
+                UserName = del.UserID.HasValue ? del.User.FirstName + " " + del.User.LastName : "",
+                DRNumber = del.Delivery.DRNumber,
+                TotalQuantity = del.Delivery.Quantity,
+                LotQuantity = del.LotQuantity,
+                LotNumber = del.LotNumber,
+                InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : 0,
+                PriorityLevel = del.Delivery.PriorityLevel,
+                DeliveryDetailVersion = del.VERSION,
+                DeliveryVersion = del.Delivery.VERSION,
+                IsUrgent = del.IsUrgent,
+                SampleSize = del.InspectionID.HasValue ? del.Inspection.SampleSize.ToString() : "",
+            }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.PriorityLevel).ToList();
+        }
+
+        public ResponseData UnAssignInspector(int delDetailID, int version, int userID)
+        {
+            try
+            {
+                var delDetail = db.DeliveryDetails.Find(delDetailID);
+                if (delDetail.VERSION != version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                if (delDetail.UserID != null)
+                {
+                    delDetail.UserID = null; // DEV Default
+                    db.Entry(delDetail).Property(d => d.UserID).IsModified = true;
+                }
+                delDetail.StatusID = 1;
+                db.Entry(delDetail).Property(d => d.StatusID).IsModified = true;
+                delDetail.VERSION++;
+                db.SaveChanges();
+
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = "Successfully Assigned DEV"
+                };
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong: {ex.Message}"
+                };
+            }
+        }
+
+        public ResponseData PauseUnpause(int StatusID, int DeliveryDetailID, int DeliveryDetailVersion)
+        {
+            try
+            {
+                var response = new ResponseData();
+                var delDetail = db.DeliveryDetails.Find(DeliveryDetailID);
+                if (delDetail.VERSION != DeliveryDetailVersion) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                if(StatusID == 3)
+                {
+                    delDetail.StatusID = 4;
+                    db.Entry(delDetail).Property(d => d.StatusID).IsModified = true;
+                    response.Success = true;
+                    response.Status = "Success";
+                    response.Message = "Scheduled Item Paused";
+                }
+                else
+                {
+                    delDetail.StatusID = 3;
+                    db.Entry(delDetail).Property(d => d.StatusID).IsModified = true;
+                    response.Success = true;
+                    response.Status = "Success";
+                    response.Message = "Scheduled Item Unpaused";
+                }
+                delDetail.VERSION++;
+                db.SaveChanges();
+                return response;
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong: {ex.Message}"
+                };
+            }
+        }
+
+        public ResponseData CreateInspection(InspectionFormData formData, List<string> cavityList)
+        {
+            try
+            {
+                var newInspection = new Inspection
+                {
+                    Humidity = formData.Humidity,
+                    SampleSize = formData.SampleSize,
+                    NumberOfCavities = formData.NumberOfCavities,
+                    Temperature = formData.Temperature,
+                    DateStart = DateTime.Now,
+                    UserID = formData.UserID,
+                    DeliveryDetailID = formData.DeliveryDetailID,
+                    VERSION = 1,
+                };
+                db.Inspections.Add(newInspection);
+                db.SaveChanges();
+
+                var newInspectionID = newInspection.InspectionID;
+                var samplingSize = newInspection.SampleSize;
+                var cavities = newInspection.NumberOfCavities;
+                var baseQty = (int)Math.Floor((decimal)samplingSize / (decimal)cavities);
+                var remainder = samplingSize % cavities;
+
+                var deliveryDetail = db.DeliveryDetails.Find(formData.DeliveryDetailID);
+                if (deliveryDetail.VERSION != formData.DeliveryDetailVersion) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                if (deliveryDetail.InspectionID != newInspectionID)
+                {
+                    deliveryDetail.InspectionID = newInspectionID;
+                    db.Entry(deliveryDetail).Property(d => d.InspectionID).IsModified = true;
+                }
+                deliveryDetail.StatusID = 3;
+                deliveryDetail.VERSION++;
+                db.SaveChanges();
+
+
+                foreach (string cavity in cavityList)
+                {
+                    var newCavity = new Cavity
+                    {
+                        InspectionID = newInspectionID,
+                        Name = cavity,
+                        Version = 1,
+                    };
+
+                    int qty = baseQty;
+                    if (remainder > 0)
+                    {
+                        qty++;
+                        remainder--;
+                    }
+                    newCavity.Size = qty;
+
+                    db.Cavities.Add(newCavity);
+                    db.SaveChanges();
+                }
+
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = "Inspection Created",
+                    RouteInspectionID = newInspectionID,
+                };
+
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong: {ex.Message}"
+                };
+            }
+        }
+
+        public ResponseData DevAssignInspector(int id, int version)
+        {
+            try
+            {
+                var delDetail = db.DeliveryDetails.Find(id);
+                if (delDetail.VERSION != version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                if (delDetail.UserID == null)
+                {
+                    delDetail.UserID = 4; // DEV Default
+                    db.Entry(delDetail).Property(d => d.UserID).IsModified = true;
+                }
+                delDetail.StatusID = delDetail.InspectionID.HasValue ? 3 : 2;
+                db.Entry(delDetail).Property(d => d.StatusID).IsModified = true;
+                delDetail.VERSION++;
+                db.SaveChanges();
+
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = "Successfully Assigned DEV"
+                };
+
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong: {ex.Message}"
+                };
+            }
         }
         #endregion
     }
