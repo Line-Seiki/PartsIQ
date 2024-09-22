@@ -76,8 +76,8 @@ namespace PartsIq.Models
             {
                 DeliveryId = del.DeliveryID,
                 DeliveryDetailId = del.DeliveryDetailID,
-                Status = del.InspectionID.HasValue ? "" : del.Status.StatusName, // Inspection.Status.Name
-                StatusID = del.InspectionID.HasValue ? 1 : del.StatusID,
+                Status = del.Status.StatusName, // Inspection.Status.Name
+                StatusID = del.StatusID,
                 DateDelivered = del.Delivery.DateDelivered,
                 Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
                 PartCode = del.Delivery.Part.Code,

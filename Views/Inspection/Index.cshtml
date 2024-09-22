@@ -362,7 +362,7 @@
                 createdRow: function (row, data, dataIndex) {
                     if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent));
                     else if (data.Status !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
-                    else $(row).css(getColorAccordingToPriorityLevel(data.PriorityLevel));
+                    else $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             })
 
@@ -572,6 +572,29 @@
                 if (!selectedData) {
                     const dataAvailable = availableTable.data().toArray();
                     const selectedData = dataAvailable.find(item => item.StatusID === 1)
+                    if (selectedData.InspectionID != 0) {
+                        console.log('get scheduled item and execute');
+                        $.ajax({
+                            url: '/Inspection/DevAssignInspector',
+                            type: 'POST',
+                            data: {
+                                delDetailID: selectedData.DeliveryDetailID,
+                                delDetailVersion: selectedData.DeliveryDetailVersion,
+                            },
+                            success(res) {
+                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                                else alertify.error(`${res.Status}: ${res.Message}`);
+                                const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                                window.open(url, '_blank');
+                                refreshTables();
+                            },
+                            error(err) {
+                                alertify.error(`${err}`);
+                            }
+                        });
+                    } else {
+                        console.log('open inspection modal');
+                    }
                     console.log(selectedData);
                 } else {
                     if (!selectedData.LotNumber) {
