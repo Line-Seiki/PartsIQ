@@ -1,23 +1,4 @@
-﻿<!--
-    TODO:
-        SCHEDULING PAGE COMPONENTS
-      ♦ 1. Create Table for Scheduling - DONE
-      ♦ 2. Create Partial for Adding Lots - DONE
-      ♦ 3. Create Partial for Editing - DONE
-      ♦ 4. Create Popup for Delete Confirmation(Modal) - DONE
-      ♦ 5. Create Legend for Color Coding Priority and Status - DONE
-      ♦ 6. Create Modal for New Delivery - DONE
-      ♦ 7. Create Button for reloading table - DONE
-
-        INSPECTION PAGE COMPONENTS
-        1. Create Table For Inspection - Available
-        2. Create Table for Inspection - Finished
-        3. Create Table for Inspection - Pending
-        4. Create Button and Functionality for Start Inspection
-        5. Create Button and Functionality for Adding Inspector
--->
-
-@section styles{
+﻿@section styles{
     <style>
         .badge-block {
             display: block;
@@ -287,9 +268,10 @@
                     }
                 ],
                 createdRow: function (row, data, dataIndex) {
+                    console.log(data);
                     if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent));
-                    else if (data.StatusID !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
-                    else $(row).css(getColorAccordingToPriorityLevel(data.Priority));
+                    else if (data.Status !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
+                    else $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
                 }
             });
 
@@ -824,14 +806,15 @@
 
         // HELPER get certain color according to data priority level
         function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
+            console.log(priorityID, isUrgent, statusID);
             if (isUrgent) return 'urgent';
             if (statusID !== 1) switch (statusID) {
-                case 2:
-                    return 'priority-paused';
                 case 4:
+                    return 'priority-paused';
+                case 3:
                     return 'priority-started';
                 default:
-                    return 'priority-started';
+                    return '';
             }
             switch (priorityID) {
                 case 1:
