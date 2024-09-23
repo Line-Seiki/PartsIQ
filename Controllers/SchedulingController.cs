@@ -81,7 +81,6 @@ namespace PartsIq.Controllers
         {
             var addBulkResponse = _db.DuplicateDelivery(otherLots);
             var editResponse = addBulkResponse.Success ? _db.EditDelivery(firstLot) : new ResponseData
-
             {
                 Message = "Something went wrong",
                 Status = "Failed"

@@ -12,6 +12,10 @@ class DynamicTabs {
         this.dataTables = dataTables
         this.id = ++DynamicTabs.tabCounter;
         this.initialize();
+
+        window.removeLot = this.removeLot.bind(this);
+        window.updateSetQty = this.updateSetQty.bind(this);
+        DynamicTabs.instance = this;
     }
 
     initialize() {
@@ -88,6 +92,11 @@ class DynamicTabs {
                     this.saveLotChanges(id, tabId, contentId);
                 });
             }
+            document.getElementById(`addLot-${id}`).addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('addLot');
+                this.addLot(id, rowData)
+            })
         }
 
 
@@ -196,7 +205,7 @@ class DynamicTabs {
                                     </div>
                                 </div>
                                 <div class="col-md-3 d-flex justify-content-end align-items-center gap-2 w-50">
-                                    <button type="button" id="addLot-${id}" class="btn btn-primary" onclick="addLot('${id}', '${encodeURIComponent(JSON.stringify(rowData))}')">Add Lot</button>
+                                    <button type="button" id="addLot-${id}" class="btn btn-primary addlot-btn")">Add Lot</button>
                                     <button type="submit" id="saveChanges" class="btn btn-success">Save</button>
                                 </div>
                             </div>
@@ -216,8 +225,8 @@ class DynamicTabs {
     // For Edit Functionality
     editChanges(id, deliveryDetailId, version, deliveryVersion, tabId, contentId, deliveryId) {
         console.log(id, deliveryDetailId, version, deliveryVersion, tabId, contentId, deliveryId);
-        const totalQty = parseInt(document.getElementById(`TotalQuantity-${id}`).value);
-        const lotQty = parseInt(document.getElementById(`LotQuantity-${id}`).value);
+        const totalQty = Math.abs(parseInt(document.getElementById(`TotalQuantity-${id}`).value));
+        const lotQty = Math.abs(parseInt(document.getElementById(`LotQuantity-${id}`).value));
         if (totalQty >= lotQty) {
             const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
             const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
@@ -225,9 +234,11 @@ class DynamicTabs {
             formData.append("Supplier", supplierSelected);
             formData.append("DeliveryDetailId", deliveryDetailId);
             formData.append("DeliveryId", deliveryId);
-            formData.append("Version", version);
+            formData.append("DeliveryDetailVersion", version);
             formData.append("DeliveryVersion", deliveryVersion);
             const data = Object.fromEntries(formData);
+            data['LotQuantity'] = Math.abs(parseInt(data['LotQuantity']));
+            data['TotalQuantity'] = Math.abs(parseInt(data['TotalQuantity']));
             console.log(data);
 
             $.ajax({
@@ -319,11 +330,11 @@ class DynamicTabs {
                     <div class="card text-white bg-secondary">
                         <div class="card-body">
                             <div class="d-flex justify-content-md-end">
-                                ${lotNumber !== 1 ? `<button class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
-                                <input type="hidden" class="version-${id}" value="${data.Version}"/>
+                                ${lotNumber !== 1 ? `<button type="button" class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
+                                <input type="hidden" class="version-${id}" value="${data.DeliveryDetailVersion}"/>
                                 <input type="hidden" class="deliveryVersion-${id}" value="${data.DeliveryVersion}" />
-                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryId}"/>
-                                <input type="hidden" class="deliveryDetailId-${id}" value="${data.DeliveryDetailId}"/>
+                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryID}"/>
+                                <input type="hidden" class="deliveryDetailId-${id}" value="${data.DeliveryDetailID}"/>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
@@ -356,7 +367,7 @@ class DynamicTabs {
                                     </div>
                                     <div class="mb-2">
                                         <label for="qty-${lotNumber}" class="form-label">Total Quantity</label>
-                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${data.LotQuantity}" readonly/>
+                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${data.TotalQuantity}" readonly/>
                                     </div>
                                     <div class="mb-2">
                                         <label for="lot-${lotNumber}" class="form-label">Lot Number</label>
@@ -377,15 +388,15 @@ class DynamicTabs {
     saveLotChanges(id, tabId, contentId) {
         const reqQty = document.getElementById(`reqQty-${id}`);
         const setQty = document.getElementById(`setQty-${id}`);
-        if (reqQty.value !== setQty.value) {
+        if (parseInt(reqQty.value) !== parseInt(setQty.value)) {
             alertify.error('Current set quantity is not equal to the required quantity!');
         } else {
             const savedLots = qtyInputs.find(input => input.id === id).savedLots;
             const lots = document.querySelectorAll(`#lot-container-${id} > div`);
             lots.forEach((lot, index) => {
                 if (index === 0) savedLots.push({
-                    DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
-                    DeliveryDetailId: lot.querySelector(`.deliveryDetailId-${id}`).value,
+                    DeliveryID: lot.querySelector(`.deliveryId-${id}`).value,
+                    DeliveryDetailID: lot.querySelector(`.deliveryDetailId-${id}`).value,
                     DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
                     PartCode: lot.querySelector(`.partCode-${id}`).value,
                     PartName: lot.querySelector(`.part-name-${id}`).value,
@@ -395,12 +406,12 @@ class DynamicTabs {
                     TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
                     LotNumber: lot.querySelector(`.lot-code-${id}`).value,
                     LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
-                    Version: lot.querySelector(`.version-${id}`).value,
+                    DeliveryDetailVersion: lot.querySelector(`.version-${id}`).value,
                     DeliveryVersion: lot.querySelector(`.deliveryVersion-${id}`).value
                 });
                 else savedLots.push({
                     DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
-                    DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
+                    DeliveryID: lot.querySelector(`.deliveryId-${id}`).value,
                     PartCode: lot.querySelector(`.partCode-${id}`).value,
                     PartName: lot.querySelector(`.part-name-${id}`).value,
                     Model: lot.querySelector(`.model-${id}`).value,
@@ -413,10 +424,9 @@ class DynamicTabs {
                 });
             });
             const [firstLot, ...otherLots] = savedLots;
-            console.log('First Lot', firstLot);
-            console.log('Rest of the Lots', otherLots);
             if (otherLots.length <= 0) {
                 alertify.error("Add lot/s to duplcate item");
+                savedLots.splice(0, savedLots.length);
             } else {
                 $.ajax({
                     url: '/Scheduling/DuplicateDelivery',
