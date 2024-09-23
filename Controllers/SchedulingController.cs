@@ -90,6 +90,8 @@ namespace PartsIq.Controllers
             if (editResponse.Status == addBulkResponse.Status) return Json(new ResponseData
             {
                 Success = true,
+                Status = "Success",
+                Message = "Successfully Splitted Delivery",
             });
             else return Json(new ResponseData
             {

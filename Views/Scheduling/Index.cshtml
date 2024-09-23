@@ -1,23 +1,4 @@
-﻿<!--
-    TODO:
-        SCHEDULING PAGE COMPONENTS
-      ♦ 1. Create Table for Scheduling - DONE
-      ♦ 2. Create Partial for Adding Lots - DONE
-      ♦ 3. Create Partial for Editing - DONE
-      ♦ 4. Create Popup for Delete Confirmation(Modal) - DONE
-      ♦ 5. Create Legend for Color Coding Priority and Status - DONE
-      ♦ 6. Create Modal for New Delivery - DONE
-      ♦ 7. Create Button for reloading table - DONE
-
-        INSPECTION PAGE COMPONENTS
-        1. Create Table For Inspection - Available
-        2. Create Table for Inspection - Finished
-        3. Create Table for Inspection - Pending
-        4. Create Button and Functionality for Start Inspection
-        5. Create Button and Functionality for Adding Inspector
--->
-
-@section styles{
+﻿@section styles{
     <style>
         .badge-block {
             display: block;
@@ -221,6 +202,8 @@
 </div><!-- /archive modal-->
 
 @section Scripts {
+    <script src="~/Utility/JS/helpers.js"></script>
+    <script src="~/Utility/JS/tabs.js"></script>
     <script>
 
         let partsList = @Html.Raw(Json.Encode(ViewBag.PartsList));
@@ -230,7 +213,6 @@
         const refreshBtn = document.getElementById('refreshTable');
         const addDeliveryModal = document.getElementById('addNewDelivery');
         const addDeliveryForm = document.getElementById('addDeliveryForm');
-        const qtyInputs = []; // Contains Created Tabs
         let schedulingTable; // DataTable Variable
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -289,9 +271,7 @@
                     }
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent));
-                    else if (data.StatusID !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
-                    else $(row).css(getColorAccordingToPriorityLevel(data.Priority));
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
                 }
             });
 
@@ -359,8 +339,8 @@
                 url: '/Scheduling/PrioritizeDelivery',
                 type: 'POST',
                 data: {
-                    deliveryDetailId: rowData.DeliveryDetailId,
-                    version: rowData.Version,
+                    deliveryDetailId: rowData.DeliveryDetailID,
+                    version: rowData.DeliveryDetailVersion,
                     isUrgent: !isUrgent,
                 },
                 success(res) {
@@ -385,7 +365,7 @@
             archiveInfo.innerHTML = "";
 
             archiveInfo.innerHTML = `<b>DR-Number:</b> ${rowData.DRNumber}  <b>Model:</b> ${rowData.Model}`;
-            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button" onclick="approveArchive(${rowData.DeliveryDetailId}, ${rowData.Version})">Yes, Archive it!</button>
+            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button" onclick="approveArchive(${rowData.DeliveryDetailID}, ${rowData.Version})">Yes, Archive it!</button>
                                      <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>`;
         }
         // When Modal Accepted
@@ -443,433 +423,18 @@
             document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
             document.getElementById('right-column').classList.remove('d-none');
 
-            const id = `${Date.now()}`
-            const deliveryDetailId = `${rowData.DeliveryDetailId}`;
-            const deliveryId = `${rowData.DeliveryId}`;
-            const version = rowData.Version;
-            const deliveryVersion = rowData.DeliveryVersion;
-            const tabId = `tab-${rowData.DeliveryId}-${Date.now()}`;
-            const tabTitle = `
-                                <li class="nav-item">
-                                    <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">
-                                        ${rowData.Model}
-                                        <span class="close-tab" onclick="removeTab('${tabId}')">&times;</span>
-                                    </a>
-                                </li>
-                            `;
-            const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
-                                    <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}','${deliveryDetailId}',${version},'${deliveryVersion}','${tabId}','${deliveryId}');">
-                                        <div class="mb-3">
-                                            <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
-                                            <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="PartCode-${id}" class="form-label">Part Code</label>
-                                            <input type="text" class="form-control" id="PartCode-${id}" name="PartCode" value="${rowData.PartCode}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="PartName-${id}" class="form-label">Part Name</label>
-                                            <input type="text" class="form-control" id="PartName-${id}" name="PartName" value="${rowData.PartName}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="Model-${id}" class="form-label">Model</label>
-                                            <input type="text" class="form-control" id="Model-${id}" name="Model" value="${rowData.Model}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="DRNumber-${id}" class="form-label">DR Number</label>
-                                            <input type="text" class="form-control" id="DRNumber-${id}" name="DRNumber" value="${rowData.DRNumber}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="Supplier-${id}" class="form-label">Supplier</label>
-                                            <select type="text" class="form-control" id="Supplier-${id}" placeholder="Select a supplier" required></select>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="TotalQuantity-${id}" class="form-label">Total Quantity</label>
-                                            <input type="number" class="form-control" id="TotalQuantity-${id}" name="TotalQuantity" value="${rowData.TotalQuantity}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="LotNumber-${id}" class="form-label">Lot Number</label>
-                                            <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber}>
-                                         </div>
-                                         <div class="mb-3">
-                                            <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
-                                            <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="${rowData.LotQuantity}">
-                                         </div>
-                                        <button type="submit" class="btn btn-primary">Submit</button>
-                                    </form>
-                                </div>`;
-
-            document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
-            document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
-
-            const $select = initializeDynamicSelectize(id);
-            $select[0].selectize.setValue(rowData.SupplierID)
-
-            const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
-            tabTrigger.show();
-        }
-
-        function editChanges(id, deliveryDetailId, version, deliveryVersion, tabId, deliveryId) {
-            const totalQty = document.getElementById(`TotalQuantity-${id}`).value;
-            const lotQty = document.getElementById(`LotQuantity-${id}`).value;
-            if (totalQty <= lotQty) {
-                const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
-                const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
-                const formData = new FormData(dynamicForm);
-                formData.append("Supplier", supplierSelected);
-                formData.append("DeliveryDetailId", deliveryDetailId);
-                formData.append("DeliveryId", deliveryId);
-                formData.append("Version", version);
-                formData.append("DeliveryVersion", deliveryVersion);
-                const data = Object.fromEntries(formData);
-                console.log(data);
-
-                $.ajax({
-                    url: '/Scheduling/EditDelivery',
-                    type: 'POST',
-                    data,
-                    success(res) {
-                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                        else alertify.error(`${res.Status}: ${res.Message}`);
-                        schedulingTable.ajax.reload();
-                        removeTab(tabId);
-                    },
-                    error(err) {
-                        alertify.error(`${err}`);
-                    }
-                });
-            } else {
-                alertify.error(`The Quantity in the lot exceeded the total quantity.`)
-            }
-            
+            const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, schedulingTable);
         }
 
         // FUNCTIONALITY for Adding Lots
-        function addLot(id, rowData) {
-            let data;
-            if (typeof rowData === "string") data = JSON.parse(decodeURIComponent(rowData));
-            else data = rowData;
-            let { reqQtyEl, lotContainer } = qtyInputs.find(input => input.id === id);
-            const rowObj = qtyInputs.find(input => input.id === id);
-            let currentLotNumber = rowObj.currentLotNumber++;
-            const reqQty = parseInt(reqQtyEl.value);
-            const newQty = Math.floor(reqQty / currentLotNumber);
-            const identifier = `${id}-${currentLotNumber}`;
-            const newLotEl = document.createElement('div');
-            newLotEl.innerHTML = createLotHTML(currentLotNumber, newQty, id, data);
-            lotContainer.appendChild(newLotEl.firstElementChild);
-            redistributeQuantities(id);
-        }
-
         function addRow(rowIndex) {
-            const addRowData = schedulingTable.row(rowIndex).data(); // get clicked row data
+            const rowData = schedulingTable.row(rowIndex).data();
 
             document.getElementById('left-column').classList.remove('col-lg-12');
             document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
             document.getElementById('right-column').classList.remove('d-none');
 
-            const tabId = `tab-${Date.now()}-${addRowData.Model}`;
-            const id = `${Date.now()}`;
-            const tabTitle = `
-                    <li class="nav-item">
-                        <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">
-                            ${addRowData.Model}
-                            <span class="close-tab" onclick="removeTab('${tabId}')">&times;</span>
-                        </a>
-                    </li>
-                `;
-            const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
-                                    <form id="lot-forms-${id}" onsubmit="event.preventDefault(); saveLotChanges('${id}','${tabId}');">
-                                        <div class="d-flex flex-md-row justify-content-between mb-3">
-                                            <div class="d-flex flex-md-row w-50 gap-2">
-                                                <div class="d-flex flex-column w-50">
-                                                    <label for="reqQty-${id}" class="form-label">Required Qty</label>
-                                                    <input type="number" id="reqQty-${id}" class="form-control" value="${addRowData.LotQuantity}" readonly />
-                                                </div>
-                                                <div class="d-flex flex-column w-50">
-                                                    <label for="setQty-${id}" class="form-label">Current Set Qty</label>
-                                                    <input type="number" id="setQty-${id}" class="form-control" value="${addRowData.LotQuantity}" readonly />
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3 d-flex justify-content-end align-items-center gap-2 w-50">
-                                                <button type="button" id="addLot-${id}" class="btn btn-primary" onclick="addLot('${id}', '${encodeURIComponent(JSON.stringify(addRowData))}')">Add Lot</button>
-                                                <button type="submit" id="saveChanges" class="btn btn-success">Save</button>
-                                            </div>
-                                        </div>
-                                        <div id="lot-container-${id}" class="row"></div>
-                                    </form>
-                                </div>`;
-
-            document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
-            document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
-
-            const qtyInput = {
-                id,
-                currentLotNumber: 1,
-                savedLots: [],
-                reqQtyEl: document.getElementById(`reqQty-${id}`),
-                setQtyEl: document.getElementById(`setQty-${id}`),
-                lotContainer: document.getElementById(`lot-container-${id}`),
-            }
-
-            qtyInputs.push(qtyInput);
-
-            // initial add lot
-            addLot(id, addRowData);
-
-            const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
-            tabTrigger.show();
-        }
-
-        function createLotHTML(lotNumber, qty, id, data) {
-            console.log(data);
-            return `
-                <div id="lotInfo-${lotNumber}-${id}" class=" col-lg-6 col-md-12 mb-3">
-                    <div class="card text-white bg-secondary">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-md-end">
-                                ${lotNumber !== 1 ? `<button class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
-                                <input type="hidden" class="version-${id}" value="${data.Version}"/>
-                                <input type="hidden" class="deliveryVersion-${id}" value="${data.DeliveryVersion}" />
-                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryId}"/>
-                                <input type="hidden" class="deliveryDetailId-${id}" value="${data.DeliveryDetailId}"/>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-2">
-                                        <label for="dateDelivered-${lotNumber}" class="form-label">Date Delivered</label>
-                                        <input type="text" id="dateDelivered-${lotNumber}" class="form-control dateDelivered-${id}" value="${convertDateStringToFormattedString(data.DateDelivered)}" readonly />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="partCode-${lotNumber}" class="form-label">Part Code</label>
-                                        <input type="text" id="partCode-${lotNumber}" class="form-control partCode-${id}" value="${data.PartCode}" readonly />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="part-${lotNumber}" class="form-label">Part Name</label>
-                                        <input type="text" id="part-${lotNumber}" class="form-control part-name-${id}" value="${data.PartName}" readonly />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="model-${lotNumber}" class="form-label">Model</label>
-                                        <input type="text" id="model-${lotNumber}" class="form-control model-${id}" value="${data.Model}" readonly />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="drNum-${lotNumber}" class="form-label">DR Number</label>
-                                        <input type="text" id="drNum-${lotNumber}" class="form-control drNum-${id}" value="${data.DRNumber}" readonly />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-2">
-                                        <label for="Supplier-${id}-${lotNumber}" class="form-label">Supplier</label>
-                                        <input id="Supplier-${id}-${lotNumber}" class="form-control supplier-${id}" value="${data.Supplier}" readonly/>
-                                        <input type="hidden" id="SupplierID-${id}-${lotNumber}" class="form-control supplierId-${id}" value="${data.SupplierID}" />
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="qty-${lotNumber}" class="form-label">Total Quantity</label>
-                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${data.LotQuantity}" readonly/>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="lot-${lotNumber}" class="form-label">Lot Number</label>
-                                        <input type="text" id="lot-${lotNumber}" class="form-control lot-code-${id}" value="${lotNumber !== 1 ? `` : `${data.LotNumber}`}"/>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label for="lotQty-${lotNumber}" class="form-label">Lot Quantity</label>
-                                        <input type="number" id="lotQty-${lotNumber}" class="form-control lot-qty-${id}" value="${qty}" onchange="updateSetQty('${id}')" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function removeLot(lotNumber, id) {
-            const rowObj = qtyInputs.find(input => input.id === id);
-            let currentLotNumber = rowObj.currentLotNumber--;
-            document.getElementById(`lotInfo-${lotNumber}-${id}`).remove();
-            redistributeQuantities(id);
-        }
-
-        function redistributeQuantities(id) {
-            let { reqQtyEl, setQtyEl } = qtyInputs.find(input => input.id === id);
-            const reqQty = parseInt(reqQtyEl.value);
-            const lotQtyInputs = document.querySelectorAll(`.lot-qty-${id}`);
-
-            if (lotQtyInputs.length === 0) {
-                setQtyEl.value = reqQty;
-                return;
-            }
-
-            const baseQty = Math.floor(reqQty / lotQtyInputs.length);
-            let remainder = reqQty % lotQtyInputs.length;
-
-            lotQtyInputs.forEach((input, index) => {
-                let qty = baseQty;
-                if (remainder > 0) {
-                    qty++;
-                    remainder--;
-                }
-                input.value = qty;
-            });
-
-            updateSetQty(id);
-        }
-
-        function updateSetQty(id) {
-            let { setQtyEl } = qtyInputs.find(input => input.id === id);
-            const lotQtyInputs = document.querySelectorAll(`.lot-qty-${id}`);
-            let totalQty = 0;
-
-            lotQtyInputs.forEach(input => {
-                totalQty += parseInt(input.value) || 0;
-            });
-
-            setQtyEl.value = totalQty;
-        }
-
-        function saveLotChanges(id, tabId) {
-            const reqQty = document.getElementById(`reqQty-${id}`);
-            const setQty = document.getElementById(`setQty-${id}`);
-            if (reqQty.value !== setQty.value) {
-                alertify.error('Current set quantity is not equal to the required quantity!');
-            } else {
-                const savedLots = qtyInputs.find(input => input.id === id).savedLots;
-                const lots = document.querySelectorAll(`#lot-container-${id} > div`);
-                lots.forEach((lot, index) => {
-                    if (index === 0) savedLots.push({
-                        DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
-                        DeliveryDetailId: lot.querySelector(`.deliveryDetailId-${id}`).value,
-                        DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
-                        PartCode: lot.querySelector(`.partCode-${id}`).value,
-                        PartName: lot.querySelector(`.part-name-${id}`).value,
-                        Model: lot.querySelector(`.model-${id}`).value,
-                        DRNumber: lot.querySelector(`.drNum-${id}`).value,
-                        Supplier: lot.querySelector(`.supplierId-${id}`).value,
-                        TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
-                        LotNumber: lot.querySelector(`.lot-code-${id}`).value,
-                        LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
-                        Version: lot.querySelector(`.version-${id}`).value,
-                        DeliveryVersion: lot.querySelector(`.deliveryVersion-${id}`).value
-                    });
-                    else savedLots.push({
-                        DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
-                        DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
-                        PartCode: lot.querySelector(`.partCode-${id}`).value,
-                        PartName: lot.querySelector(`.part-name-${id}`).value,
-                        Model: lot.querySelector(`.model-${id}`).value,
-                        DRNumber: lot.querySelector(`.drNum-${id}`).value,
-                        Supplier: lot.querySelector(`.supplierId-${id}`).value,
-                        TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
-                        LotNumber: lot.querySelector(`.lot-code-${id}`).value,
-                        LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
-                        DeliveryVersion: lot.querySelector(`.deliveryVersion-${id}`).value
-                    });
-                }); // TODO: Separate the first lot. the first is always the original which will only be edited not posted as a new item
-                const [firstLot, ...otherLots] = savedLots;
-                console.log('First Lot', firstLot);
-                console.log('Rest of the Lots', otherLots);
-                if (otherLots.length <= 0) {
-                    alertify.error("Add lot/s to duplcate item");
-                } else {
-                    // TODO: send as a list and add as range (only send the rest not the first)
-                    $.ajax({
-                        url: '/Scheduling/DuplicateDelivery',
-                        type: 'POST',
-                        data: {
-                            firstLot,
-                            otherLots
-                        },
-                        success(res) {
-                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                            else alertify.error(`${res.Status}: ${res.Message}`);
-                            schedulingTable.ajax.reload();
-                            removeTab(tabId);
-                        },
-                        error(err) {
-                            alertify.error(`${err}`);
-                        }
-                    });
-                    // Clear Lots After Saving
-                    savedLots.splice(0, savedLots.length);
-                }
-            }
-        }
-
-        // FUNCTIONALITY on right column tabs
-        function removeTab(tabId) {
-            const tabElement = document.getElementById(tabId);
-            const tabNavElement = document.getElementById(`${tabId}-tab`);
-
-            if (tabElement && tabNavElement) {
-                // Remove the tab content
-                tabElement.remove();
-                tabNavElement.remove();
-
-                const firstTab = document.querySelector('#tab-list .nav-link');
-                if (firstTab) {
-                    const firstTabTrigger = new bootstrap.Tab(firstTab);
-                    firstTabTrigger.show();
-                } else {
-                    // No tabs left, hide the right column and expand the left column
-                    document.getElementById('right-column').classList.add('d-none');
-                    document.getElementById('left-column').classList.remove('col-lg-6', 'col-md-12');
-                    document.getElementById('left-column').classList.add('col-lg-12');
-                }
-            }
-        }
-
-        // HELPER get certain color according to data priority level
-        function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
-            if (isUrgent) return 'urgent';
-            if (statusID !== 1) switch (statusID) {
-                case 2:
-                    return 'priority-paused';
-                case 4:
-                    return 'priority-started';
-                default:
-                    return 'priority-started';
-            }
-            switch (priorityID) {
-                case 1:
-                    return 'low-priority';
-                case 2:
-                    return 'normal-priority';
-                case 3:
-                    return 'high-priority';
-                default:
-                    return '';
-            }
-        }
-
-        // HELPER convert date to date string
-        function convertDateStringToFormattedString(date) {
-            let dateObj;
-            if (typeof date === 'string' && date !== null) dateObj = date.substring(6, date.length - 2);
-            else return '';
-            dateObj = new Date(parseInt(dateObj))
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-
-            return `${year}-${month}-${day}`;
-        }
-
-        // HELPER initializing selectize dynamically
-        function initializeDynamicSelectize(id) {
-            const $select = $(`#Supplier-${id}`).selectize({
-                valueField: 'Value',
-                labelField: 'Text',
-                searchField: 'Text',
-                options: suppliersList,
-                create: false,
-            });
-            return $select;
+            const addRowTab = new DynamicTabs('tab-list', 'tab-content', 'duplicate', rowData, schedulingTable);
         }
     </script>
 }

@@ -74,10 +74,10 @@ namespace PartsIq.Models
         {
             return db.DeliveryDetails.Where(d => !d.IsArchived).Select(del => new SchedulingData
             {
-                DeliveryId = del.DeliveryID,
-                DeliveryDetailId = del.DeliveryDetailID,
-                Status = del.InspectionID.HasValue ? "" : del.Status.StatusName, // Inspection.Status.Name
-                StatusID = del.InspectionID.HasValue ? 1 : del.StatusID,
+                DeliveryID = del.DeliveryID,
+                DeliveryDetailID = del.DeliveryDetailID,
+                Status = del.Status.StatusName, // Inspection.Status.Name
+                StatusID = del.StatusID,
                 DateDelivered = del.Delivery.DateDelivered,
                 Deadline = del.Delivery.Deadline.HasValue ? del.Delivery.Deadline.Value : del.Delivery.DateDelivered,
                 PartCode = del.Delivery.Part.Code,
@@ -94,7 +94,7 @@ namespace PartsIq.Models
                 InspectionDeadline = null, // Inspection Table CONDITION: If no value was found return null
                 InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : 0,
                 Priority = del.Delivery.PriorityLevel,
-                Version = del.VERSION,
+                DeliveryDetailVersion = del.VERSION,
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
 
@@ -159,8 +159,8 @@ namespace PartsIq.Models
         {
             try
             {
-                var delivery = db.Deliveries.Find(formData.DeliveryId);
-                var deliveryDetail = db.DeliveryDetails.Find(formData.DeliveryDetailId);
+                var delivery = db.Deliveries.Find(formData.DeliveryID);
+                var deliveryDetail = db.DeliveryDetails.Find(formData.DeliveryDetailID);
 
                 if (delivery == null) return new ResponseData
                 {
@@ -254,7 +254,7 @@ namespace PartsIq.Models
 
                 var deliveries = multipleFormData.Select(d => new DeliveryDetail
                 {
-                    DeliveryID = d.DeliveryId,
+                    DeliveryID = d.DeliveryID,
                     LotNumber = d.LotNumber,
                     LotQuantity = d.LotQuantity,
                     StatusID = 1,

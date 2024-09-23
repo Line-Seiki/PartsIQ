@@ -14,8 +14,8 @@ namespace PartsIq.Models
     #region Scheduling
     public class SchedulingData
     {
-        public int DeliveryId { get; set; }
-        public int DeliveryDetailId { get; set; }
+        public int DeliveryID { get; set; }
+        public int DeliveryDetailID { get; set; }
         public string Status { get; set; }
         public int StatusID { get; set; }
         public DateTime DateDelivered { get; set; }
@@ -34,7 +34,7 @@ namespace PartsIq.Models
         public int LotQuantity { get; set; }
         public DateTime? InspectionDeadline { get; set; }
         public int Priority { get; set; }
-        public int Version { get; set; }
+        public int DeliveryDetailVersion { get; set; }
         public int DeliveryVersion { get; set; }
         public bool IsUrgent { get; set; }
         public int RemainingDays => (Deadline - DateTime.Now).Days;
@@ -51,8 +51,8 @@ namespace PartsIq.Models
 
     public class EditDeliveryFormData
     {
-        public int DeliveryId { get; set; }
-        public int DeliveryDetailId { get; set; }
+        public int DeliveryID { get; set; }
+        public int DeliveryDetailID { get; set; }
         public DateTime DateDelivered { get; set; }
         public string PartCode { get; set; }
         public int Supplier { get; set; }
