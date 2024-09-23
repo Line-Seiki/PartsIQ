@@ -32,6 +32,7 @@
             background-color: #FFF0D1;
             color: black;
         }
+
         .urgent {
             background-color: #FF0000;
             color: white;
@@ -258,6 +259,8 @@
     </div><!-- /.modal-dialog -->
 </div>
 @section scripts {
+    <script src="~/Utility/JS/helpers.js"></script>
+    <script src="~/Utility/JS/tabs.js"></script>
     <script>
 
         let availableTable;
@@ -280,7 +283,7 @@
         const cavityInput = document.getElementById('iCavities');
         const inspectionForm = document.getElementById('inspectionForm');
 
-        // DEV ELEMENTS  
+        // DEV ELEMENTS
         const devInspect = document.getElementById('dev-inspection');
         const devAssign = document.getElementById('devAssign');
 
@@ -656,182 +659,7 @@
             document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
             document.getElementById('right-column').classList.remove('d-none');
 
-            const id = `${Date.now()}`
-            const deliveryDetailId = `${rowData.DeliveryDetailID}`;
-            const deliveryId = `${rowData.DeliveryID}`;
-            const version = rowData.DeliveryDetailVersion;
-            const deliveryVersion = rowData.DeliveryVersion;
-            const tabId = `tab-${rowData.DeliveryId}-${Date.now() }`;
-            const tabTitle = `
-                        <li class="nav-item">
-                            <a id="${tabId}-tab" class="nav-link" data-bs-toggle="tab" href="#${tabId}" role="tab">
-                                ${rowData.DRNumber}
-                                <span class="close-tab" onclick="removeTab('${tabId}')">&times;</span>
-                            </a>
-                        </li>
-                    `;
-            const tabContent = `<div class="tab-pane fade" id="${tabId}" role="tabpanel">
-                            <form id="partDeliveryForm-${id}" onsubmit="event.preventDefault(); editChanges('${id}','${deliveryDetailId}',${version},'${deliveryVersion}','${tabId}','${deliveryId}');">
-                                <div class="mb-3">
-                                    <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
-                                    <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="PartCode-${id}" class="form-label">Part Code</label>
-                                    <input type="text" class="form-control" id="PartCode-${id}" name="PartCode" value="${rowData.PartCode}" readonly>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="PartName-${id}" class="form-label">Part Name</label>
-                                    <input type="text" class="form-control" id="PartName-${id}" name="PartName" value="${rowData.PartName}" readonly>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="Model-${id}" class="form-label">Model</label>
-                                    <input type="text" class="form-control" id="Model-${id}" name="Model" value="${rowData.Model}" readonly>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="DRNumber-${id}" class="form-label">DR Number</label>
-                                    <input type="text" class="form-control" id="DRNumber-${id}" name="DRNumber" value="${rowData.DRNumber}" readonly>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="Supplier-${id}" class="form-label">Supplier</label>
-                                    <select type="text" class="form-control" id="Supplier-${id}" placeholder="Select a supplier" required></select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="TotalQuantity-${id}" class="form-label">Total Quantity</label>
-                                    <input type="number" class="form-control" id="TotalQuantity-${id}" name="TotalQuantity" value="${rowData.TotalQuantity}" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="LotNumber-${id}" class="form-label">Lot Number</label>
-                                    <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber}>
-                                 </div>
-                                 <div class="mb-3">
-                                    <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
-                                    <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="${rowData.LotQuantity}">
-                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </form>
-                        </div>`;
-
-            document.getElementById('tab-list').insertAdjacentHTML('beforeend', tabTitle);
-            document.getElementById('tab-content').insertAdjacentHTML('beforeend', tabContent);
-
-            const $select = initializeDynamicSelectize(id);
-            $select[0].selectize.setValue(rowData.SupplierID)
-
-            const tabTrigger = new bootstrap.Tab(document.getElementById(`${tabId}-tab`));
-            tabTrigger.show();
-        }
-
-        function editChanges(id, deliveryDetailId, version, deliveryVersion, tabId, deliveryId) {
-            const totalQty = document.getElementById(`TotalQuantity-${id}`).value;
-            const lotQty = document.getElementById(`LotQuantity-${id}`).value;
-            if (totalQty <= lotQty) {
-                const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
-                const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
-                const formData = new FormData(dynamicForm);
-                formData.append("Supplier", supplierSelected);
-                formData.append("DeliveryDetailId", deliveryDetailId);
-                formData.append("DeliveryId", deliveryId);
-                formData.append("Version", version);
-                formData.append("DeliveryVersion", deliveryVersion);
-                const data = Object.fromEntries(formData);
-                console.log(data);
-
-                $.ajax({
-                    url: '/Scheduling/EditDelivery',
-                    type: 'POST',
-                    data,
-                    success(res) {
-                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                        else alertify.error(`${res.Status}: ${res.Message}`);
-                        refreshTables();
-                        removeTab(tabId);
-                    },
-                    error(err) {
-                        alertify.error(`${err}`);
-                    }
-                });
-            } else {
-                alertify.error(`The Quantity in the lot exceeded the total quantity.`)
-            }
-
-        }
-
-        // FUNCTIONALITY on right column tabs
-        function removeTab(tabId) {
-            const tabElement = document.getElementById(tabId);
-            const tabNavElement = document.getElementById(`${tabId}-tab`);
-
-            if (tabElement && tabNavElement) {
-                // Remove the tab content
-                tabElement.remove();
-                tabNavElement.remove();
-
-                const firstTab = document.querySelector('#tab-list .nav-link');
-                if (firstTab) {
-                    const firstTabTrigger = new bootstrap.Tab(firstTab);
-                    firstTabTrigger.show();
-                } else {
-                    // No tabs left, hide the right column and expand the left column
-                    document.getElementById('right-column').classList.add('d-none');
-                    document.getElementById('left-column').classList.remove('col-lg-6', 'col-md-12');
-                    document.getElementById('left-column').classList.add('col-lg-12');
-                }
-            }
-        }
-
-        // HELPER get certain color according to data priority level
-        function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
-            if (isUrgent) return 'urgent';
-            if (statusID != 1) switch (statusID) {
-                case 4:
-                    return 'priority-paused';
-                case 3:
-                    return 'priority-started';
-                default:
-                    return 'priority-started';
-            }
-            switch (priorityID) {
-                case 1:
-                    return 'low-priority';
-                case 2:
-                    return 'normal-priority';
-                case 3:
-                    return 'high-priority';
-                default:
-                    return '';
-            }
-        }
-
-        // HELPER convert date to date string
-        function convertDateStringToFormattedString(date) {
-            let dateObj;
-            if (typeof date === 'string' && date !== null) dateObj = date.substring(6, date.length - 2);
-            else return '';
-            dateObj = new Date(parseInt(dateObj))
-            const year = dateObj.getFullYear();
-            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const day = String(dateObj.getDate()).padStart(2, '0');
-
-            return `${year}-${month}-${day}`;
-        }
-
-        // HELPER initializing selectize dynamically
-        function initializeDynamicSelectize(id) {
-            const $select = $(`#Supplier-${id}`).selectize({
-                valueField: 'Value',
-                labelField: 'Text',
-                searchField: 'Text',
-                options: suppliersList,
-                create: false,
-            });
-            return $select;
+            const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
         }
     </script>
 }
