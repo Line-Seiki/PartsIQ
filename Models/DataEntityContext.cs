@@ -175,7 +175,7 @@ namespace PartsIq.Models
                     Message = "DeliveryDetail Not Found"
                 };
 
-                if (deliveryDetail.VERSION != formData.Version) return new ResponseData
+                if (deliveryDetail.VERSION != formData.DeliveryDetailVersion) return new ResponseData
                 {
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
@@ -299,7 +299,7 @@ namespace PartsIq.Models
                 {
                     Success = true,
                     Status = "Success",
-                    Message = "Item Prioritized!"
+                    Message = deliveryDetail.IsUrgent ? "Item Prioritized!" : "Item Deprioritized!"
                 };
             }
             catch (Exception ex)

@@ -363,7 +363,7 @@
             archiveInfo.innerHTML = "";
 
             archiveInfo.innerHTML = `<b>DR-Number:</b> ${rowData.DRNumber}  <b>Model:</b> ${rowData.Model}`;
-            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button" onclick="approveArchive(${rowData.DeliveryDetailID}, ${rowData.Version})">Yes, Archive it!</button>
+            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button" onclick="approveArchive(${rowData.DeliveryDetailID}, ${rowData.DeliveryDetailVersion})">Yes, Archive it!</button>
                                      <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>`;
         }
         // When Modal Accepted
@@ -383,7 +383,7 @@
                     $('#archiveModal').modal('hide');
                 },
                 error(err) {
-                    alertify.error(`${err}`);
+                    console.log(err);
                 }
             })
         }
