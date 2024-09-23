@@ -3,7 +3,13 @@
 @{
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var Status = Model.IsActive.HasValue && Model.IsActive.Value ? "Inactive" : "Active";
+    var StatusClass = Model.IsActive.HasValue && Model.IsActive.Value ? "danger" : "success";
 }
+
+
+
 <div class="page-content">
     <div class="page-title-box">
         <div class="container-fluid">
@@ -36,7 +42,7 @@
                                     <h5 class="text-dark fw-semibold mt-2">@Model.Code <i class="bx bxs-badge-check fs-sm align-middle text-success"></i></h5>
                                     <h6 class="text-muted fw-semibold mt-2 mb-3">@Model.Name</h6>
                                     <button type="button" data-bs-toggle="modal" data-bs-target="#editPartModal" class="btn btn-primary btn-sm me-1" id="">Edit</button>
-                                    <button type="button" class="btn btn-danger btn-sm">Set as Inactive</button>
+                                    <button type="button" data-status="@Model.IsActive" data-partID="@Model.PartID" id="statusBtn" class="btn btn-@StatusClass btn-sm">Set as @Status </button>
                                 </div>
                             </div>
                             <div class="mt-3 pt-2 border-top">
@@ -54,7 +60,7 @@
                                             </tr>
                                             <tr>
                                                 <th class="pl-0" scope="row">Type</th>
-                                                <td>@Model.DocNumber</td>
+                                                <td>@Model.Type</td>
                                             </tr>
                                             <tr>
                                                 <th class="pl-0" scope="row">Priority</th>
@@ -1088,65 +1094,184 @@
                 <h4 class="modal-title">Edit Part</h4>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
             </div>
+            @Html.AntiForgeryToken()
             <div class="modal-body p-4">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="field-1" class="control-label">Code</label>
-                            <input type="text" class="form-control" id="field-1" value="@Model.Code">
+                            <label for="partCode" class="control-label">Code</label>
+                            <input type="text" class="form-control" id="partCode" value="@Model.Code">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="field-2" class="control-label">Name</label>
-                            <input type="text" class="form-control" id="field-2" value="@Model.Name">
+                            <label for="partName" class="control-label">Name</label>
+                            <input type="text" class="form-control" id="partName" value="@Model.Name">
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="field-3" class="control-label">Model</label>
-                            <input type="text" class="form-control" id="field-3" value="@Model.Model">
+                            <label for="partModel" class="control-label">Model</label>
+                            <input type="text" class="form-control" id="partModel" value="@Model.Model">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="field-3" class="control-label">Document Number</label>
-                            <input type="text" class="form-control" id="field-3" value="@Model.DocNumber">
+                            <label for="partDoc" class="control-label">Document Number</label>
+                            <input type="text" class="form-control" id="partDoc" value="@Model.DocNumber">
                         </div>
-                    </div>                
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="field-4" class="control-label">Type</label>
-                            <input type="text" class="form-control" id="field-4" value="Test">
+                            <label for="partType" class="control-label">Type</label>
+                            <input type="text" class="form-control" id="partType" value="Test">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="field-5" class="control-label">Priorty</label>
-                            <input type="text" class="form-control" id="field-5" value="High">
+                            <label for="partPriority" class="control-label">Priorty</label>
+                            <input type="text" class="form-control" id="partPriority" value="High">
                         </div>
                     </div>
-                   
-                </div>              
+
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary waves-effect"
                         data-bs-dismiss="modal">
                     Close
                 </button>
-                <button type="button" class="btn btn-info" data-effect="wave">Save changes</button>
+                <button type="button" data-id="@Model.PartID" class="btn btn-info" id="partEditBtn" data-effect="wave">Save changes</button>
             </div>
         </div>
     </div>
+</div>
+<div id="partStatusModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body p-4 text-center">
+                <i class="bx bx-notification-off fs-xl text-white modal-icon"></i>
+                <h4 class="mt-2 text-white modal-title"></h4>
+                <p class="mt-3 text-white modal-body-text"></p>
+                <form>
+                    @Html.AntiForgeryToken();
+                    <button type="button" class="btn btn-light my-2 confirm-status-btn" data-bs-dismiss="modal">Continue</button>
+                    <button type="button" class="btn btn-secondary my-2" data-bs-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+<!-- /.modal -->
 
 @section scripts {
     <script>
-$(document).ready(function() {
+        $(document).ready(function () {
+
+        $(document).on("click", "#statusBtn", function () {
+
+            let userID = $(this).data('partid');
+            let userStatus = $(this).data('status'); // 0 for inactive, 1 for active
+            let modal = $('#partStatusModal');
+
+            if (userStatus == 'True') {
+                modal.find('.modal-content').addClass('bg-danger').removeClass('bg-success');
+                modal.find('.modal-title').text('Oh snap!');
+                modal.find('.modal-body-text').text('Press continue to set User as Inactive.');
+                modal.find('.confirm-status-btn').attr("data-status", "False"); // Set status to active
+                modal.find('.modal-icon').removeClass('bx-notification-on').addClass('bx-notification-off');
+            } else {
+                modal.find('.modal-content').addClass('bg-success').removeClass('bg-danger');
+                modal.find('.modal-title').text('Status');
+                modal.find('.modal-body-text').text('Press continue to set User as Active.');
+                modal.find('.confirm-status-btn').attr("data-status", "True"); // Set status to inactive
+                modal.find('.modal-icon').removeClass('bx-notification-off').addClass('bx-notification-on');
+            }
+
+            modal.find('.confirm-status-btn').attr("data-id", userID); // Set the user ID
+            modal.modal('show'); // Show modal
+        });
+
+       $(document).on('click', '.confirm-status-btn', function () {
+
+           let partStatus = $(this).data('status');
+       
+        let newStatus = partStatus == "True" ? "False" : "True"; // Toggle the status
+           let statusClass = partStatus == "True" ? "btn btn-danger btn-sm" : "btn btn-success btn-sm";
+           let statusText = partStatus == "True" ? "Set as Inactive" : "Set as Active";
+        let partID = $(this).data('id');
+        let action = "ChangeStatus";
+        let token = $('input[name="__RequestVerificationToken"]').val();
+
+        let formData = new FormData();
+           formData.append("partStatus", partStatus); // Use newStatus to reflect the change
+        formData.append("partID", partID);
+        formData.append("action", action);
+        formData.append("__RequestVerificationToken", token);
+
+        $.ajax({
+            url: `@Url.Action("Edit", "Parts")/${partID}`,
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    alertify.success(`${response.message}.`);
+                    $('#statusBtn').attr('data-status', partStatus); // Set the new status
+                    $('#statusBtn').text(statusText); // Update button text
+                    $('#statusBtn').removeClass().addClass(statusClass); // Update button class
+                } else {
+                    alertify.error(`${response.message}.`);
+                }
+            },
+            error: function (err) {
+                alertify.error(`Error ${err.message} occurred.`);
+            }
+        });
+    });
+
+
+        $(document).on('click', '#partEditBtn', function () {
+            let partId = $(this).data('id');
+            let formData = new FormData();
+            let token = $('input[name="__RequestVerificationToken"]').val();
+
+        // Append form data
+            formData.append("partCode", $('#partCode').val());
+            formData.append("partName", $('#partName').val());
+            formData.append("partModel", $('#partModel').val());
+            formData.append("partDoc", $('#partDoc').val());
+            formData.append("partType", $('#partType').val());
+            formData.append("partPriority", $('#partPriority').val());
+            formData.append("partID", partId);
+            formData.append("__RequestVerificationToken", token);
+
+            $.ajax({
+                url: `@Url.Action("Edit", "Parts")/${partId}`,
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        alertify.success(`Part edited successfully.`);
+                        $('#editPartModal').modal("hide");
+                    } else {
+                        alertify.error(`Error ${response.message} occurred.`);
+                    }
+                },
+                error: function (error) {
+                    alertify.error(`Error ${error.message} occurred.`);
+                }
+            });
+            console.log(token);
+        });
+
 
         let id = @Html.Raw(Json.Encode(Model.PartID));
         $('#checkpointTable').DataTable({

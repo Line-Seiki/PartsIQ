@@ -139,10 +139,10 @@ namespace PartsIq.Controllers
                               Name = (u.FirstName.Trim() + " " + u.LastName.Trim()), // Trim first and last names and add a space between them
                               Email = u.Email.Trim(), // Trim email
                               UserGroup = u.UserGroupPermission.Name.Trim(), // Trim user group name
-                              Status = u.IsActive == 1 ? "Active" : "InActive",
+                              Status = u.IsActive ? "Active" : "InActive",
                               UserID = u.UserID,
                           }).ToList();
-                return Json(users, JsonRequestBehavior.AllowGet);
+                return Json(new { data = users, success = true }, JsonRequestBehavior.AllowGet);
             }
             else
             {
@@ -153,10 +153,10 @@ namespace PartsIq.Controllers
                              Name = (u.FirstName.Trim() + " " + u.LastName.Trim()),
                              Email = u.Email.Trim(),
                              UserGroup = u.UserGroupPermission.Name.Trim(),
-                             Status = u.IsActive == 1 ? "Active" : "InActive",
+                             Status = u.IsActive ? "Active" : "InActive",
                              UserID = u.UserID,
                          }).ToList();
-                return Json(users, JsonRequestBehavior.AllowGet);
+                return Json(new { data = users, success = true }, JsonRequestBehavior.AllowGet);
             }
         }
 

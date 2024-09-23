@@ -14,8 +14,15 @@ namespace PartsIq.Models
     
     public partial class User
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public User()
+        {
+            this.DeliveryDetails = new HashSet<DeliveryDetail>();
+            this.Inspections = new HashSet<Inspection>();
+        }
+    
         public string Email { get; set; }
-        public byte IsActive { get; set; }
+        public bool IsActive { get; set; }
         public byte IsLoggedIN { get; set; }
         public Nullable<System.DateTime> LastUpdate { get; set; }
         public string FirstName { get; set; }
@@ -25,6 +32,10 @@ namespace PartsIq.Models
         public Nullable<int> UserGroup_ID { get; set; }
         public string LastName { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DeliveryDetail> DeliveryDetails { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Inspection> Inspections { get; set; }
         public virtual UserGroupPermission UserGroupPermission { get; set; }
     }
 }

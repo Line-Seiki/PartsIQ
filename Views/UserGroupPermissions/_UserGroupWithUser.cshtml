@@ -53,89 +53,70 @@
 
 <script>
     $(document).ready(function (e) {
-        $.ajax({
-            url: '@Url.Action("GetUsersInGroup", "UserGroupPermissions")',
-            data: { groupId: 0 },
-            type: 'GET',
-            success: function (data) {
-                $('#userTable').DataTable({
-                    data: data,
-                    lengthChange: !1,
-                    language: {
-                        paginate:
-                        {
-                            previous: "<i class='bx bx-chevron-left'>", next: "<i class='bx bx-chevron-right'>"
-                        },
-                        info: "Showing customers _START_ to _END_ of _TOTAL_", lengthMenu: 'Display <select class=\'form-select form-select-sm ms-1 me-1\'><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="-1">All</option></select> orders'
-                    }, pageLength: 10, dom: '<"row align-items-center" <"col-sm-4" l> <"col-sm-8" <"d-flex align-items-center justify-content-sm-end flex-wrap" f<"ms-0 ms-sm-3" B>>> ><"row" <"col-12"Tgt>> <"row align-items-center" <"col-md-6"i> <"col-md-6"p> >',
-                    order: [],
-                    columns: [
-                        { data: "Username", },
-                        { data: "Name", },
-                        { data: "Email", },
-                        { data: "UserGroup", },
-                        {
-                            data: "Status",
-                            render: function (data, type, row, meata) {
-                                if (row.Status == "Active") {
-                                    return `<span class="badge bg-success badge-pill ">Active</span>`;
-                                } else if (row.Status == "InActive") {
-                                    return `<span class="badge bg-danger badge-pill">InActive</span>`;
-                                }
+
+        let nav = $(document).find('.nav-link[aria-selected="false"]').data("group-id");
+        nav = (typeof nav !== 'undefined') ? nav : 0;
+       
+            $('#userTable').DataTable({
+                ajax: {
+                        url: '@Url.Action("GetUsersInGroup", "UserGroupPermissions")',
+                        data: { groupId: nav }, // Data sent to the server
+                        dataSrc: 'data' // This points to the key in the server response where the data is stored (adjust if needed)
+                    },
+                lengthChange: !1,
+                language: {
+                    paginate:
+                    {
+                        previous: "<i class='bx bx-chevron-left'>", next: "<i class='bx bx-chevron-right'>"
+                    },
+                    info: "Showing customers _START_ to _END_ of _TOTAL_", lengthMenu: 'Display <select class=\'form-select form-select-sm ms-1 me-1\'><option value="10">10</option><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="-1">All</option></select> orders'
+                }, pageLength: 10, dom: '<"row align-items-center" <"col-sm-4" l> <"col-sm-8" <"d-flex align-items-center justify-content-sm-end flex-wrap" f<"ms-0 ms-sm-3" B>>> ><"row" <"col-12"Tgt>> <"row align-items-center" <"col-md-6"i> <"col-md-6"p> >',
+                order: [],
+                columns: [
+                    { data: "Username", },
+                    { data: "Name", },
+                    { data: "Email", },
+                    { data: "UserGroup", },
+                    {
+                        data: "Status",
+                        render: function (data, type, row, meata) {
+                            if (row.Status == "Active") {
+                                return `<span class="badge bg-success badge-pill ">Active</span>`;
+                            } else if (row.Status == "InActive") {
+                                return `<span class="badge bg-danger badge-pill">InActive</span>`;
                             }
-                        },
-                        {
-                            data: "UserID",
-                            render: function (data, type, row, meta) {
-                                if (row.Status == "Active") {
-                                    return `
-                       <div>
-                             <button type="button" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#edit-user-modal" class="btn btn-sm btn-primary waves-effect waves-light" data-effect="wave">Edit</button>
-                            <button type="button" data-status="1" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#user-status-modal" class="btn btn-sm btn-danger waves-effect waves-light btn-status" data-effect="wave">Deactivate</button>
-                       </div> `
-                                } else if (row.Status == "InActive") {
-                                    return `
-                       <div>
-                             <button type="button" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#edit-user-modal" class="btn btn-sm btn-primary waves-effect waves-light" data-effect="wave">Edit</button>
-                            <button type="button" data-status="0" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#user-status-modal" class="btn btn-sm btn-success waves-effect waves-light btn-status" data-effect="wave">Activate</button>
-                       </div> `
-                                }
-
-                            },
                         }
-                    ],
-                    drawCallback: function () {
-                        e(".dataTables_paginate > .pagination").addClass("flat-rounded-pagination "), e(".dataTables_filter").find("label").addClass("search-box d-inline-flex position-relative"), e(".dataTables_filter").find(".form-control").attr("placeholder", "Search...")
+                    },
+                    {
+                        data: "UserID",
+                        render: function (data, type, row, meta) {
+                            if (row.Status == "Active") {
+                                return `
+                    <div>
+                            <button type="button" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#edit-user-modal" class="btn btn-sm btn-primary waves-effect waves-light" data-effect="wave">Edit</button>
+                        <button type="button" data-status="1" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#user-status-modal" class="btn btn-sm btn-danger waves-effect waves-light btn-status" data-effect="wave">Deactivate</button>
+                    </div> `
+                            } else if (row.Status == "InActive") {
+                                return `
+                    <div>
+                            <button type="button" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#edit-user-modal" class="btn btn-sm btn-primary waves-effect waves-light" data-effect="wave">Edit</button>
+                        <button type="button" data-status="0" data-user-id="${data}" data-bs-toggle="modal" data-bs-target="#user-status-modal" class="btn btn-sm btn-success waves-effect waves-light btn-status" data-effect="wave">Activate</button>
+                    </div> `
+                            }
 
+                        },
                     }
-                });
-            }
-        });
-           
+                ],
+                drawCallback: function () {
+                    e(".dataTables_paginate > .pagination").addClass("flat-rounded-pagination "), e(".dataTables_filter").find("label").addClass("search-box d-inline-flex position-relative"), e(".dataTables_filter").find(".form-control").attr("placeholder", "Search...")
 
-        $(document).on('click', ".nav-link", function (e) {
-            e.preventDefault();
-            var groupId = $(this).data("group-id");
-
-            $.ajax({
-                url: '@Url.Action("GetUsersInGroup", "UserGroupPermissions")',
-                data: { groupId },
-                type: 'GET',
-                success: function (data) {
-                    var table = $('#userTable').DataTable();
-                    table.clear().draw(); // Clear existing data
-                    if (data.length) {
-                        table.rows.add(data).draw(); // Add new data and draw the table
-                    }
-                    
-                    // Recalculate the column widths and adjust the table layout
-                    table.columns.adjust().responsive.recalc();
-                },
-                error: function () {
-                    alert("An error occurred while fetching users.");
                 }
             });
-        });
+            
+        
+
+
+       
 
     });
 </script>

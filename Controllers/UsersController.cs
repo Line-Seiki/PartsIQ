@@ -105,7 +105,7 @@ namespace PartsIq.Controllers
                         Email = email,
                         Password = password,
                         UserGroup_ID = Convert.ToInt32(usergroup),
-                        IsActive = 1,
+                        IsActive = true,
                     };
                     db.Users.Add(user);
                     db.SaveChanges();
@@ -184,7 +184,7 @@ namespace PartsIq.Controllers
             {
                 var user = db.Users.Find(userID);
                 if (user != null) {
-                    user.IsActive = status;
+                    user.IsActive = Convert.ToBoolean(status);
                     db.SaveChanges();
                     return Json(new { success = true, message = "User status modified" }, JsonRequestBehavior.AllowGet);
 

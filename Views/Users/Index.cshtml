@@ -80,6 +80,7 @@
 
     <script>
         $(document).ready(function () {
+            let currentGroupId = 0;
 
             $.ajax({
                 url: '@Url.Action("ViewUserGroup", "UserGroupPermissions")',
@@ -89,6 +90,29 @@
                 }
             });
 
+             $(document).on('click', ".nav-link", function (e) {
+                 e.preventDefault();
+                 currentGroupId = $(this).data("group-id");
+
+                 $.ajax({
+                     url: '@Url.Action("GetUsersInGroup", "UserGroupPermissions")',
+                     data: { groupId: currentGroupId },
+                     type: 'GET',
+                     success: function (response) {
+                         var table = $('#userTable').DataTable();
+                         table.clear().draw(); // Clear existing data
+                         if (response.data.length) {
+                             table.rows.add(response.data).draw(); // Add new data and draw the table
+                         }
+
+                         // Recalculate the column widths and adjust the table layout
+                         table.columns.adjust().responsive.recalc();
+                     },
+                     error: function () {
+                         alert("An error occurred while fetching users.");
+                     }
+                 });
+            });
         $(document).on("click", ".btn-primary[data-bs-target='#edit-user-modal']", function () {
             var userId = $(this).data("user-id");
                 console.log(userId)
@@ -130,6 +154,7 @@
             });
 
             $(document).on('click', '.confirm-status-btn', function () {
+
                 let userID = $(this).data("id");
                 let status = $(this).data("status");
 
@@ -143,22 +168,17 @@
                     success: function (res) {
                         if (res.success) {
                             alertify.success(res.message);
-                            var activeNavLink = $('.nav-link.active');
-                            activeNavLink.trigger('click');
+                            var table = $('#userTable').DataTable();
+                            table.ajax.url('@Url.Action("GetUsersInGroup", "UserGroupPermissions")').load({ groupId: currentGroupId });
                         } else {
                             alertify.error(res.message);
                         }
-                      
+
                         // Optionally reload or refresh the table or page content
                     }, error: function (err) {
                         alertify.error("An error occurred while updating the status.");
                     }
                 });
-            });
-
-
-            $(document).on('submit', '#edit-user-form', function () {
-                alert('test');
             });
 
             $(document).on('click', '#edit-user-form-btn', function () {
