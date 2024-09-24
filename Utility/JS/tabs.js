@@ -12,9 +12,8 @@ class DynamicTabs {
         this.dataTables = dataTables
         this.id = ++DynamicTabs.tabCounter;
         this.initialize();
-
-        window.removeLot = this.removeLot.bind(this);
-        window.updateSetQty = this.updateSetQty.bind(this);
+        this.bindMethods();
+        
         DynamicTabs.instance = this;
     }
 
@@ -22,8 +21,13 @@ class DynamicTabs {
         this.addTab(this.contentType);
     }
 
+    // for inline scripts to run globally
+    bindMethods() {
+        window.removeLot = this.removeLot.bind(this);
+        window.updateSetQty = this.updateSetQty.bind(this);
+    }
+
     addTab(content) {
-        this.tabCounter++;
         const id = `${this.id}`;
         const tabId = `${this.id}-tab`;
         const contentId = `${this.id}-content`;
