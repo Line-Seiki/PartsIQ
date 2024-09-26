@@ -196,7 +196,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="right-column" class="col-lg-6 col-md-12 d-none">
+                        <div id="right-column" class="col-lg-6 col-md-12 order-lg-last order-md-first d-none">
                             <div class="card">
                                 <div class="card-body">
                                     <ul id="tab-list" class="nav nav-tabs">
@@ -268,8 +268,11 @@
     <script src="~/Utility/JS/tabs.js"></script>
     <script>
 
+        // DataTables
         let availableTable;
         let pendingTable;
+
+        // Selectize
         let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
 
         // BTN ELEMENTS
@@ -495,6 +498,7 @@
                     success(res) {
                         if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
                         else alertify.error(`${res.Status}: ${res.Message}`);
+                        inspectionForm.reset();
                         refreshTables();
                         if (res.RouteInspectionID) {
                             const url = `/Inspection/Details/${res.RouteInspectionID}`;
