@@ -98,7 +98,7 @@ namespace PartsIq.Models
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
 
-            }).OrderByDescending(d => d.IsUrgent).ThenByDescending(d => d.StatusID).ThenByDescending(d => d.Priority).ToList();
+            }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.Priority).ToList();
         }
 
         public ResponseData CreateDelivery(DeliveryFormData formData)

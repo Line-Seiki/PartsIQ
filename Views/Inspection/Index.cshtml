@@ -641,7 +641,7 @@
                     }
                     console.log(selectedData);
                 } else {
-                    if (!selectedData.LotNumber) {
+                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
                         console.log('modal here');
                         addLotBtn.dataset.index = selectedDataIndex;
                         drNumber.innerText = selectedData.DRNumber;
