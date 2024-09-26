@@ -142,6 +142,8 @@
                 formData.append("SupplierID", e.target.dataset.id);
                 formData.append("Version", e.target.dataset.version);
                 const data = Object.fromEntries(formData);
+                data["InCharge"] = data["InCharge"].replace(/['"\/']/g, '');
+                data["Name"] = data["Name"].replace(/['"\/']/g, '');
                 $.ajax({
                     url: '/Suppliers/Edit',
                     type: 'POST',
