@@ -98,7 +98,7 @@
                     { data: "Name" },
                     {
                         data: "SupplierID", orderable: false, render(data, type, row, meta) {
-                            const rowData = JSON.stringify(row).replace(/'/g, "");
+                            const rowData = JSON.stringify(row).replace(/['\/]/g, "");
                             return `
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <button class="btn btn-secondary" onclick="editSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-pencil"></i></button>
@@ -176,8 +176,8 @@
             console.log(id, supplierObj);
             const supplierForm = document.getElementById('SupplierForm');
             document.getElementById('formBtn').innerText = "Edit Supplier"
-            document.getElementById('Name').value = supplierObj.Name;
-            document.getElementById('InCharge').value = supplierObj.InCharge;
+            document.getElementById('Name').value = supplierObj.Name.replace(/['"\/']/g, '');
+            document.getElementById('InCharge').value = supplierObj.InCharge.replace(/['"\/']/g, '');
             supplierForm.dataset.type = "edit";
             supplierForm.dataset.id = id;
             supplierForm.dataset.version = supplierObj.Version;
