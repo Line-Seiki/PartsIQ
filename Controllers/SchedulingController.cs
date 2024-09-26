@@ -117,6 +117,10 @@ namespace PartsIq.Controllers
         }
 
         #region HELPERS
+        /// <summary>
+        /// Convert Parts from the database into a list of SelectListItem
+        /// </summary>
+        /// <returns>returns a list of SelectListItem from Parts</returns>
         public List<SelectListItem> PartListItems()
         {
             return _db.GetParts().Select(p => new SelectListItem
@@ -125,7 +129,10 @@ namespace PartsIq.Controllers
                 Text = p.Code,
             }).ToList();
         }
-
+        /// <summary>
+        /// Convert Suppliers from the database into a list of SelectListItem
+        /// </summary>
+        /// <returns>returns a list of SelectListItem from Suppliers</returns>
         public List<SelectListItem> SupplierListItems()
         {
             return _db.GetSuppliers().Select(s => new SelectListItem
