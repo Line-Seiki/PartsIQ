@@ -63,7 +63,7 @@ namespace PartsIq.Models
         public string LotNumber { get; set; }
         public int LotQuantity { get; set; }
         public string Model { get; set; }
-        public int Version { get; set; }
+        public int DeliveryDetailVersion { get; set; }
         public int DeliveryVersion { get; set; }
     }
     #endregion
@@ -103,7 +103,7 @@ namespace PartsIq.Models
         public string Email { get; set; }
     }
     #endregion
-
+    
     #region Inspection
     public class InspectionData
     {

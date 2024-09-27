@@ -98,7 +98,7 @@ namespace PartsIq.Models
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
 
-            }).OrderByDescending(d => d.IsUrgent).ThenByDescending(d => d.StatusID).ThenByDescending(d => d.Priority).ToList();
+            }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.Priority).ToList();
         }
 
         public ResponseData CreateDelivery(DeliveryFormData formData)
@@ -175,7 +175,7 @@ namespace PartsIq.Models
                     Message = "DeliveryDetail Not Found"
                 };
 
-                if (deliveryDetail.VERSION != formData.Version) return new ResponseData
+                if (deliveryDetail.VERSION != formData.DeliveryDetailVersion) return new ResponseData
                 {
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
@@ -299,7 +299,7 @@ namespace PartsIq.Models
                 {
                     Success = true,
                     Status = "Success",
-                    Message = "Item Prioritized!"
+                    Message = deliveryDetail.IsUrgent ? "Item Prioritized!" : "Item Deprioritized!"
                 };
             }
             catch (Exception ex)
@@ -324,6 +324,7 @@ namespace PartsIq.Models
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
                 };
+
                 deliveryDetail.IsArchived = true;
                 db.Entry(deliveryDetail).Property(d => d.IsArchived).IsModified = true;
                 deliveryDetail.VERSION++;
@@ -503,6 +504,7 @@ namespace PartsIq.Models
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
                 };
+
                 if (delDetail.UserID != null)
                 {
                     delDetail.UserID = null; // DEV Default
@@ -517,7 +519,7 @@ namespace PartsIq.Models
                 {
                     Success = true,
                     Status = "Success",
-                    Message = "Successfully Assigned DEV"
+                    Message = "Successfully Unassigned DEV"
                 };
             }
             catch (Exception ex)
@@ -542,6 +544,7 @@ namespace PartsIq.Models
                     Status = "Failed",
                     Message = "Editing Conflict! Current item already edited try again"
                 };
+
                 if(StatusID == 3)
                 {
                     delDetail.StatusID = 4;
@@ -577,6 +580,13 @@ namespace PartsIq.Models
         {
             try
             {
+                var deliveryDetail = db.DeliveryDetails.Find(formData.DeliveryDetailID);
+                if (deliveryDetail.VERSION != formData.DeliveryDetailVersion) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+
                 var newInspection = new Inspection
                 {
                     Humidity = formData.Humidity,
@@ -597,12 +607,6 @@ namespace PartsIq.Models
                 var baseQty = (int)Math.Floor((decimal)samplingSize / (decimal)cavities);
                 var remainder = samplingSize % cavities;
 
-                var deliveryDetail = db.DeliveryDetails.Find(formData.DeliveryDetailID);
-                if (deliveryDetail.VERSION != formData.DeliveryDetailVersion) return new ResponseData
-                {
-                    Status = "Failed",
-                    Message = "Editing Conflict! Current item already edited try again"
-                };
                 if (deliveryDetail.InspectionID != newInspectionID)
                 {
                     deliveryDetail.InspectionID = newInspectionID;

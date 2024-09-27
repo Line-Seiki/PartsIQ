@@ -28,6 +28,11 @@
             color: black;
         }
 
+        .priority-reserved {
+            background-color: #C4DAD2;
+            color: black;
+        }
+
         .priority-paused {
             background-color: #FFF0D1;
             color: black;
@@ -91,10 +96,10 @@
                                             <h5>Available</h5>
                                         </div>
                                         <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button id="editBtn" class="btn btn-secondary" data-index=""><i class="mdi mdi-pencil"></i></button>
-                                            <button id="playpauseBtn" class="btn btn-info" data-index=""><i class="mdi mdi-play-pause"></i></button>
-                                            <button id="memberBtn" class="btn btn-primary" data-index=""><i class="mdi mdi-account-arrow-right"></i></button>
-                                            <button id="refreshBtn" class="btn btn-success"><i class="mdi mdi-reload"></i></button>
+                                            <button id="editBtn" class="btn btn-secondary" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                            <button id="playpauseBtn" class="btn btn-info" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Pause/Unpause"><i class="mdi mdi-play-pause"></i></button>
+                                            <button id="memberBtn" class="btn btn-primary" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Unassign Member"><i class="mdi mdi-account-arrow-right"></i></button>
+                                            <button id="refreshBtn" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh Tables"><i class="mdi mdi-reload"></i></button>
                                             <button id="devAssign" class="btn btn-warning text-black"><i class="mdi mdi-account"></i> DEV Assign</button>
                                         </div>
                                     </div>
@@ -191,7 +196,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="right-column" class="col-lg-6 col-md-12 d-none">
+                        <div id="right-column" class="col-lg-6 col-md-12 order-lg-last order-md-first d-none">
                             <div class="card">
                                 <div class="card-body">
                                     <ul id="tab-list" class="nav nav-tabs">
@@ -263,8 +268,11 @@
     <script src="~/Utility/JS/tabs.js"></script>
     <script>
 
+        // DataTables
         let availableTable;
         let pendingTable;
+
+        // Selectize
         let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
 
         // BTN ELEMENTS
@@ -295,6 +303,7 @@
                     url: '/Inspection/GetAvailableInspections',
                     dataSrc: 'data'
                 },
+                responsive: true,
                 ordering: false,
                 columns: [
                     { data: "Priority" },
@@ -333,9 +342,7 @@
                     }
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent));
-                    else if (data.StatusID !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
-                    else $(row).css(getColorAccordingToPriorityLevel(data.PriorityLevel));
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             });
 
@@ -363,9 +370,7 @@
                     },
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    if (data.IsUrgent) $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent));
-                    else if (data.Status !== "Available") $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
-                    else $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             })
 
@@ -483,8 +488,9 @@
                 data.UserID = inspectionForm.dataset.user;
                 data.DeliveryDetailID = inspectionForm.dataset.detail;
                 data.DeliveryDetailVersion = inspectionForm.dataset.detailversion
+                data['Humidity'] = Number(data['Humidity']);
+                data['Temperature'] = Number(data['Temperature']);
                 console.log(data);
-
                 $.ajax({
                     url: '/Inspection/CreateInspection',
                     type: 'GET',
@@ -492,6 +498,7 @@
                     success(res) {
                         if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
                         else alertify.error(`${res.Status}: ${res.Message}`);
+                        inspectionForm.reset();
                         refreshTables();
                         if (res.RouteInspectionID) {
                             const url = `/Inspection/Details/${res.RouteInspectionID}`;
@@ -508,6 +515,7 @@
 
         // FUNCTIONALITY: RefreshTables
         function refreshTables() {
+            console.log('refresh');
             availableTable.ajax.reload();
             pendingTable.ajax.reload();
             editBtn.dataset.index = '';
@@ -547,22 +555,26 @@
         // FUNCTIONALITY: Remove/Transfer Assigned Inspector
         function removeAssignedInspector(rowIndex) {
             const { DeliveryDetailID, DeliveryDetailVersion, UserID } = availableTable.row(rowIndex).data();
-            $.ajax({
-                url: '/Inspection/UnAssignInspector',
-                data: {
-                    DeliveryDetailID,
-                    DeliveryDetailVersion,
-                    UserID,
-                },
-                success(res) {
-                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                    else alertify.error(`${res.Status}: ${res.Message}`);
-                    refreshTables();
-                },
-                error(err) {
-                    alertify.error(`${err}`);
-                }
-            });
+            if (!UserID) {
+                alertify.notify('Item doesn\'t have an inspector!')
+            } else {
+                $.ajax({
+                    url: '/Inspection/UnAssignInspector',
+                    data: {
+                        DeliveryDetailID,
+                        DeliveryDetailVersion,
+                        UserID,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        refreshTables();
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            } 
         }
 
         // DEV-FUNCTIONALITY: Start Inspection
@@ -597,10 +609,39 @@
                         });
                     } else {
                         console.log('open inspection modal');
+                        console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
+                        $.ajax({
+                            url: '/Inspection/DevAssignInspector',
+                            type: 'POST',
+                            data: {
+                                delDetailID: selectedData.DeliveryDetailID,
+                                delDetailVersion: selectedData.DeliveryDetailVersion,
+                            },
+                            success(res) {
+                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                                else alertify.error(`${res.Status}: ${res.Message}`);
+                                refreshTables();
+                                // TODO: Make retrieving data async
+                                setTimeout(() => {
+                                    const dataPending = pendingTable.data().toArray();
+                                    const newData = dataPending.find(item => item.StatusID !== 4);
+                                    console.log('new: ', dataPending);
+                                    console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
+                                    inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
+                                    inspectionForm.dataset.detail = newData.DeliveryDetailID;
+                                    inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
+                                    inspectionModal.show();
+                                }, 100);
+                                
+                            },
+                            error(err) {
+                                alertify.error(`${err}`);
+                            }
+                        });
                     }
                     console.log(selectedData);
                 } else {
-                    if (!selectedData.LotNumber) {
+                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
                         console.log('modal here');
                         addLotBtn.dataset.index = selectedDataIndex;
                         drNumber.innerText = selectedData.DRNumber;
@@ -629,7 +670,7 @@
             const dataAvailable = availableTable.data().toArray();
             const selectedData = dataAvailable.find(item => !item.UserName);
             if (!selectedData) {
-                alertify.error('DEV Error - No Deliveries Without Inspector')
+                alertify.error('DEV Error - No Deliveries Without Inspector');
             } else {
                 $.ajax({
                     url: '/Inspection/DevAssignInspector',

@@ -3,7 +3,8 @@ const qtyInputs = [];
 
 // CLASS FOR DYNAMIC TAB GENERATION
 class DynamicTabs {
-    static tabCounter = 0    
+    static tabCounter = 0;
+    static instace = null;
     constructor(tabLinksContainer, tabContentsContainer, contentType, rowData, ...dataTables) {
         this.tabLinksContainer = document.getElementById(tabLinksContainer);
         this.tabContentsContainer = document.getElementById(tabContentsContainer);
@@ -12,14 +13,22 @@ class DynamicTabs {
         this.dataTables = dataTables
         this.id = ++DynamicTabs.tabCounter;
         this.initialize();
+        this.bindMethods();
+        
+        DynamicTabs.instance = this;
     }
 
     initialize() {
         this.addTab(this.contentType);
     }
 
+    // for inline scripts to run globally
+    bindMethods() {
+        window.removeLot = this.removeLot.bind(this);
+        window.updateSetQty = this.updateSetQty.bind(this);
+    }
+
     addTab(content) {
-        this.tabCounter++;
         const id = `${this.id}`;
         const tabId = `${this.id}-tab`;
         const contentId = `${this.id}-content`;
@@ -27,71 +36,94 @@ class DynamicTabs {
         const rowData = this.rowData;
         const tabContentHTML = this.getHtmlContent(contentType, id, rowData, tabId, contentId)
 
+        const tabLink = this.createTabLink(tabId, contentId, this.rowData.Model);
+        const tabContent = this.createTabContent(contentId, tabContentHTML);
+        
+
+        this.tabLinksContainer.appendChild(tabLink);
+        this.tabContentsContainer.appendChild(tabContent);
+
+        this.setupTabContent(contentType, id);
+        this.showTab(tabLink);
+        this.addCloseTabListener(tabLink, tabId, contentId);
+    }
+
+    // dynamic tab methods link and content creation
+    createTabLink(tabId, contentId, model) {
         const tabLink = document.createElement('li');
         tabLink.classList.add('nav-item');
         tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
-                                ${rowData.Model}
+                                ${model}
                                 <span class="close-tab">&times;</span>
                               </a>`;
+        return tabLink;
 
+    }
+
+    createTabContent(contentId, tabContentHTML) {
         const tabContent = document.createElement('div');
         tabContent.classList.add('tab-pane', 'fade');
         tabContent.id = contentId;
         tabContent.role = 'tabpanel';
         tabContent.innerHTML = tabContentHTML;
+        return tabContent;
+    }
 
-        this.tabLinksContainer.appendChild(tabLink);
-        this.tabContentsContainer.appendChild(tabContent);
-
+    // setup content for created tab
+    setupTabContent(contentType, id) {
         if (contentType === 'edit') {
-            const $select = this.initializeDynamicSelectize(id);
-            $select[0].selectize.setValue(rowData.SupplierID);
+            this.initializeEditTab(id);
         } else if (contentType === 'duplicate') {
-            const qtyInput = {
-                id,
-                currentLotNumber: 1,
-                savedLots: [],
-                reqQtyEl: document.getElementById(`reqQty-${id}`),
-                setQtyEl: document.getElementById(`setQty-${id}`),
-                lotContainer: document.getElementById(`lot-container-${id}`),
-            }
-
-            qtyInputs.push(qtyInput);
-
-            // initial add lot
-            this.addLot(id, rowData);
+            this.initializeDuplicateTab(id);
         }
-        
+    }
+
+    initializeEditTab(id) {
+        const $select = this.initializeDynamicSelectize(id);
+        $select[0].selectize.setValue(this.rowData.SupplierID);
+        this.addFormSubmitListener(id, 'edit');
+    }
+
+    initializeDuplicateTab(id) {
+        const qtyInput = {
+            id,
+            currentLotNumber: 1,
+            savedLots: [],
+            reqQtyEl: document.getElementById(`reqQty-${id}`),
+            setQtyEl: document.getElementById(`setQty-${id}`),
+            lotContainer: document.getElementById(`lot-container-${id}`),
+        };
+        qtyInputs.push(qtyInput);
+        this.addLot(id, this.rowData);
+        this.addFormSubmitListener(id, 'duplicate');
+        document.getElementById(`addLot-${id}`).addEventListener('click', () => this.addLot(id, this.rowData));
+    }
+
+    showTab(tabLink) {
         const tabLinkEl = new bootstrap.Tab(tabLink.querySelector('a'));
         tabLinkEl.show();
+    }
 
+    addCloseTabListener(tabLink, tabId, contentId) {
         tabLink.querySelector('.close-tab').addEventListener('click', (e) => {
             e.stopPropagation();
             this.removeTab(tabId, contentId);
         });
+    }
 
-        let form;
-        if (contentType === 'edit') {
-            form = document.getElementById(`partDeliveryForm-${id}`);
-            if (form) {
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    console.log('class form', rowData);
-                    this.editChanges(id, rowData.DeliveryDetailID, rowData.DeliveryDetailVersion, rowData.DeliveryVersion, tabId, contentId, rowData.DeliveryID);
-                });
-            }
-        } else if (contentType === 'duplicate') {
-            form = document.getElementById(`lot-forms-${id}`);
-            if (form) {
-                form.addEventListener('submit', e => {
-                    e.preventDefault();
-                    this.saveLotChanges(id, tabId, contentId);
-                });
-            }
+    addFormSubmitListener(id, type) {
+        const formId = type === 'edit' ? `partDeliveryForm-${id}` : `lot-forms-${id}`;
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (type === 'edit') {
+                    this.editChanges(id, this.rowData.DeliveryDetailID, this.rowData.DeliveryDetailVersion, this.rowData.DeliveryVersion, `${id}-tab`, `${id}-content`, this.rowData.DeliveryID);
+                } else {
+                    this.saveLotChanges(id, `${id}-tab`, `${id}-content`);
+                }
+            });
         }
-
-
-
     }
 
     removeTab(tabId, contentId) {
@@ -99,32 +131,37 @@ class DynamicTabs {
         const tabContent = document.getElementById(contentId);
 
         if (tabLink && tabContent) {
-            // Remove the tab content
             tabLink.remove();
             tabContent.remove();
-
-            if (this.tabLinksContainer.children.length > 0) {
-                const firstTabLink = this.tabLinksContainer.querySelector('a');
-                const firstTab = new bootstrap.Tab(firstTabLink);
-                firstTab.show();
-            } else {
-                // No tabs left, hide the right column and expand the left column
-                document.getElementById('right-column').classList.add('d-none');
-                document.getElementById('left-column').classList.remove('col-lg-6', 'col-md-12');
-                document.getElementById('left-column').classList.add('col-lg-12');
-            }
+            this.updateTabsAfterRemoval();
         }
     }
 
+    updateTabsAfterRemoval() {
+        if (this.tabLinksContainer.children.length > 0) {
+            const firstTabLink = this.tabLinksContainer.querySelector('a');
+            const firstTab = new bootstrap.Tab(firstTabLink);
+            firstTab.show();
+        } else {
+            this.hideRightColumn();
+        }
+    }
+
+    hideRightColumn() {
+        document.getElementById('right-column').classList.add('d-none');
+        const leftColumn = document.getElementById('left-column');
+        leftColumn.classList.remove('col-lg-6', 'col-md-12');
+        leftColumn.classList.add('col-lg-12');
+    }
+
     initializeDynamicSelectize(id) {
-        const $select = $(`#Supplier-${id}`).selectize({
+        return $(`#Supplier-${id}`).selectize({
             valueField: 'Value',
             labelField: 'Text',
             searchField: 'Text',
             options: suppliersList,
             create: false,
         });
-        return $select;
     }
 
     getHtmlContent(contentType, id, rowData, tabId, contentId) {
@@ -173,7 +210,7 @@ class DynamicTabs {
                             </div>
                             <div class="mb-3">
                                 <label for="LotNumber-${id}" class="form-label">Lot Number</label>
-                                <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber}>
+                                <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber != null ? `${rowData.LotNumber}` : `` }>
                             </div>
                             <div class="mb-3">
                                 <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
@@ -196,7 +233,7 @@ class DynamicTabs {
                                     </div>
                                 </div>
                                 <div class="col-md-3 d-flex justify-content-end align-items-center gap-2 w-50">
-                                    <button type="button" id="addLot-${id}" class="btn btn-primary" onclick="addLot('${id}', '${encodeURIComponent(JSON.stringify(rowData))}')">Add Lot</button>
+                                    <button type="button" id="addLot-${id}" class="btn btn-primary addlot-btn")">Add Lot</button>
                                     <button type="submit" id="saveChanges" class="btn btn-success">Save</button>
                                 </div>
                             </div>
@@ -216,8 +253,8 @@ class DynamicTabs {
     // For Edit Functionality
     editChanges(id, deliveryDetailId, version, deliveryVersion, tabId, contentId, deliveryId) {
         console.log(id, deliveryDetailId, version, deliveryVersion, tabId, contentId, deliveryId);
-        const totalQty = parseInt(document.getElementById(`TotalQuantity-${id}`).value);
-        const lotQty = parseInt(document.getElementById(`LotQuantity-${id}`).value);
+        const totalQty = Math.abs(parseInt(document.getElementById(`TotalQuantity-${id}`).value));
+        const lotQty = Math.abs(parseInt(document.getElementById(`LotQuantity-${id}`).value));
         if (totalQty >= lotQty) {
             const dynamicForm = document.getElementById(`partDeliveryForm-${id}`);
             const supplierSelected = document.getElementById(`Supplier-${id}`).selectize.getValue();
@@ -225,9 +262,11 @@ class DynamicTabs {
             formData.append("Supplier", supplierSelected);
             formData.append("DeliveryDetailId", deliveryDetailId);
             formData.append("DeliveryId", deliveryId);
-            formData.append("Version", version);
+            formData.append("DeliveryDetailVersion", version);
             formData.append("DeliveryVersion", deliveryVersion);
             const data = Object.fromEntries(formData);
+            data['LotQuantity'] = Math.abs(parseInt(data['LotQuantity']));
+            data['TotalQuantity'] = Math.abs(parseInt(data['TotalQuantity']));
             console.log(data);
 
             $.ajax({
@@ -313,17 +352,16 @@ class DynamicTabs {
     }
 
     createLotHTML(lotNumber, qty, id, data) {
-        console.log(data);
         return `
                 <div id="lotInfo-${lotNumber}-${id}" class=" col-lg-6 col-md-12 mb-3">
                     <div class="card text-white bg-secondary">
                         <div class="card-body">
                             <div class="d-flex justify-content-md-end">
-                                ${lotNumber !== 1 ? `<button class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
-                                <input type="hidden" class="version-${id}" value="${data.Version}"/>
+                                ${lotNumber !== 1 ? `<button type="button" class="btn btn-danger btn-sm float-end mb-1" onclick="removeLot(${lotNumber},'${id}')">Remove</button>` : ``}
+                                <input type="hidden" class="version-${id}" value="${data.DeliveryDetailVersion}"/>
                                 <input type="hidden" class="deliveryVersion-${id}" value="${data.DeliveryVersion}" />
-                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryId}"/>
-                                <input type="hidden" class="deliveryDetailId-${id}" value="${data.DeliveryDetailId}"/>
+                                <input type="hidden" class="deliveryId-${id}" value="${data.DeliveryID}"/>
+                                <input type="hidden" class="deliveryDetailId-${id}" value="${data.DeliveryDetailID}"/>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
@@ -356,11 +394,11 @@ class DynamicTabs {
                                     </div>
                                     <div class="mb-2">
                                         <label for="qty-${lotNumber}" class="form-label">Total Quantity</label>
-                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${data.LotQuantity}" readonly/>
+                                        <input type="number" id="qty-${lotNumber}" class="form-control total-qty-${id}" value="${data.TotalQuantity}" readonly/>
                                     </div>
                                     <div class="mb-2">
                                         <label for="lot-${lotNumber}" class="form-label">Lot Number</label>
-                                        <input type="text" id="lot-${lotNumber}" class="form-control lot-code-${id}" value="${lotNumber !== 1 ? `` : `${data.LotNumber}`}"/>
+                                        <input type="text" id="lot-${lotNumber}" class="form-control lot-code-${id}" value="${lotNumber !== 1 ? `` : data.LotNumber != null ? `${data.LotNumber}` : ``}"/>
                                     </div>
                                     <div class="mb-2">
                                         <label for="lotQty-${lotNumber}" class="form-label">Lot Quantity</label>
@@ -377,15 +415,15 @@ class DynamicTabs {
     saveLotChanges(id, tabId, contentId) {
         const reqQty = document.getElementById(`reqQty-${id}`);
         const setQty = document.getElementById(`setQty-${id}`);
-        if (reqQty.value !== setQty.value) {
+        if (parseInt(reqQty.value) !== parseInt(setQty.value)) {
             alertify.error('Current set quantity is not equal to the required quantity!');
         } else {
             const savedLots = qtyInputs.find(input => input.id === id).savedLots;
             const lots = document.querySelectorAll(`#lot-container-${id} > div`);
             lots.forEach((lot, index) => {
                 if (index === 0) savedLots.push({
-                    DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
-                    DeliveryDetailId: lot.querySelector(`.deliveryDetailId-${id}`).value,
+                    DeliveryID: lot.querySelector(`.deliveryId-${id}`).value,
+                    DeliveryDetailID: lot.querySelector(`.deliveryDetailId-${id}`).value,
                     DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
                     PartCode: lot.querySelector(`.partCode-${id}`).value,
                     PartName: lot.querySelector(`.part-name-${id}`).value,
@@ -395,12 +433,12 @@ class DynamicTabs {
                     TotalQuantity: parseInt(lot.querySelector(`.total-qty-${id}`).value) || 0,
                     LotNumber: lot.querySelector(`.lot-code-${id}`).value,
                     LotQuantity: lot.querySelector(`.lot-qty-${id}`).value || 0,
-                    Version: lot.querySelector(`.version-${id}`).value,
+                    DeliveryDetailVersion: lot.querySelector(`.version-${id}`).value,
                     DeliveryVersion: lot.querySelector(`.deliveryVersion-${id}`).value
                 });
                 else savedLots.push({
                     DateDelivered: lot.querySelector(`.dateDelivered-${id}`).value,
-                    DeliveryId: lot.querySelector(`.deliveryId-${id}`).value,
+                    DeliveryID: lot.querySelector(`.deliveryId-${id}`).value,
                     PartCode: lot.querySelector(`.partCode-${id}`).value,
                     PartName: lot.querySelector(`.part-name-${id}`).value,
                     Model: lot.querySelector(`.model-${id}`).value,
@@ -413,10 +451,9 @@ class DynamicTabs {
                 });
             });
             const [firstLot, ...otherLots] = savedLots;
-            console.log('First Lot', firstLot);
-            console.log('Rest of the Lots', otherLots);
             if (otherLots.length <= 0) {
                 alertify.error("Add lot/s to duplcate item");
+                savedLots.splice(0, savedLots.length);
             } else {
                 $.ajax({
                     url: '/Scheduling/DuplicateDelivery',

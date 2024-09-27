@@ -7,7 +7,7 @@ function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
         case 3:
             return 'priority-started';
         default:
-            return '';
+            return 'priority-reserved';
     }
     switch (priorityID) {
         case 1:
