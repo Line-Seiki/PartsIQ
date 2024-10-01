@@ -2,6 +2,8 @@
 function getColorAccordingToPriorityLevel(priorityID, isUrgent, statusID) {
     if (isUrgent) return 'urgent';
     if (statusID !== 1) switch (statusID) {
+        case 5:
+            return 'priority-completed';
         case 4:
             return 'priority-paused';
         case 3:

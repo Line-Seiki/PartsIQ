@@ -72,7 +72,7 @@ namespace PartsIq.Models
         #region Scheduling
         public List<SchedulingData> GetSchedulingData()
         {
-            return db.DeliveryDetails.Where(d => !d.IsArchived).Select(del => new SchedulingData
+            return db.DeliveryDetails.Where(d => !d.IsArchived && d.StatusID != 5).Select(del => new SchedulingData
             {
                 DeliveryID = del.DeliveryID,
                 DeliveryDetailID = del.DeliveryDetailID,
@@ -93,12 +93,12 @@ namespace PartsIq.Models
                 LotNumber = del.LotNumber,
                 InspectionDeadline = null, // Inspection Table CONDITION: If no value was found return null
                 InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : 0,
-                Priority = del.Delivery.PriorityLevel,
+                PriorityLevel = del.Delivery.PriorityLevel,
                 DeliveryDetailVersion = del.VERSION,
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
 
-            }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.Priority).ToList();
+            }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.PriorityLevel).ToList();
         }
 
         public ResponseData CreateDelivery(DeliveryFormData formData)
@@ -435,7 +435,7 @@ namespace PartsIq.Models
         #region Inspection
         public List<InspectionData> GetAvailableInspections()
         {
-            return db.DeliveryDetails.Where(d => !d.IsArchived).Select(del => new InspectionData
+            return db.DeliveryDetails.Where(d => !d.IsArchived && d.StatusID != 5).Select(del => new InspectionData
             {
                 DeliveryID = del.DeliveryID,
                 DeliveryDetailID = del.DeliveryDetailID,
@@ -466,7 +466,7 @@ namespace PartsIq.Models
 
         public List<InspectionData> GetPendingInspections(int userID)
         {
-            return db.DeliveryDetails.Where(d => d.UserID == userID).Select(del => new InspectionData
+            return db.DeliveryDetails.Where(d => d.UserID == userID && d.StatusID != 5 && !d.IsArchived).Select(del => new InspectionData
             {
                 DeliveryID = del.DeliveryID,
                 DeliveryDetailID = del.DeliveryDetailID,
@@ -485,13 +485,39 @@ namespace PartsIq.Models
                 TotalQuantity = del.Delivery.Quantity,
                 LotQuantity = del.LotQuantity,
                 LotNumber = del.LotNumber,
-                InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : 0,
+                InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : del.InspectionID,
                 PriorityLevel = del.Delivery.PriorityLevel,
                 DeliveryDetailVersion = del.VERSION,
                 DeliveryVersion = del.Delivery.VERSION,
                 IsUrgent = del.IsUrgent,
                 SampleSize = del.InspectionID.HasValue ? del.Inspection.SampleSize.ToString() : "",
             }).OrderByDescending(d => d.StatusID).ThenByDescending(d => d.IsUrgent).ThenByDescending(d => d.PriorityLevel).ToList();
+        }
+
+        public List<FinishedData> GetFinishedInspections()
+        {
+            return db.DeliveryDetails.Where(d => d.StatusID == 5).Select(del => new FinishedData
+            {
+                DeliveryID = del.DeliveryID,
+                DeliveryDetailID = del.DeliveryDetailID,
+                Status = del.Status.StatusName,
+                StatusID = del.StatusID,
+                DateFinished = del.Inspection.DateEnd.HasValue ? del.Inspection.DateEnd.Value : del.Inspection.DateEnd,
+                Decision = "", // TODO: Change Value when available
+                ControlNumber = "", // TODO: Change Value when available
+                DRNumber = del.Delivery.DRNumber,
+                PartCode = del.Delivery.Part.Code,
+                PartName = del.Delivery.Part.Name,
+                LotNumber = del.LotNumber,
+                LotQuantity = del.LotQuantity,
+                Comments = "", // TODO: Change Value when available
+                InspectorComments = "", // TODO: Change Value when available
+                InspectionID = del.InspectionID.HasValue ? del.InspectionID.Value : del.InspectionID,
+                PriorityLevel = del.Delivery.PriorityLevel,
+                DeliveryDetailVersion = del.VERSION,
+                DeliveryVersion = del.Delivery.VERSION,
+                InspectionVersion = del.Inspection.VERSION,
+            }).ToList();
         }
 
         public ResponseData UnAssignInspector(int delDetailID, int version, int userID)

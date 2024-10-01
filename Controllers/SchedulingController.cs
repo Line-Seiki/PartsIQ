@@ -120,7 +120,7 @@ namespace PartsIq.Controllers
         /// <summary>
         /// Convert Parts from the database into a list of SelectListItem
         /// </summary>
-        /// <returns>returns a list of SelectListItem from Parts</returns>
+        /// <returns>returns a List(SelectListItem) of SelectListItem from Parts</returns>
         public List<SelectListItem> PartListItems()
         {
             return _db.GetParts().Select(p => new SelectListItem

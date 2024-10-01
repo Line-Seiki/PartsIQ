@@ -34,7 +34,7 @@ namespace PartsIq.Models
         public string LotNumber { get; set; }
         public int LotQuantity { get; set; }
         public DateTime? InspectionDeadline { get; set; }
-        public int Priority { get; set; }
+        public int PriorityLevel { get; set; }
         public int DeliveryDetailVersion { get; set; }
         public int DeliveryVersion { get; set; }
         public bool IsUrgent { get; set; }
@@ -105,29 +105,11 @@ namespace PartsIq.Models
     #endregion
     
     #region Inspection
-    public class InspectionData
+    public class InspectionData : SchedulingData
     {
-        public int DeliveryID { get; set; }
-        public int DeliveryDetailID { get; set; }
-        public int? InspectionID { get; set; }
-        public int StatusID { get; set; }
-        public string Status { get; set; }
-        public int SupplierID { get; set; }
-        public string Supplier { get; set; }
-        public int? UserID { get; set; }
-        public string UserName { get; set; }
-        public DateTime DateDelivered { get; set; }
-        public DateTime Deadline { get; set; }
         public DateTime? DateStarted { get; set; }
-        public string LotNumber { get; set; }
-        public int LotQuantity { get; set; }
-        public string PartCode { get; set; }
-        public string PartName { get; set; }
-        public string Model { get; set; }
-        public int TotalQuantity { get; set; }
-        public string DRNumber { get; set; }
         public string SampleSize { get; set; }
-        public int PriorityLevel { get; set; }
+        public int InspectionVersion { get; set; }
         public string Priority
         {
             get
@@ -145,11 +127,15 @@ namespace PartsIq.Models
                 }
             }
         }
-        
-        public int DeliveryDetailVersion { get; set; }
-        public int DeliveryVersion { get; set; }
-        public int InspectionVersion { get; set; }
-        public bool IsUrgent { get; set; }
+    }
+
+    public class FinishedData : InspectionData
+    {
+        public DateTime? DateFinished { get; set; }
+        public string Comments { get; set; }
+        public string InspectorComments { get; set; }
+        public string Decision { get; set; }
+        public string ControlNumber { get; set; }
 
     }
 

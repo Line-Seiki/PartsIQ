@@ -38,6 +38,11 @@
             color: black;
         }
 
+        .priority-completed {
+            background-color: #347928;
+            color: white;
+        }
+
         .urgent {
             background-color: #FF0000;
             color: white;
@@ -150,7 +155,7 @@
                                                     <th>Decision</th>
                                                     <th>Control Number</th>
                                                     <th>DR Number</th>
-                                                    <th>Pard Code</th>
+                                                    <th>Part Code</th>
                                                     <th>Part Name</th>
                                                     <th>Lot Number</th>
                                                     <th>Lot Quantity</th>
@@ -270,6 +275,7 @@
 
         // DataTables
         let availableTable;
+        let finishedTable;
         let pendingTable;
 
         // Selectize
@@ -340,6 +346,37 @@
                             return `<button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})"><i class="mdi mdi-pencil"></i></button>`
                         }
                     }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                }
+            });
+
+            // Finished Table
+            finishedTable = $("#inspection-finished").DataTable({
+                ajax: {
+                    url: '/Inspection/GetFinishedInspections',
+                    dataSrc: 'data'
+                },
+                ordering: false,
+                columns: [
+                    { data: "Status" },
+                    {
+                        data: "DateFinished",
+                        render: function (data, type, row) {
+                            if (!data) return "";
+                            return `${convertDateStringToFormattedString(data)}`;
+                        }
+                    },
+                    { data: "Decision" },
+                    { data: "ControlNumber" },
+                    { data: "DRNumber" },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    { data: "LotNumber" },
+                    { data: "LotQuantity" },
+                    { data: "Comments" },
+                    { data: "InspectorComments" },
                 ],
                 createdRow: function (row, data, dataIndex) {
                     $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
@@ -587,7 +624,7 @@
                 if (!selectedData) {
                     const dataAvailable = availableTable.data().toArray();
                     const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                    if (selectedData.InspectionID != 0) {
+                    if (selectedData.InspectionID != 0 || selectedData.InspectionID !== null) {
                         console.log('get scheduled item and execute');
                         $.ajax({
                             url: '/Inspection/DevAssignInspector',
@@ -646,7 +683,7 @@
                         addLotBtn.dataset.index = selectedDataIndex;
                         drNumber.innerText = selectedData.DRNumber;
                         lotModal.show();
-                    } else if (selectedData.InspectionID != 0) {
+                    } else if (selectedData.InspectionID != 0 || selectedData.InspectionID !== null) {
                         const url = `/Inspection/Details/${selectedData.InspectionID}`;
                         window.open(url, '_blank');
                     } else {
