@@ -45,17 +45,25 @@ class DynamicTabs {
 
         this.setupTabContent(contentType, id);
         this.showTab(tabLink);
-        this.addCloseTabListener(tabLink, tabId, contentId);
+        if (content !== 'checkpoint') this.addCloseTabListener(tabLink, tabId, contentId);
     }
 
     // dynamic tab methods link and content creation
     createTabLink(tabId, contentId, model) {
         const tabLink = document.createElement('li');
         tabLink.classList.add('nav-item');
-        tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
+
+        if (!model) {
+            tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
+                                    checkpoint
+                                </a>`
+        } else {
+            tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
                                 ${model}
                                 <span class="close-tab">&times;</span>
                               </a>`;
+        }
+        
         return tabLink;
 
     }
@@ -75,6 +83,8 @@ class DynamicTabs {
             this.initializeEditTab(id);
         } else if (contentType === 'duplicate') {
             this.initializeDuplicateTab(id);
+        } else {
+
         }
     }
 
@@ -239,6 +249,70 @@ class DynamicTabs {
                             </div>
                             <div id="lot-container-${id}" class="row"></div>
                         </form>`;
+            case 'checkpoint':
+                return `<form id="checkpointForm-${id}">
+                            <div class="mb-3">
+                                <label for="Code-${id}" class="form-label">Code</label>
+                                <input type="text" class="form-control" id="Code-${id}" name="Code" value="${rowData.Code}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="InspectionPart-${id}" class="form-label">Inspection Part</label>
+                                <input type="text" class="form-control" id="InspectionPart-${id}" name="InspectionPart" value="${rowData.InspectionPart}">
+                            </div>
+
+                            <div class="d-flex mb-3 gap-4">
+                                <div>
+                                    <label for="Specification-${id}" class="form-label">Specification</label>
+                                    <input type="text" class="form-control" id="Specification-${id}" name="Specification" value="${rowData.Specification}">
+                                </div>
+                                <div>
+                                    <label for="UpperLimit-${id}" class="form-label">Upper Limit</label>
+                                    <input type="text" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit}">
+                                </div>
+                                <div>
+                                    <label for="LowerLimit-${id}" class="form-label">Lower Limit</label>
+                                    <input type="text" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit}">
+                                </div>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <p class="form-label">Measurement?</p>
+                                <div class="form-check custom-radio">
+                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="1"/>
+                                    <label class="form-check-label" for="IsMeasurementT">True</label>
+                                </div>
+                                <div class="form-check custom-radio">
+                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="0"/>
+                                    <label class="form-check-label" for="IsMeasurementF">False</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Tool-${id}" class="form-label">Tool</label>
+                                <input type="text" class="form-control" id="Tool-${id}" name="Tool" value="${rowData.Tool}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="MethodSampling-${id}" class="form-label">Sampling Method</label>
+                                <input type="text" class="form-control" id="MethodSampling-${id}" name="MethodSampling" value="${rowData.MethodSampling}">
+                            </div>
+                            <div class="d-flex mb-3 gap-4">
+                                <div>
+                                    <label for="Level-${id}" class="form-label">Level</label>
+                                    <input type="text" class="form-control" id="Level-${id}" name="Level" value="${rowData.Level}">
+                                </div>
+                                <div>
+                                    <label for="LevelNum-${id}" class="form-label">LevelNum</label>
+                                    <input type="text" class="form-control" id="LevelNum-${id}" name="LevelNum" value="${rowData.Level_1}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Note-${id}" class="form-label">Note</label>
+                                <input type="text" class="form-control" id="Note-${id}" name="Note" value="${rowData.Note}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form >`
             default:
                 return `<p>No Content Inserted</p>`;
         }

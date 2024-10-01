@@ -124,6 +124,12 @@ namespace PartsIq.Controllers
             return Json(new {data}, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetFinishedInspections()
+        {
+            var data = dbContext.GetFinishedInspections();
+            return Json(new { data }, JsonRequestBehavior.AllowGet);
+        }
+
         // POST: /Inspection/UnAssignInspector
         public JsonResult UnAssignInspector(int DeliveryDetailID, int DeliveryDetailVersion, int UserID)
         {

@@ -38,6 +38,11 @@
             color: black;
         }
 
+        .priority-completed {
+            background-color: #347928;
+            color: white;
+        }
+
         .urgent {
             background-color: #FF0000;
             color: white;
@@ -278,7 +283,7 @@
                     }
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    $(row).addClass(getColorAccordingToPriorityLevel(data.Priority, data.IsUrgent, data.StatusID));
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             });
 

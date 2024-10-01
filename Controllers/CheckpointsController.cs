@@ -11,6 +11,8 @@ using PartsIq.Models;
 using OfficeOpenXml;
 using System.Diagnostics;
 using System.Net.Http;
+using Microsoft.Ajax.Utilities;
+using System.Reflection;
 
 namespace PartsIq.Controllers
 {
@@ -217,6 +219,51 @@ namespace PartsIq.Controllers
             }
 
             return Json(htmlJson, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult UploadPartCheckpoints(HttpPostedFileBase excelFile)
+        {
+            string[] headers = { "Code", "InspectionPart", "Specification", "SpecificationRange", "CurrentTolerance", "Tool", "MethodSampling", "Level", "Level_1", "Note" };
+            var data = new List<Dictionary<string, string>>();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            if (excelFile != null && excelFile.ContentLength > 0)
+            {
+                using (var package = new ExcelPackage(excelFile.InputStream))
+                {
+                    // Get the first worksheet
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+
+                    for (int row = 6; row < worksheet.Dimension.End.Row; row++)
+                    {
+                        string codeValue = worksheet.Cells[row, 1].GetValue<string>();
+
+                        if (string.IsNullOrEmpty(codeValue) || codeValue.Contains("SPECIAL INSTRUCTION:"))
+                        {
+                            break;
+                        }
+
+                        var rowData = new Dictionary<string, string>();
+                        rowData[headers[0]] = worksheet.Cells[row, 1].GetValue<string>();
+                        rowData[headers[1]] = worksheet.Cells[row, 2].GetValue<string>();
+                        rowData[headers[2]] = worksheet.Cells[row, 5].GetValue<string>();
+                        rowData[headers[3]] = worksheet.Cells[row, 7].GetValue<string>();
+                        rowData[headers[4]] = worksheet.Cells[row, 10].GetValue<string>();
+                        rowData[headers[5]] = worksheet.Cells[row, 12].GetValue<string>();
+                        rowData[headers[6]] = worksheet.Cells[row, 13].GetValue<string>();
+                        rowData[headers[7]] = worksheet.Cells[row, 16].GetValue<string>();
+                        rowData[headers[8]] = worksheet.Cells[row, 17].GetValue<string>();
+                        rowData[headers[9]] = worksheet.Cells[row, 18].GetValue<string>();
+
+                        
+                        data.Add(rowData);
+                    }
+                }
+                return Json(new { success = true, message = "File uploaded and processed successfully!", data });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Please upload a valid Excel file.", data });
+            }
         }
 
         [HttpPost]
