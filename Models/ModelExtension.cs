@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Web;
+using System.Web.Mvc;
 
 namespace PartsIq.Models
 {
@@ -162,6 +163,56 @@ namespace PartsIq.Models
         public int DeliveryDetailID { get; set; }
         public int DeliveryDetailVersion { get; set; }
         public string CavityList { get; set; }
+    }
+
+    public class InspectionViewModel
+    {
+        public Part Part { get; set; } // Property for the Part model
+        public CheckpointInfoViewModel CheckpointInfo { get; set; } // Property for the Checkpoint info
+        public DeliveryDetail DeliveryDetail { get; set; }
+        public int SampleSize { get; set; }
+        public int SampleNumber { get; set; }
+        public string CavityNumber { get; set; }
+        public int InspectionID { get; set; }
+        public int CavityID { get; set; }
+        public int CheckpointID {  get; set; }
+
+
+
+    }
+
+    public class StartInsepction
+    {
+
+    }
+
+
+    #endregion
+
+    #region Checkpoint
+    public class CheckpointInfoViewModel
+    {
+        public IEnumerable<Checkpoint> Checkpoints { get; set; }
+        public string CheckpointNumber { get; set; }
+        public string InspectionPart { get; set; }
+        public string Specification { get; set; }
+        public string Notes { get; set; }
+        public string Tools { get; set; }
+        public string SamplingMethod { get; set; }
+        public double UpperLimit { get; set; }
+        public double LowerLimit { get; set; }
+
+        public int SampleSize { get; set; }
+
+        public byte IsMeasurement { get; set; }  
+    }
+
+    #endregion
+
+    #region Cavity
+    public class CavityMaxSample : Cavity
+    {
+        public int? MaxSampleNumber {  get; set; }
     }
     #endregion
 }

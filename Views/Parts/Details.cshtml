@@ -3,89 +3,1319 @@
 @{
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var Status = Model.IsActive.HasValue && Model.IsActive.Value ? "Inactive" : "Active";
+    var StatusClass = Model.IsActive.HasValue && Model.IsActive.Value ? "danger" : "success";
 }
 
-<h2>Details</h2>
 
-<div>
-    <h4>Part</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Code)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Code)
-        </dd>
+<div class="page-content">
+    <div class="page-title-box">
+        <div class="container-fluid">
+            <div class="page-title dflex-between-center">
+                <h3 class="mb-1 fw-bold">PIS</h3>
+                <ol class="breadcrumb mb-0 mt-1">
+                    <li class="breadcrumb-item">
+                        <a href="../index.html">
+                            <i class="bx bx-home fs-xs"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="ui-buttons.html">
+                            Components
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Accordian</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="page-content-wrapper mt--45">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-5 col-xl-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media mb-3">
+                                <div class="media-body">
+                                    <h5 class="text-dark fw-semibold mt-2">@Model.Code <i class="bx bxs-badge-check fs-sm align-middle text-success"></i></h5>
+                                    <h6 class="text-muted fw-semibold mt-2 mb-3">@Model.Name</h6>
+                                    <button type="button" data-bs-toggle="modal" data-bs-target="#editPartModal" class="btn btn-primary btn-sm me-1" id="">Edit</button>
+                                    <button type="button" data-status="@Model.IsActive" data-partID="@Model.PartID" id="statusBtn" class="btn btn-@StatusClass btn-sm">Set as @Status </button>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-2 border-top">
+                                <h5 class="mb-3 pt-2 fw-semibold text-dark">Part Information</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-borderless text-muted mb-0 table-sm fs-14">
+                                        <tbody>
+                                            <tr>
+                                                <th class="pl-0" scope="row">Model</th>
+                                                <td>@Model.Model</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0" scope="row">Document Number</th>
+                                                <td>@Model.DocNumber</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0" scope="row">Type</th>
+                                                <td>@Model.Type</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0" scope="row">Priority</th>
+                                                <td>@Model.Priority</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="pl-0" scope="row">File</th>
+                                                <td>
+                                                    @if (Model.FileAttachment != null)
+                                                    {
+                                                        @Model.FileAttachment.FileName
+                                                    }
+                                                    else
+                                                    {
+                                                        @:"NULL"
+                                                    }
+                                                </td>
+                                            </tr>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.dateMonitored)
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.dateMonitored)
-        </dd>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.docNumber)
-        </dt>
+                        </div>
+                    </div>
+                    <!-- end card -->
+                </div>
+                <div class="col-lg-7 col-xl-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills bg-light nav-justified" id="pills-tab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" id="pills-messages-tab" data-bs-toggle="pill" href="#pills-settings" role="tab" aria-controls="pills-settings" aria-selected="true">
+                                        Checkpoints
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="pills-activity-tab" data-bs-toggle="pill" href="#pills-activity" role="tab" aria-controls="pills-activity" aria-selected="false" tabindex="-1">
+                                        Activity
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="pills-projects-tab" data-bs-toggle="pill" href="#pills-projects" role="tab" aria-controls="pills-projects" aria-selected="false" tabindex="-1">
+                                        Logs
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" id="pills-tasks-tab" data-bs-toggle="pill" href="#pills-tasks" role="tab" aria-controls="pills-tasks" aria-selected="false" tabindex="-1">
+                                        Tasks
+                                    </a>
+                                </li>
 
-        <dd>
-            @Html.DisplayFor(model => model.docNumber)
-        </dd>
+                            </ul>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.isMonitored)
-        </dt>
+                            <div class="tab-content mt-4 pt-3" id="pills-tabContent">
+                                <div class="tab-pane fade" id="pills-activity" role="tabpanel" aria-labelledby="pills-activity-tab">
+                                    <div class="d-block d-lg-none mb-4">
+                                        <div class="d-inline-flex me-2 input-date">
+                                            <input class="form-control flatpickr-input" type="text" id="inline-datepicker-m" placeholder="Choose Date" readonly="readonly">
+                                            <div class="date-icon">
+                                                <i class="bx bx-calendar fs-sm"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <h5 class="fw-semibold text-dark mb-4">This Week</h5>
+                                            <div class="timeline-left-only ms-3">
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item w-">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2018 - 19
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Appco Website</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Appco Website - A responsive web template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2019 - 20
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Letstart Single Page Website</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Letstart SP - A parallax modern responsive web template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2017 - 19
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Letstart Admin Devlopment</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Letstart Admin - A responsive admin and dashboard template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h5 class="fw-semibold text-dark my-4">Last Week</h5>
+                                            <div class="timeline-left-only ms-3">
 
-        <dd>
-            @Html.DisplayFor(model => model.isMonitored)
-        </dd>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2018 - 19
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Appco Website</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Appco Website - A responsive web template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2019 - 20
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Letstart Single Page Website</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Letstart SP - A parallax modern responsive web template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2017 - 19
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Letstart Admin Devlopment</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Letstart Admin - A responsive admin and dashboard template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h5 class="fw-semibold text-dark my-4">Last Month</h5>
+                                            <div class="timeline-left-only ms-3">
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2018 - 19
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Appco Website</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Appco Website - A responsive web template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2019 - 20
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Letstart Single Page Website</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Letstart SP - A parallax modern responsive web template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-primary">
+                                                    <div class="timeline-item">
+                                                        <div class="timeline-box card w-100">
+                                                            <div class="card-body">
+                                                                <div class="timeline-icon bg-white fs-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="1em">
+                                                                        <path class="quarter-fill" d="M12,14.19531a1.00211,1.00211,0,0,1-.5-.13379l-9-5.19726a1.00032,1.00032,0,0,1,0-1.73242l9-5.19336a1.00435,1.00435,0,0,1,1,0l9,5.19336a1.00032,1.00032,0,0,1,0,1.73242l-9,5.19726A1.00211,1.00211,0,0,1,12,14.19531Z">
+                                                                        </path>
+                                                                        <path class="half-fill" d="M21.5,11.13184,19.53589,9.99847,12.5,14.06152a1.0012,1.0012,0,0,1-1,0L4.46411,9.99847,2.5,11.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                        <path class="full-fill" d="M21.5,15.13184l-1.96411-1.13337L12.5,18.06152a1.0012,1.0012,0,0,1-1,0L4.46411,13.99847,2.5,15.13184a1.00032,1.00032,0,0,0,0,1.73242l9,5.19726a1.0012,1.0012,0,0,0,1,0l9-5.19726a1.00032,1.00032,0,0,0,0-1.73242Z">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="d-inline-block py-1 px-3 bg-soft-primary text-primary fw-semibold badge-pill rounded-1">
+                                                                    2017 - 19
+                                                                </div>
+                                                                <h6 class="fs-15 fw-semibold mt-3">Letstart Admin Devlopment</h6>
+                                                                <div class="text-muted">
+                                                                    <p class="mb-0">Letstart Admin - A responsive admin and dashboard template</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 pl-xl-5">
+                                            <h5 class="fw-semibold text-dark mb-4 mt-4 mt-lg-0">Filter Activities</h5>
+                                            <input type="text" id="inline-datepicker" class="form-control flatpickr-input" placeholder="Inline calendar" readonly="readonly" style="display: none;"><div class="flatpickr-calendar rangeMode animate inline" tabindex="-1">
+                                                <div class="flatpickr-months"><span class="flatpickr-prev-month"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M5.207 8.471l7.146 7.147-0.707 0.707-7.853-7.854 7.854-7.853 0.707 0.707-7.147 7.146z"></path></svg></span><div class="flatpickr-month"><div class="flatpickr-current-month"><select class="flatpickr-monthDropdown-months" tabindex="-1"><option class="flatpickr-monthDropdown-month" value="0" tabindex="-1">January</option><option class="flatpickr-monthDropdown-month" value="1" tabindex="-1">February</option><option class="flatpickr-monthDropdown-month" value="2" tabindex="-1">March</option><option class="flatpickr-monthDropdown-month" value="3" tabindex="-1">April</option><option class="flatpickr-monthDropdown-month" value="4" tabindex="-1">May</option><option class="flatpickr-monthDropdown-month" value="5" tabindex="-1">June</option><option class="flatpickr-monthDropdown-month" value="6" tabindex="-1">July</option><option class="flatpickr-monthDropdown-month" value="7" tabindex="-1">August</option><option class="flatpickr-monthDropdown-month" value="8" tabindex="-1">September</option><option class="flatpickr-monthDropdown-month" value="9" tabindex="-1">October</option><option class="flatpickr-monthDropdown-month" value="10" tabindex="-1">November</option><option class="flatpickr-monthDropdown-month" value="11" tabindex="-1">December</option></select><div class="numInputWrapper"><input class="numInput cur-year" type="number" tabindex="-1" aria-label="Year"><span class="arrowUp"></span><span class="arrowDown"></span></div></div></div><span class="flatpickr-next-month"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 17 17"><g></g><path d="M13.207 8.472l-7.854 7.854-0.707-0.707 7.146-7.146-7.146-7.148 0.707-0.707 7.854 7.854z"></path></svg></span></div><div class="flatpickr-innerContainer">
+                                                    <div class="flatpickr-rContainer">
+                                                        <div class="flatpickr-weekdays">
+                                                            <div class="flatpickr-weekdaycontainer">
+                                                                <span class="flatpickr-weekday">
+                                                                    Sun
+                                                                </span><span class="flatpickr-weekday">Mon</span><span class="flatpickr-weekday">Tue</span><span class="flatpickr-weekday">Wed</span><span class="flatpickr-weekday">Thu</span><span class="flatpickr-weekday">Fri</span><span class="flatpickr-weekday">
+                                                                    Sat
+                                                                </span>
+                                                            </div>
+                                                        </div><div class="flatpickr-days" tabindex="-1"><div class="dayContainer"><span class="flatpickr-day " aria-label="September 1, 2024" tabindex="-1">1</span><span class="flatpickr-day " aria-label="September 2, 2024" tabindex="-1">2</span><span class="flatpickr-day " aria-label="September 3, 2024" tabindex="-1">3</span><span class="flatpickr-day " aria-label="September 4, 2024" tabindex="-1">4</span><span class="flatpickr-day " aria-label="September 5, 2024" tabindex="-1">5</span><span class="flatpickr-day " aria-label="September 6, 2024" tabindex="-1">6</span><span class="flatpickr-day " aria-label="September 7, 2024" tabindex="-1">7</span><span class="flatpickr-day " aria-label="September 8, 2024" tabindex="-1">8</span><span class="flatpickr-day " aria-label="September 9, 2024" tabindex="-1">9</span><span class="flatpickr-day " aria-label="September 10, 2024" tabindex="-1">10</span><span class="flatpickr-day " aria-label="September 11, 2024" tabindex="-1">11</span><span class="flatpickr-day " aria-label="September 12, 2024" tabindex="-1">12</span><span class="flatpickr-day " aria-label="September 13, 2024" tabindex="-1">13</span><span class="flatpickr-day " aria-label="September 14, 2024" tabindex="-1">14</span><span class="flatpickr-day " aria-label="September 15, 2024" tabindex="-1">15</span><span class="flatpickr-day " aria-label="September 16, 2024" tabindex="-1">16</span><span class="flatpickr-day " aria-label="September 17, 2024" tabindex="-1">17</span><span class="flatpickr-day " aria-label="September 18, 2024" tabindex="-1">18</span><span class="flatpickr-day today" aria-label="September 19, 2024" aria-current="date" tabindex="-1">19</span><span class="flatpickr-day " aria-label="September 20, 2024" tabindex="-1">20</span><span class="flatpickr-day " aria-label="September 21, 2024" tabindex="-1">21</span><span class="flatpickr-day " aria-label="September 22, 2024" tabindex="-1">22</span><span class="flatpickr-day " aria-label="September 23, 2024" tabindex="-1">23</span><span class="flatpickr-day " aria-label="September 24, 2024" tabindex="-1">24</span><span class="flatpickr-day " aria-label="September 25, 2024" tabindex="-1">25</span><span class="flatpickr-day " aria-label="September 26, 2024" tabindex="-1">26</span><span class="flatpickr-day " aria-label="September 27, 2024" tabindex="-1">27</span><span class="flatpickr-day " aria-label="September 28, 2024" tabindex="-1">28</span><span class="flatpickr-day " aria-label="September 29, 2024" tabindex="-1">29</span><span class="flatpickr-day " aria-label="September 30, 2024" tabindex="-1">30</span><span class="flatpickr-day nextMonthDay" aria-label="October 1, 2024" tabindex="-1">1</span><span class="flatpickr-day nextMonthDay" aria-label="October 2, 2024" tabindex="-1">2</span><span class="flatpickr-day nextMonthDay" aria-label="October 3, 2024" tabindex="-1">3</span><span class="flatpickr-day nextMonthDay" aria-label="October 4, 2024" tabindex="-1">4</span><span class="flatpickr-day nextMonthDay" aria-label="October 5, 2024" tabindex="-1">5</span><span class="flatpickr-day nextMonthDay" aria-label="October 6, 2024" tabindex="-1">6</span><span class="flatpickr-day nextMonthDay" aria-label="October 7, 2024" tabindex="-1">7</span><span class="flatpickr-day nextMonthDay" aria-label="October 8, 2024" tabindex="-1">8</span><span class="flatpickr-day nextMonthDay" aria-label="October 9, 2024" tabindex="-1">9</span><span class="flatpickr-day nextMonthDay" aria-label="October 10, 2024" tabindex="-1">10</span><span class="flatpickr-day nextMonthDay" aria-label="October 11, 2024" tabindex="-1">11</span><span class="flatpickr-day nextMonthDay" aria-label="October 12, 2024" tabindex="-1">12</span></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.model)
-        </dt>
+                                <div class="tab-pane fade" id="pills-projects" role="tabpanel" aria-labelledby="pills-projects-tab">
+                                    <h5 class="card-title mb-4 pb-2"> User Logs </h5>
+                                    <div class="row mt-3">
+                                        <div class="col-lg-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="media">
+                                                        <div class="avatar bg-soft-success text-success">
+                                                            AG
+                                                        </div>
+                                                        <div class="media-body overflow-hidden">
+                                                            <h5 class="card-title mb-2 pr-4 text-truncate"><a href="#" class="text-dark" title="Landing page Design">Landing page Design</a></h5>
+                                                            <p class="text-muted mb-3">
+                                                                Lorem Ipsum is simply dummy text of the printing and
+                                                                typesetting.
+                                                            </p>
+                                                            <div class="circle-condense-profiles">
+                                                                <a href="javascript: void(0);" class="condense-profile" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-2.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="condense-profile" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-3.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="condense-profile" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-4.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="condense-profile" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <div class="avatar bg-white text-secondary op-6 fw-bold avatar-sm me-0">
+                                                                        +3
+                                                                    </div>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-top">
+                                                    <div class="row align-items-center justify-content-between">
+                                                        <div class="col-auto">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Task">
+                                                                        <i class="bx bx-list-ul fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">76</span>
+                                                                    </h5>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
+                                                                        <i class="bx bx-comment-detail fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">240</span>
+                                                                    </h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col pl-2">
+                                                            <span class="badge bg-success float-end">Completed</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown edit-field-half-left">
+                                                    <div class="btn-icon btn-icon-sm btn-icon-soft-primary dropdown-toggle me-0 edit-field-icon" data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-vertical fs-sm"></i>
+                                                    </div>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-pencil align-middle me-1 text-primary"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-delete align-middle me-1 text-danger"></i>
+                                                            <span>Delete</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end card -->
+                                        </div><!-- end col-4 -->
+                                        <div class="col-lg-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="media">
+                                                        <img src="assets/images/projects-logo/project1.jpg" class="avatar rounded-circle" width="30" alt="Lettstart Admin">
+                                                        <div class="media-body overflow-hidden">
+                                                            <h5 class="card-title mb-2 pr-4 text-truncate">
+                                                                <a href="#" class="text-dark" title="Option 2 App Design, Development and Maintenance">
+                                                                    Option 2 App Design,
+                                                                    Development and Maintenance
+                                                                </a>
+                                                            </h5>
+                                                            <p class="text-muted mb-3">
+                                                                Lorem Ipsum is simply dummy text of the printing and
+                                                                typesetting.
+                                                            </p>
+                                                            <div>
+                                                                <a href="javascript: void(0);" class="me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-2.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-3.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-top">
+                                                    <div class="row align-items-center justify-content-between">
+                                                        <div class="col-auto">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Task">
+                                                                        <i class="bx bx-list-ul fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">80</span>
+                                                                    </h5>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
+                                                                        <i class="bx bx-comment-detail fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">200</span>
+                                                                    </h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col pl-2">
+                                                            <span class="badge bg-warning text-white float-end">In Progress</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown edit-field-half-left">
+                                                    <div class="btn-icon btn-icon-sm btn-icon-soft-primary dropdown-toggle me-0 edit-field-icon" data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-vertical fs-sm"></i>
+                                                    </div>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-pencil align-middle me-1 text-primary"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-delete align-middle me-1 text-danger"></i>
+                                                            <span>Delete</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end card -->
+                                        </div><!-- end col-4 -->
+                                        <div class="col-lg-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="media">
+                                                        <img src="assets/images/projects-logo/project2.jpg" class="avatar rounded-circle" width="30" alt="Lettstart Admin">
+                                                        <div class="media-body overflow-hidden">
+                                                            <h5 class="card-title mb-2 pr-4 text-truncate">
+                                                                <a href="#" class="text-dark" title="Landing page Design">
+                                                                    Option 3 Admin page
+                                                                    design
+                                                                </a>
+                                                            </h5>
+                                                            <p class="text-muted mb-3">
+                                                                Lorem Ipsum is simply dummy text of the printing and
+                                                                typesetting.
+                                                            </p>
+                                                            <div>
+                                                                <a href="javascript: void(0);" class="me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-2.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="avatar avatar-sm bg-soft-info text-info me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    JD
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-top">
+                                                    <div class="row align-items-center justify-content-between">
+                                                        <div class="col-auto">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Task">
+                                                                        <i class="bx bx-list-ul fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">85</span>
+                                                                    </h5>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
+                                                                        <i class="bx bx-comment-detail fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">150</span>
+                                                                    </h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col">
+                                                            <span class="badge bg-danger float-end">Delay</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown edit-field-half-left">
+                                                    <div class="btn-icon btn-icon-sm btn-icon-soft-primary dropdown-toggle me-0 edit-field-icon" data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-vertical fs-sm"></i>
+                                                    </div>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-pencil align-middle me-1 text-primary"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-delete align-middle me-1 text-danger"></i>
+                                                            <span>Delete</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end card -->
+                                        </div><!-- end col-4 -->
+                                        <div class="col-lg-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="media">
+                                                        <img src="assets/images/projects-logo/project3.jpg" class="avatar rounded-circle" width="30" alt="Lettstart Admin">
+                                                        <div class="media-body overflow-hidden">
+                                                            <h5 class="card-title mb-2 pr-4 text-truncate"><a href="#" class="text-dark" title="Landing page Design">Option 4 Blog Template Design</a></h5>
+                                                            <p class="text-muted mb-3">
+                                                                Lorem Ipsum is simply dummy text of the printing and
+                                                                typesetting.
+                                                            </p>
+                                                            <div class="circle-condense-profiles">
+                                                                <a href="javascript: void(0);" class="condense-profile" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <span class="avatar avatar-sm bg-soft-info text-info me-0">DS</span>
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="condense-profile" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <span class="avatar avatar-sm bg-soft-info text-info me-0">JM</span>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-top">
+                                                    <div class="row align-items-center justify-content-between">
+                                                        <div class="col-auto">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Task">
+                                                                        <i class="bx bx-list-ul fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">60</span>
+                                                                    </h5>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
+                                                                        <i class="bx bx-comment-detail fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">120</span>
+                                                                    </h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col pl-2">
+                                                            <span class="badge bg-success float-end">Completed</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown edit-field-half-left">
+                                                    <div class="btn-icon btn-icon-sm btn-icon-soft-primary dropdown-toggle me-0 edit-field-icon" data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-vertical fs-sm"></i>
+                                                    </div>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-pencil align-middle me-1 text-primary"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-delete align-middle me-1 text-danger"></i>
+                                                            <span>Delete</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end card -->
+                                        </div><!-- end col-4 -->
+                                        <div class="col-lg-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="media">
+                                                        <img src="assets/images/projects-logo/project4.jpg" class="avatar rounded-circle" width="30" alt="Lettstart Admin">
+                                                        <div class="media-body overflow-hidden">
+                                                            <h5 class="card-title mb-2 pr-4 text-truncate">
+                                                                <a href="#" class="text-dark" title="App Design and Development">
+                                                                    Homepage
+                                                                    Redesign
+                                                                </a>
+                                                            </h5>
+                                                            <p class="text-muted mb-3">
+                                                                Lorem Ipsum is simply dummy text of the printing and
+                                                                typesetting.
+                                                            </p>
+                                                            <div>
+                                                                <a href="javascript: void(0);" class="me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-2.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-3.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-top">
+                                                    <div class="row align-items-center justify-content-between">
+                                                        <div class="col-auto">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Task">
+                                                                        <i class="bx bx-list-ul fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">100</span>
+                                                                    </h5>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
+                                                                        <i class="bx bx-comment-detail fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">400</span>
+                                                                    </h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col pl-2">
+                                                            <span class="badge bg-success text-white float-end">Completed</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown edit-field-half-left">
+                                                    <div class="btn-icon btn-icon-sm btn-icon-soft-primary dropdown-toggle me-0 edit-field-icon" data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-vertical fs-sm"></i>
+                                                    </div>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-pencil align-middle me-1 text-primary"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-delete align-middle me-1 text-danger"></i>
+                                                            <span>Delete</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end card -->
+                                        </div><!-- end col-4 -->
+                                        <div class="col-lg-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="media">
+                                                        <img src="assets/images/projects-logo/project2.jpg" class="avatar rounded-circle" width="30" alt="Lettstart Admin">
+                                                        <div class="media-body overflow-hidden">
+                                                            <h5 class="card-title mb-2 pr-4 text-truncate"><a href="#" class="text-dark" title="Landing page Design">Mobile Development</a></h5>
+                                                            <p class="text-muted mb-3">
+                                                                Lorem Ipsum is simply dummy text of the printing and
+                                                                typesetting.
+                                                            </p>
+                                                            <div>
+                                                                <a href="javascript: void(0);" class="me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    <img src="assets/images/users/avatar-2.jpg" alt="Lettstart Admin" class="avatar-sm rounded-circle">
+                                                                </a>
+                                                                <a href="javascript: void(0);" class="avatar avatar-sm bg-soft-info text-info me-1" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="ProfileUser">
+                                                                    JD
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body border-top">
+                                                    <div class="row align-items-center justify-content-between">
+                                                        <div class="col-auto">
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Task">
+                                                                        <i class="bx bx-list-ul fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">10</span>
+                                                                    </h5>
+                                                                </li>
+                                                                <li class="list-inline-item">
+                                                                    <h5 class="fs-14 mb-0" data-bs-toggle="tooltip" data-placement="top" title="" data-original-title="Comments">
+                                                                        <i class="bx bx-comment-detail fs-sm text-secondary op-6 align-middle"></i>
+                                                                        <span class="align-middle">40</span>
+                                                                    </h5>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col">
+                                                            <span class="badge bg-warning text-white float-end">In Progress</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown edit-field-half-left">
+                                                    <div class="btn-icon btn-icon-sm btn-icon-soft-primary dropdown-toggle me-0 edit-field-icon" data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-vertical fs-sm"></i>
+                                                    </div>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-pencil align-middle me-1 text-primary"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="#" class="dropdown-item">
+                                                            <i class="mdi mdi-delete align-middle me-1 text-danger"></i>
+                                                            <span>Delete</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- end card -->
+                                        </div><!-- end col-4 -->
+                                    </div>
+                                    <!-- end row -->
+                                </div>
 
-        <dd>
-            @Html.DisplayFor(model => model.model)
-        </dd>
+                                <div class="tab-pane fade" id="pills-tasks" role="tabpanel" aria-labelledby="pills-tasks-tab">
+                                    <div class="card mb-0 shadow-none" data-plugin="dragula" data-containers="[&quot;task-list-one&quot;]" data-handleclass="dragula-handle">
+                                        <div class="card-header p-0">
+                                            <h5 class="card-title"> Assigned Task </h5>
+                                        </div>
+                                        <div class="card-body p-0" id="task-list-one">
+                                            <!-- task -->
+                                            <div class="row g-0 border-bottom align-items-center">
+                                                <div class="col-md-6 mt-2">
+                                                    <div class="d-flex">
+                                                        <div class="dragula-handle">
+                                                        </div>
+                                                        <div class="form-check custom-checkbox align-self-center col">
+                                                            <input type="checkbox" class="form-check-input" id="task1">
+                                                            <label class="form-check-label" for="task1">
+                                                                Draft the new contract document for
+                                                                sales team
+                                                            </label>
+                                                        </div> <!-- end checkbox -->
+                                                    </div>
+                                                </div> <!-- end col -->
+                                                <div class="col-md-6 my-2">
+                                                    <div class="d-flex align-items-center justify-content-md-end fs-14">
+                                                        <div class="me-3">
+                                                            <img src="assets/images/users/avatar-9.jpg" alt="image" class="avatar-xs rounded-circle" data-bs-toggle="tooltip" data-placement="bottom" aria-label="Assigned to Arya S" data-bs-original-title="Assigned to Arya S">
+                                                        </div>
+                                                        <ul class="list-inline mb-0">
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-calendar me-1"></i>
+                                                                10am
+                                                            </li>
+                                                            <li class="list-inline-item pr-2">
+                                                                <i class="bx bx-comment-dots me-1"></i>
+                                                                21
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <span class="badge badge-soft-danger p-1">High</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div> <!-- end .d-flex-->
+                                                </div> <!-- end col -->
+                                            </div>
+                                            <!-- end task -->
+                                            <!-- task -->
+                                            <div class="row g-0 border-bottom align-items-center">
+                                                <div class="col-md-6 mt-2">
+                                                    <div class="d-flex">
+                                                        <div class="dragula-handle">
+                                                        </div>
+                                                        <div class="form-check custom-checkbox align-self-center col">
+                                                            <input type="checkbox" class="form-check-input" id="task2">
+                                                            <label class="form-check-label" for="task2">
+                                                                iOS App home page
+                                                            </label>
+                                                        </div> <!-- end checkbox -->
+                                                    </div>
+                                                </div> <!-- end col -->
+                                                <div class="col-md-6 my-2">
+                                                    <div class="d-flex align-items-center justify-content-md-end fs-14">
+                                                        <div class="me-3">
+                                                            <img src="assets/images/users/avatar-2.jpg" alt="image" class="avatar-xs rounded-circle" data-bs-toggle="tooltip" data-placement="bottom" aria-label="Assigned to James B" data-bs-original-title="Assigned to James B">
+                                                        </div>
+                                                        <ul class="list-inline mb-0">
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-calendar me-1"></i>
+                                                                4pm
+                                                            </li>
+                                                            <li class="list-inline-item pr-2">
+                                                                <i class="bx bx-comment-dots me-1"></i>
+                                                                48
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <span class="badge badge-soft-danger p-1">High</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div> <!-- end .d-flex-->
+                                                </div> <!-- end col -->
+                                            </div>
+                                            <!-- end task -->
+                                            <!-- task -->
+                                            <div class="row g-0 border-bottom align-items-center">
+                                                <div class="col-md-6 mt-2">
+                                                    <div class="d-flex">
+                                                        <div class="dragula-handle">
+                                                        </div>
+                                                        <div class="form-check custom-checkbox align-self-center col">
+                                                            <input type="checkbox" class="form-check-input" id="task3">
+                                                            <label class="form-check-label" for="task3">
+                                                                Write a release note
+                                                            </label>
+                                                        </div> <!-- end checkbox -->
+                                                    </div>
+                                                </div> <!-- end col -->
+                                                <div class="col-md-6 my-2">
+                                                    <div class="d-flex align-items-center justify-content-md-end fs-14">
+                                                        <div class="me-3">
+                                                            <img src="assets/images/users/avatar-4.jpg" alt="image" class="avatar-xs rounded-circle" data-bs-toggle="tooltip" data-placement="bottom" aria-label="Assigned to Kevin C" data-bs-original-title="Assigned to Kevin C">
+                                                        </div>
+                                                        <ul class="list-inline mb-0">
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-calendar me-1"></i>
+                                                                6pm
+                                                            </li>
+                                                            <li class="list-inline-item pr-2">
+                                                                <i class="bx bx-comment-dots me-1"></i>
+                                                                73
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <span class="badge badge-soft-info p-1">Medium</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div> <!-- end .d-flex-->
+                                                </div> <!-- end col -->
+                                            </div>
+                                            <!-- end task -->
+                                            <!-- task -->
+                                            <div class="row g-0 border-bottom align-items-center">
+                                                <div class="col-md-6 mt-2">
+                                                    <div class="d-flex">
+                                                        <div class="dragula-handle">
+                                                        </div>
+                                                        <div class="form-check custom-checkbox align-self-center col">
+                                                            <input type="checkbox" class="form-check-input" id="task4">
+                                                            <label class="form-check-label" for="task4">
+                                                                Invite user to a project
+                                                            </label>
+                                                        </div> <!-- end checkbox -->
+                                                    </div>
+                                                </div> <!-- end col -->
+                                                <div class="col-lg-6 my-2">
+                                                    <div class="d-flex align-items-center justify-content-md-end fs-14">
+                                                        <div class="me-3">
+                                                            <img src="assets/images/users/avatar-2.jpg" alt="image" class="avatar-xs rounded-circle" data-bs-toggle="tooltip" data-placement="bottom" aria-label="Assigned to James B" data-bs-original-title="Assigned to James B">
+                                                        </div>
+                                                        <ul class="list-inline mb-0">
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-calendar me-1"></i>
+                                                                Tomorrow,
+                                                                7am
+                                                            </li>
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-align-middle me-1"></i>
+                                                                1/12
+                                                            </li>
+                                                            <li class="list-inline-item pr-2">
+                                                                <i class="bx bx-comment-dots me-1"></i>
+                                                                36
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <span class="badge badge-soft-danger p-1">High</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div> <!-- end .d-flex-->
+                                                </div> <!-- end col -->
+                                            </div>
+                                            <!-- end task -->
+                                            <!-- task -->
+                                            <div class="row g-0 border-bottom align-items-center">
+                                                <div class="col-md-6 mt-2">
+                                                    <div class="d-flex">
+                                                        <div class="dragula-handle">
+                                                        </div>
+                                                        <div class="form-check custom-checkbox align-self-center col">
+                                                            <input type="checkbox" class="form-check-input" id="task5">
+                                                            <label class="form-check-label" for="task5">
+                                                                Enable analytics tracking
+                                                            </label>
+                                                        </div> <!-- end checkbox -->
+                                                    </div>
+                                                </div> <!-- end col -->
+                                                <div class="col-lg-6 my-2">
+                                                    <div class="d-flex align-items-center justify-content-md-end fs-14">
+                                                        <div class="me-3">
+                                                            <img src="assets/images/users/avatar-2.jpg" alt="image" class="avatar-xs rounded-circle" data-bs-toggle="tooltip" data-placement="bottom" aria-label="Assigned to James B" data-bs-original-title="Assigned to James B">
+                                                        </div>
+                                                        <ul class="list-inline mb-0">
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-calendar me-1"></i>
+                                                                27 Aug,
+                                                                10am
+                                                            </li>
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-align-middle me-1"></i>
+                                                                13/72
+                                                            </li>
+                                                            <li class="list-inline-item pr-2">
+                                                                <i class="bx bx-comment-dots me-1"></i>
+                                                                211
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <span class="badge badge-soft-success p-1">Low</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div> <!-- end .d-flex-->
+                                                </div> <!-- end col -->
+                                            </div>
+                                            <!-- end task -->
+                                            <!-- task -->
+                                            <div class="row g-0 border-bottom align-items-center">
+                                                <div class="col-md-6 mt-2">
+                                                    <div class="d-flex">
+                                                        <div class="dragula-handle">
+                                                        </div>
+                                                        <div class="form-check custom-checkbox align-self-center col">
+                                                            <input type="checkbox" class="form-check-input" id="task6">
+                                                            <label class="form-check-label" for="task6">
+                                                                Code HTML email template
+                                                            </label>
+                                                        </div> <!-- end checkbox -->
+                                                    </div>
+                                                </div> <!-- end col -->
+                                                <div class="col-lg-6 my-2">
+                                                    <div class="d-flex align-items-center justify-content-md-end fs-14">
+                                                        <div class="me-3">
+                                                            <img src="assets/images/users/avatar-7.jpg" alt="image" class="avatar-xs rounded-circle" data-bs-toggle="tooltip" data-placement="bottom" aria-label="Assigned to Edward S" data-bs-original-title="Assigned to Edward S">
+                                                        </div>
+                                                        <ul class="list-inline mb-0">
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-calendar me-1"></i>
+                                                                No Due
+                                                                Date
+                                                            </li>
+                                                            <li class="list-inline-item pr-1">
+                                                                <i class="bx bx-align-middle me-1"></i>
+                                                                0/7
+                                                            </li>
+                                                            <li class="list-inline-item pr-2">
+                                                                <i class="bx bx-comment-dots me-1"></i>
+                                                                0
+                                                            </li>
+                                                            <li class="list-inline-item">
+                                                                <span class="badge badge-soft-info p-1">Medium</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div> <!-- end .d-flex-->
+                                                </div> <!-- end col -->
+                                            </div>
+                                            <!-- end task -->
+                                            <div class="text-center mt-4">
+                                                <a href="javascript:void(0);" class="btn btn-sm btn-white">
+                                                    <i class="bx bx-loader me-1 align-middle bx-spin"></i>
+                                                    <span class="align-middle">Load more</span>
+                                                </a>
+                                            </div>
+                                        </div> <!-- end card-body-->
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade active show" id="pills-settings" role="tabpanel" aria-labelledby="pills-tasks-tab">
+                                    <div class="card mb-0 shadow-none">
+                                        <div class="card-header p-0">
+                                            <h5 class="card-title">Checkpoints</h5>
+                                        </div>
+                                        <div class="card-body px-0">
+                                            <form action="#" novalidate="novalidate" id="addprofileform" data-type="edit">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <table class="table table-centered dt-responsive w-100 dataTable no-footer dtr-inline fs-12" id="checkpointTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Code</th>
+                                                                    <th>Inspection Part</th>
+                                                                    <th>Variable Type</th>
+                                                                    <th>Specification</th>
+                                                                    <th>Upper Limit</th>
+                                                                    <th>Lower Limit</th>
+                                                                    <th>Sampling Method</th>
+                                                                    <th>Tool</th>
+                                                                    <th>Status</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.name)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.name)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.priority)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.priority)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Version)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Version)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.FileAttachment.FilePath)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.FileAttachment.FilePath)
-        </dd>
-
-    </dl>
+                        </div>
+                    </div>
+                    <!-- end card -->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.PartId }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+<!--Modal-->
+<div id="editPartModal" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="#editPartModal" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Part</h4>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            @Html.AntiForgeryToken()
+            <div class="modal-body p-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="partCode" class="control-label">Code</label>
+                            <input type="text" class="form-control" id="partCode" value="@Model.Code">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="partName" class="control-label">Name</label>
+                            <input type="text" class="form-control" id="partName" value="@Model.Name">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="partModel" class="control-label">Model</label>
+                            <input type="text" class="form-control" id="partModel" value="@Model.Model">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="partDoc" class="control-label">Document Number</label>
+                            <input type="text" class="form-control" id="partDoc" value="@Model.DocNumber">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="partType" class="control-label">Type</label>
+                            <input type="text" class="form-control" id="partType" value="Test">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="partPriority" class="control-label">Priorty</label>
+                            <input type="text" class="form-control" id="partPriority" value="High">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary waves-effect"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" data-id="@Model.PartID" class="btn btn-info" id="partEditBtn" data-effect="wave">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="partStatusModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body p-4 text-center">
+                <i class="bx bx-notification-off fs-xl text-white modal-icon"></i>
+                <h4 class="mt-2 text-white modal-title"></h4>
+                <p class="mt-3 text-white modal-body-text"></p>
+                <form>
+                    @Html.AntiForgeryToken();
+                    <button type="button" class="btn btn-light my-2 confirm-status-btn" data-bs-dismiss="modal">Continue</button>
+                    <button type="button" class="btn btn-secondary my-2" data-bs-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- /.modal -->
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+
+        $(document).on("click", "#statusBtn", function () {
+
+            let userID = $(this).data('partid');
+            let userStatus = $(this).data('status'); // 0 for inactive, 1 for active
+            let modal = $('#partStatusModal');
+
+            if (userStatus == 'True') {
+                modal.find('.modal-content').addClass('bg-danger').removeClass('bg-success');
+                modal.find('.modal-title').text('Oh snap!');
+                modal.find('.modal-body-text').text('Press continue to set User as Inactive.');
+                modal.find('.confirm-status-btn').attr("data-status", "False"); // Set status to active
+                modal.find('.modal-icon').removeClass('bx-notification-on').addClass('bx-notification-off');
+            } else {
+                modal.find('.modal-content').addClass('bg-success').removeClass('bg-danger');
+                modal.find('.modal-title').text('Status');
+                modal.find('.modal-body-text').text('Press continue to set User as Active.');
+                modal.find('.confirm-status-btn').attr("data-status", "True"); // Set status to inactive
+                modal.find('.modal-icon').removeClass('bx-notification-off').addClass('bx-notification-on');
+            }
+
+            modal.find('.confirm-status-btn').attr("data-id", userID); // Set the user ID
+            modal.modal('show'); // Show modal
+        });
+
+       $(document).on('click', '.confirm-status-btn', function () {
+
+           let partStatus = $(this).data('status');
+       
+        let newStatus = partStatus == "True" ? "False" : "True"; // Toggle the status
+           let statusClass = partStatus == "True" ? "btn btn-danger btn-sm" : "btn btn-success btn-sm";
+           let statusText = partStatus == "True" ? "Set as Inactive" : "Set as Active";
+        let partID = $(this).data('id');
+        let action = "ChangeStatus";
+        let token = $('input[name="__RequestVerificationToken"]').val();
+
+        let formData = new FormData();
+           formData.append("partStatus", partStatus); // Use newStatus to reflect the change
+        formData.append("partID", partID);
+        formData.append("action", action);
+        formData.append("__RequestVerificationToken", token);
+
+        $.ajax({
+            url: `@Url.Action("Edit", "Parts")/${partID}`,
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    alertify.success(`${response.message}.`);
+                    $('#statusBtn').attr('data-status', partStatus); // Set the new status
+                    $('#statusBtn').text(statusText); // Update button text
+                    $('#statusBtn').removeClass().addClass(statusClass); // Update button class
+                } else {
+                    alertify.error(`${response.message}.`);
+                }
+            },
+            error: function (err) {
+                alertify.error(`Error ${err.message} occurred.`);
+            }
+        });
+    });
+
+
+        $(document).on('click', '#partEditBtn', function () {
+            let partId = $(this).data('id');
+            let formData = new FormData();
+            let token = $('input[name="__RequestVerificationToken"]').val();
+
+        // Append form data
+            formData.append("partCode", $('#partCode').val());
+            formData.append("partName", $('#partName').val());
+            formData.append("partModel", $('#partModel').val());
+            formData.append("partDoc", $('#partDoc').val());
+            formData.append("partType", $('#partType').val());
+            formData.append("partPriority", $('#partPriority').val());
+            formData.append("partID", partId);
+            formData.append("__RequestVerificationToken", token);
+
+            $.ajax({
+                url: `@Url.Action("Edit", "Parts")/${partId}`,
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        alertify.success(`Part edited successfully.`);
+                        $('#editPartModal').modal("hide");
+                    } else {
+                        alertify.error(`Error ${response.message} occurred.`);
+                    }
+                },
+                error: function (error) {
+                    alertify.error(`Error ${error.message} occurred.`);
+                }
+            });
+            console.log(token);
+        });
+
+
+        let id = @Html.Raw(Json.Encode(Model.PartID));
+        $('#checkpointTable').DataTable({
+            ajax: {
+                url: '@Url.Action("GetCheckpoints", "Checkpoints")',
+                data: { id: id },
+                dataSrc: 'data'
+            },
+            responsive: true,
+            lengthChange: false,
+            pageLength: 10,
+            columns: [
+                { data: 'Code' },
+                { data: 'InspectionPart', orderable: !1, },
+                { data: 'VariableType' },
+                { data: 'Specification', orderable: !1, },
+                { data: 'LimitUpper' },
+                { data: 'LimitLower' },
+                { data: 'SamplingMethod', orderable: !1, },
+                {
+                    data: 'Tools',
+                    orderable: !1,
+                },
+                { data: 'Status' },
+                {
+                    data: "CheckpointId",
+                    orderable: !1,
+                    render: function (data, type, row) {
+                        return `
+                        <button data-id="${data}"class="btn btn-sm btn-secondary waves-effect waves-light mb-1"><i class="mdi mdi-pencil"></i></button>
+                        <button data-id="${data}"class="btn btn-sm btn-danger waves-effect waves-light mb-1"><i class="mdi mdi-trash-can"></i></button>`
+
+                    }
+                },
+            ],
+            rowId: 'CheckpointId',
+            scrollX: true
+        });
+
+
+
+    });
+
+    </script>
+
+}
+

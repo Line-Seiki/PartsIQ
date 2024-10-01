@@ -14,6 +14,12 @@ namespace PartsIq.Models
     
     public partial class Checkpoint
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Checkpoint()
+        {
+            this.InspectionItems = new HashSet<InspectionItem>();
+        }
+    
         public int CheckpointId { get; set; }
         public int Part_ID { get; set; }
         public string Code { get; set; }
@@ -28,5 +34,7 @@ namespace PartsIq.Models
         public string Tools { get; set; }
     
         public virtual Part Part { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<InspectionItem> InspectionItems { get; set; }
     }
 }
