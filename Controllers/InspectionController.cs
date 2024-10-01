@@ -67,7 +67,7 @@ namespace PartsIq.Controllers
             var inspectionItem = db.InspectionItems
                 .Where(ins => ins.InspectionID == id)
                 .OrderByDescending(ins => ins.SampleNumber) // Order by SampleNumber descending to get the latest one
-                .FirstOrDefault()?.SampleNumber ?? 1; // Default to 1 if no inspection items found
+                .FirstOrDefault()?.SampleNumber ?? 0; // Default to 1 if no inspection items found
 
             inspectionItem = inspectionItem < inspection.SampleSize ? inspectionItem+=1 : inspection.SampleSize;
 
@@ -87,11 +87,7 @@ namespace PartsIq.Controllers
                 CheckpointInfo = new CheckpointInfoViewModel
                 {
                     CheckpointNumber = checkpoints.Select(c => c.Code).FirstOrDefault(),
-                    Checkpoints = checkpoints.Select(c => new SelectListItem
-                    {
-                        Value = c.CheckpointId.ToString(),
-                        Text = c.Code,
-                    }).ToList(),
+                    Checkpoints = checkpoints,
                     InspectionPart = checkpoints.Select(c => c.InspectionPart).FirstOrDefault(),
                     Tools = checkpoints.Select(c => c.Tools).FirstOrDefault(),
                     SamplingMethod = checkpoints.Select(c => c.SamplingMethod).FirstOrDefault(),
@@ -99,6 +95,7 @@ namespace PartsIq.Controllers
                     Specification = "12", // Placeholder for specification, modify as needed
                     UpperLimit = checkpoints.Select(c => c.LimitUpper).FirstOrDefault() ?? 0,
                     LowerLimit = checkpoints.Select(c => c.LimitLower).FirstOrDefault() ?? 0,
+                    IsMeasurement = checkpoints.Select(c => c.IsMeasurement).FirstOrDefault() ?? 0
                 }
             };
 
@@ -157,11 +154,7 @@ namespace PartsIq.Controllers
 
             var checkpointInfoViewModel = new CheckpointInfoViewModel
             {
-                Checkpoints = part.Checkpoints.Select(c => new SelectListItem
-                {
-                    Value = c.CheckpointId.ToString(),
-                    Text = c.Specification
-                }),
+                Checkpoints = part.Checkpoints,
                 CheckpointNumber = "", // Default value
                 InspectionPart = part.Name,
                 Specification = "SPECIFICATION", // Placeholder for actual value
@@ -182,6 +175,45 @@ namespace PartsIq.Controllers
             return View(inspectionViewModel);
         }
 
+        //POST End inspection
+        [HttpPost]
+        public ActionResult EndInspection(int inspectionID)
+        {
+            if (inspectionID < 0)
+            {
+                return Json(new { message = "ID Cannot be null", success = false }, JsonRequestBehavior.AllowGet);
+            }
+
+            var inspection = db.Inspections.Find(inspectionID);
+            if (inspection == null)
+            {
+                return Json(new { message = "Inspection cannot be found", success = false }, JsonRequestBehavior.AllowGet);
+            }
+
+            // Set the Status to 5 for the first DeliveryDetail with a Status value
+            var deliveryDetail = inspection.DeliveryDetails.FirstOrDefault();
+            if (deliveryDetail != null)
+            {
+                deliveryDetail.StatusID = 5;
+            }
+
+            // End the inspection by setting the end date
+            inspection.DateEnd = DateTime.Now;
+
+            // Calculate the inspection duration in seconds
+            var inspectionDuration = inspection.DateEnd - inspection.DateStart;
+            if (inspectionDuration.HasValue)
+            {
+                inspection.InspectionDuration = Convert.ToInt32(inspectionDuration.Value.TotalSeconds);
+            }
+
+            db.SaveChanges();
+
+            return Json(new { message = "Inspection ended.", success = true }, JsonRequestBehavior.AllowGet);
+        }
+
+
+
 
 
         #region DEV Controller Actions
@@ -194,6 +226,12 @@ namespace PartsIq.Controllers
         #endregion
 
         #region HELPERS
+
+        public static long ToUnixTimeStamp(DateTime dateTime)
+        {
+            DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime);
+            return dateTimeOffset.ToUnixTimeSeconds();
+        }
         public List<SelectListItem> PartListItems()
         {
             return dbContext.GetParts().Select(p => new SelectListItem

@@ -192,7 +192,7 @@ namespace PartsIq.Models
     #region Checkpoint
     public class CheckpointInfoViewModel
     {
-        public IEnumerable<SelectListItem> Checkpoints { get; set; }
+        public IEnumerable<Checkpoint> Checkpoints { get; set; }
         public string CheckpointNumber { get; set; }
         public string InspectionPart { get; set; }
         public string Specification { get; set; }
@@ -203,6 +203,8 @@ namespace PartsIq.Models
         public double LowerLimit { get; set; }
 
         public int SampleSize { get; set; }
+
+        public byte IsMeasurement { get; set; }  
     }
 
     #endregion

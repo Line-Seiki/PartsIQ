@@ -102,17 +102,88 @@
         $(document).ready(function () {
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
-            console.log(cavities);
+
 
             $(document).on('change', '#CheckpointInfo', function () {
+                // Get selected option values
                 let checkpointID = $(this).val();
-                let inspectionID = $('#submitInspectionItem').attr('data-inspectionid');
+                let inspectionID = $('.submit-inspection-item').attr('data-inspectionid');
 
+                // Use find(':selected') to access the data-* attributes
+                let selectedOption = $(this).find(':selected');
+                let isMeasurement = selectedOption.data('measurement');
+                let cavityID = selectedOption.data('cavityid');
+                let lowerLimit = selectedOption.data('lowerlimit');
+                let upperLimit = selectedOption.data('upperlimit');
+
+                console.log(isMeasurement)
+
+                // Set the limits to corresponding inputs or elements
+                if ($('#UpperLimit').length) {
+                    $('#UpperLimit').val(upperLimit).text(upperLimit);
+                }
+                if ($('#LowerLimit').length) {
+                    $('#LowerLimit').val(lowerLimit).text(lowerLimit);
+                }
+                if ($('.submit-inspection-item').length) {
+                    $('.submit-inspection-item').attr('data-checkpointid', checkpointID);
+                    
+                }
                 // Update the data and reload the table
                 inspectionTable.ajax.reload();
-                $('#submitInspectionItem').attr('data-checkpointid', checkpointID);
-                $('#SampleNumber').val(1);
+
+                // Call the function to handle button toggles with necessary data
+                inspectionSendToggle(isMeasurement, checkpointID, inspectionID);
             });
+
+
+            function enableDisableToggle(disabled) {
+                $('.submit-inspection-item').prop('disabled', disabled);
+            }
+
+            function inspectionSendToggle(isMeasurement, checkpointID, inspectionID) {
+                let cavityID = $('.submit-inspection-item').attr('data-cavityid');
+                let buttonDiv = $('#inspection-buttons');
+                console.log(buttonDiv);
+                // Buttons for when measurement is required
+                let measurementBtn = `
+                    <button class="submit-inspection-item btn btn-success"
+                            data-checkpointID="${checkpointID}"
+                            data-inspectionID="${inspectionID}"
+                            data-cavityID="${cavityID}"
+                            data-measurement="${isMeasurement}"
+                            type="button">
+                        <i class="mdi mdi-check-bold"></i> Submit
+                    </button>`;
+
+                // Buttons for attribute inspection (Good/No Good)
+                let attrBtn = `
+                    <button class="submit-inspection-item btn btn-success"
+                            data-checkpointID="${checkpointID}"
+                            data-inspectionID="${inspectionID}"
+                            data-cavityID="${cavityID}"
+                            data-measurement="${isMeasurement}"
+                            data-judgement="1"
+                            type="button">
+                        <i class="mdi mdi-check-bold"></i> Good
+                    </button>
+                    <button class="submit-inspection-item btn btn-danger ms-2"
+                            data-checkpointID="${checkpointID}"
+                            data-inspectionID="${inspectionID}"
+                            data-measurement="${isMeasurement}"
+                            data-cavityID="${cavityID}"
+                            data-judgement="0"
+                            type="button">
+                        <i class="mdi mdi-close"></i> No Good
+                    </button>`;
+
+                // Toggle button content based on isMeasurement value
+                if (isMeasurement == 1) {
+                    buttonDiv.html(measurementBtn);
+                } else if (isMeasurement == 0) {
+                    buttonDiv.html(attrBtn);
+                }
+            }
 
 
             function checkSampleNumber(sampleNumber, cavityID) {
@@ -138,7 +209,7 @@
                 if (cavity.MaxSampleNumber >= parsedSampleNumber) {
                     // Set the CavityName in the input field
                     $('#CavityNumber').val(cavity.Name);
-                    $('#submitInspectionItem').attr('data-cavityid', cavity.CavityID);
+                    $('.submit-inspection-item').attr('data-cavityid', cavity.CavityID);
 
                     console.log(`Cavity assigned: ${cavity.Name} with MaxSampleNumber: ${cavity.MaxSampleNumber}`);
                     return true;
@@ -151,7 +222,7 @@
                     if (nextCavity) {
                         // Set the CavityName and update the submit button
                         $('#CavityNumber').val(nextCavity.Name);
-                        $('#submitInspectionItem').attr('data-cavityid', nextCavity.CavityID);
+                        $('.submit-inspection-item').attr('data-cavityid', nextCavity.CavityID);
 
                         console.log(`New cavity assigned: ${nextCavity.Name} with MaxSampleNumber: ${nextCavity.MaxSampleNumber}`);
                         return true;
@@ -163,16 +234,16 @@
             }
 
 
-            $(document).on('click', '#submitInspectionItem', function () {
+            $(document).on('click', '.submit-inspection-item', function () {
 
                 let token = $('input[name="__RequestVerificationToken"]').val();
                 let checkpointID = $(this).data('checkpointid');
                 let inspectionID = $(this).data('inspectionid');
-
+                let isMeasurement = $(this).data('measurement');
                 let Judgement = 0;
 
                 // Explicitly fetch the updated data-cavityid directly from the DOM
-                let cavityID = $('#submitInspectionItem').attr('data-cavityid'); // This ensures you're getting the most recent value
+                let cavityID = $(this).attr('data-cavityid'); // This ensures you're getting the most recent value
 
                 let measurement = $(document).find('#Measurement').val();
                 let cavityNumber = $(document).find('#CavityNumber').val();
@@ -181,10 +252,14 @@
                 // Check if this logs the correct cavityID
                 let upperLimit = $('#UpperLimit').val();
                 let lowerLimit = $('#LowerLimit').val();
+                if (isMeasurement == 1) {
+                    if (measurement <= upperLimit && measurement >= lowerLimit) {
+                        Judgement = 1;
+                    }
+                } else {
+                    Judgement = $(this).data("judgement");
+                } 
 
-                if (measurement <= upperLimit && measurement >= lowerLimit) {
-                    Judgement = 1;
-                }
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
 
@@ -219,7 +294,6 @@
                             inspectionTable.row.add(data).draw();
                             if (response.SampleNumber == "0") {
                                 alertify.success("End inspection");
-                                $('#Measurement').attr("readonly", true);
                             } else {
                                 $('#SampleNumber').val(response.SampleNumber);
                                 checkSampleNumber(response.SampleNumber, cavityID);  // Pass the updated cavityID
@@ -234,16 +308,17 @@
             ajax: {
                 url: '@Url.Action("GetInspectionItems", "InspectionItems")',
                 data: function (d) {
-                    let button = $('#submitInspectionItem');
+                    let button = $('.submit-inspection-item');
                     d.CheckpointID = $('#CheckpointInfo').val();
                     d.InspectionID = $(button).data('inspectionid');
-                    d.CavityID = $(button).data('cavityid');
+  
                 },
                 dataSrc: 'data'
             },
             responsive: false,
             searching: false,
             scrollX: true,
+            paging: false,
             columns: [
                 { data: "SampleNumber" },
                 { data: "CavityName" },
@@ -257,8 +332,84 @@
                     }
                 },
             ],
-            order: [[0, 'asc']]
+            order: [[0, 'asc']],
+            drawCallback: function (settings) {
+                var api = this.api();
+
+                // Get the SampleItems from the current page rows
+                var data = api.rows({ page: 'current' }).data().toArray();
+
+                console.log(data);
+
+                if (data.length > 0 && data) {
+                    var sampleItemsArray = data.map(function (item) {
+                        return item.SampleNumber;
+                    });
+
+                    // Find the maximum value in the SampleItems array
+                    var maxSampleItem = Math.max(...sampleItemsArray);
+
+                    if ($('#SampleSize').val() > maxSampleItem) {
+                        $('#SampleNumber').val(maxSampleItem + 1);
+                        enableDisableToggle(false)
+                    } else {
+                        $('#SampleNumber').val(maxSampleItem);
+                        enableDisableToggle(true);
+
+                    }
+                    // Log the next sample number
+
+                } else {
+                    $('#SampleNumber').val(1);
+                }
+
+
+            }
         });
+
+            $(document).on('click', '#end-inspection-btn', function () {
+                let inspectionID = $(this).data('id');
+                Swal.fire({
+                    title: "End inspection?",
+                    text: "You won't be able to revert this!",
+                    type: "warning",
+                    showCancelButton: !0,
+                    confirmButtonText: "Yes!",
+                    cancelButtonText: "No, cancel!",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    cancelButtonClass: "btn btn-danger ms-2 mt-2",
+                    buttonsStyling: !1,
+                }).then(function (t) {
+                    t.value
+                        ?
+                         $.ajax({
+                            url: '@Url.Action("EndInspection", "Inspection")',
+                            data: { InspectionID: inspectionID },
+                            type: "POST",
+                             success: function (response) {
+                                 if (response.success) {
+                                     Swal.fire({
+                                         title: "Success!",
+                                         text: "Inspection ended.",
+                                         type: "success",
+                                     })
+                                 } else {
+                                     alertify.error(`Error ${response.message} occured.`);
+                                 }
+
+                            }, error: function (err) {
+                                alertify.error(`Error ${err} occured.`);
+                            }
+                        })
+                        : t.dismiss === Swal.DismissReason.cancel &&
+                        Swal.fire({
+                            title: "Cancelled",
+                            text: "Your imaginary file is safe :)",
+                            type: "error",
+                        });
+                });
+               
+            });
 
 
 
