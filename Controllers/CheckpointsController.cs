@@ -266,6 +266,14 @@ namespace PartsIq.Controllers
             }
         }
 
+
+        // POST: /Checkpoints/UploadCheckpoint
+        public JsonResult UploadCheckpoint(FormCheckpoint data)
+        {
+            return Json(data, JsonRequestBehavior.AllowGet);
+        }
+
+
         [HttpPost]
         public ActionResult UploadList (FormCollection formData)
         {

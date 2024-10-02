@@ -407,6 +407,7 @@
                     },
                 ],
                 createdRow: function (row, data, dataIndex) {
+                    console.log(data);
                     $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             })
@@ -624,7 +625,7 @@
                 if (!selectedData) {
                     const dataAvailable = availableTable.data().toArray();
                     const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                    if (selectedData.InspectionID != 0 || selectedData.InspectionID !== null) {
+                    if (selectedData.InspectionID !== null) {
                         console.log('get scheduled item and execute');
                         $.ajax({
                             url: '/Inspection/DevAssignInspector',
@@ -683,7 +684,7 @@
                         addLotBtn.dataset.index = selectedDataIndex;
                         drNumber.innerText = selectedData.DRNumber;
                         lotModal.show();
-                    } else if (selectedData.InspectionID != 0 || selectedData.InspectionID !== null) {
+                    } else if (selectedData.InspectionID !== null) {
                         const url = `/Inspection/Details/${selectedData.InspectionID}`;
                         window.open(url, '_blank');
                     } else {
