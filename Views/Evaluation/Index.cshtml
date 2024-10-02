@@ -35,9 +35,10 @@
                             <div class="card">
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table id="supplier-table" class="table table-centered mb-0">
+                                        <table id="evaluation-table" class="table table-centered mb-0 fs-13">
                                             <thead>
                                                 <tr>
+                                                    <th>Action</th>
                                                     <th>Decision</th>
                                                     <th>Evaluator</th>
                                                     <th>Inspector</th>
@@ -103,7 +104,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table id="supplier-table" class="table table-centered mb-0">
+                                        <table id="monitoring-table" class="table table-centered mb-0 fs-13">
                                             <thead>
                                                 <tr>
                                                     <th>Part Code</th>
@@ -123,3 +124,62 @@
         </div>
     </div>
 </div>
+
+@section scripts {
+    <script src="~/Utility/JS/helpers.js"></script>
+    <script>
+        let evaluationTable;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            evaluationTable = $('#evaluation-table').DataTable({
+                ajax: {
+                    url: '/Evaluation/GetEvaluationData',
+                    dataSrc: 'data'
+                },
+                responsive: false,
+                columns: [
+                    {
+                        data: null,
+                        render: function (data, type, row, meta) {
+                            return `
+                            <div class="d-flex gap-1 flex-lg-row flex-md-column">
+                                <button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="evaluateItem(${meta.row})" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-clipboard-check-outline"></i></button>
+                            </div>`;
+                        }
+                    },
+                    { data: 'DecisionName' },
+                    { data: 'EvaluatorName' },
+                    { data: 'UserName' },
+                    { data: 'ControlNumber' },
+                    { data: 'InspectorComments' },
+                    {
+                        data: 'DateFinished',
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    { data: 'PartCode' },
+                    { data: 'PartName' },
+                    { data: 'LotNumber' },
+                    { data: 'LotQuantity' },
+                    { data: 'DRNumber' },
+                    {
+                        data: 'Time',
+                        render: function (data, type, row)
+                        {
+                            return `${convertIntToTimeFormat(data)}`
+                        }
+                    },
+                    { data: 'Comments' },
+                    { data: 'NCRNumber' },
+                    { data: 'Purpose' },
+                ],
+            });
+        });
+
+        function evaluateItem(rowIndex) {
+            const rowData = evaluationTable.row(rowIndex).data();
+            console.log(rowData);
+        }
+    </script>
+}
