@@ -54,7 +54,7 @@
             <!-- Checkpoints Tab Container-->
             <div class="row mt-2">
                 <div class="card">
-                    <div class="card-body">
+                    <div id="checkpoint-container" class="card-body d-none">
                         <ul id="checkpoint-tab" class="nav nav-tabs"></ul>
                         <div class="tab-content" id="checkpoint-content"></div>
                     </div>
@@ -221,8 +221,9 @@
 
                 function processSpecifications(data) {
                     return data.map(item => {
-                        const { Specification, SpecificationRange } = item;
+                        let { Specification, SpecificationRange } = item;
                         let leftTolerance, rightTolerance;
+                        if (Specification.includes('Ø')) Specification = Specification.replace(/[Ø]/g, '');
 
                         if (!SpecificationRange) {
                             return item;
@@ -242,6 +243,7 @@
 
                             return {
                                 ...item,
+                                Specification,
                                 UpperLimit: upperLimit,
                                 LowerLimit: lowerLimit
                             };
@@ -251,6 +253,8 @@
 
                 $('#upload-form').submit(function (event) {
                     event.preventDefault();
+                    const checkpointContainer = document.getElementById('checkpoint-container');
+                    checkpointContainer.classList.remove('d-none');
                     var formData = new FormData();
                     var fileInput = $('#excelFile')[0].files[0];
                     formData.append('excelFile', fileInput);
