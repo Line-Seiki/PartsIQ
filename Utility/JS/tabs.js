@@ -55,7 +55,7 @@ class DynamicTabs {
 
         if (!model) {
             tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
-                                    checkpoint
+                                    checkpoint ${tabId.split(`-`)[0]}
                                 </a>`
         } else {
             tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
@@ -84,8 +84,12 @@ class DynamicTabs {
         } else if (contentType === 'duplicate') {
             this.initializeDuplicateTab(id);
         } else {
-
+            this.initializeCheckpointTab(id);
         }
+    }
+
+    initializeCheckpointTab(id) {
+        this.addFormSubmitListener(id, 'checkpoint');
     }
 
     initializeEditTab(id) {
@@ -122,15 +126,17 @@ class DynamicTabs {
     }
 
     addFormSubmitListener(id, type) {
-        const formId = type === 'edit' ? `partDeliveryForm-${id}` : `lot-forms-${id}`;
+        const formId = type === 'edit' ? `partDeliveryForm-${id}` : type === 'duplicate' ? `lot-forms-${id}` : `checkpointForm-${id}`;
         const form = document.getElementById(formId);
         if (form) {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (type === 'edit') {
                     this.editChanges(id, this.rowData.DeliveryDetailID, this.rowData.DeliveryDetailVersion, this.rowData.DeliveryVersion, `${id}-tab`, `${id}-content`, this.rowData.DeliveryID);
-                } else {
+                } else if (type === 'duplicate') {
                     this.saveLotChanges(id, `${id}-tab`, `${id}-content`);
+                } else {
+                    this.saveCheckpoint(id, `${id}-tab`, `${id}-content`);
                 }
             });
         }
@@ -153,8 +159,14 @@ class DynamicTabs {
             const firstTab = new bootstrap.Tab(firstTabLink);
             firstTab.show();
         } else {
-            this.hideRightColumn();
+            if (this.contentType === 'checkpoint') this.hideMainContainer();
+            else this.hideRightColumn();
         }
+    }
+
+    hideMainContainer() {
+        document.getElementById('checkpoint-container').classList.add('d-none');
+        DynamicTabs.tabCounter = 0;
     }
 
     hideRightColumn() {
@@ -268,11 +280,11 @@ class DynamicTabs {
                                 </div>
                                 <div>
                                     <label for="UpperLimit-${id}" class="form-label">Upper Limit</label>
-                                    <input type="text" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit}">
+                                    <input type="text" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit ? rowData.UpperLimit : ``}">
                                 </div>
                                 <div>
                                     <label for="LowerLimit-${id}" class="form-label">Lower Limit</label>
-                                    <input type="text" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit}">
+                                    <input type="text" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit ? rowData.LowerLimit : ``}">
                                 </div>
                             </div>
 
@@ -280,7 +292,7 @@ class DynamicTabs {
                             <div class="mb-3">
                                 <p class="form-label">Measurement?</p>
                                 <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="1"/>
+                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="1" checked/>
                                     <label class="form-check-label" for="IsMeasurementT">True</label>
                                 </div>
                                 <div class="form-check custom-radio">
@@ -300,16 +312,16 @@ class DynamicTabs {
                             <div class="d-flex mb-3 gap-4">
                                 <div>
                                     <label for="Level-${id}" class="form-label">Level</label>
-                                    <input type="text" class="form-control" id="Level-${id}" name="Level" value="${rowData.Level}">
+                                    <input type="text" class="form-control" id="Level-${id}" name="Level" value="${rowData.Level ? rowData.Level : ``}">
                                 </div>
                                 <div>
                                     <label for="LevelNum-${id}" class="form-label">LevelNum</label>
-                                    <input type="text" class="form-control" id="LevelNum-${id}" name="LevelNum" value="${rowData.Level_1}">
+                                    <input type="text" class="form-control" id="LevelNum-${id}" name="LevelNum" value="${rowData.Level_1 ? rowData.Level_1 : ``}">
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="Note-${id}" class="form-label">Note</label>
-                                <input type="text" class="form-control" id="Note-${id}" name="Note" value="${rowData.Note}">
+                                <input type="text" class="form-control" id="Note-${id}" name="Note" value="${rowData.Note ? rowData.Note : ``}">
                             </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form >`
@@ -322,6 +334,28 @@ class DynamicTabs {
     reloadDataTables(dataTables) {
         console.log('table reloaded');
         dataTables.forEach(table => table.ajax.reload());
+    }
+
+    // For Saving Checkpoint Functionality
+    saveCheckpoint(id, tabId, contentId) {
+        const form = document.getElementById(`checkpointForm-${id}`);
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        console.log(data);
+
+        $.ajax({
+            url: `/Checkpoints/UploadCheckpoint`,
+            type: 'POST',
+            data,
+            success: (res) => {
+                console.log(res);
+                this.removeTab(tabId, contentId);
+
+            },
+            error: (err) => {
+                console.log(err);
+            }
+        });
     }
 
     // For Edit Functionality
