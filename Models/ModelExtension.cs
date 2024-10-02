@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Net;
 using System.Web;
+using System.Web.Management;
 using System.Web.Mvc;
 
 namespace PartsIq.Models
@@ -167,12 +169,6 @@ namespace PartsIq.Models
 
     }
 
-    public class StartInsepction
-    {
-
-    }
-
-
     #endregion
 
     #region Checkpoint
@@ -217,5 +213,22 @@ namespace PartsIq.Models
     {
         public int? MaxSampleNumber {  get; set; }
     }
+    #endregion
+
+    #region Evaluation
+
+    public class EvaluationData : FinishedData
+    {
+        public int? DecisionID { get; set; }
+        public string DecisionName { get; set; }
+        public int? EvaluatorID { get; set; }
+        public string EvaluatorName { get; set; }
+        public int? Time { get; set; }
+        public string NCRNumber { get; set; }
+        public int NCRID { get; set; }
+        public string Purpose { get; set; }
+
+    }
+
     #endregion
 }

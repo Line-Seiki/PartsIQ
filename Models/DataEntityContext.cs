@@ -723,5 +723,75 @@ namespace PartsIq.Models
             }
         }
         #endregion
+
+        #region Evaluation
+        public List<EvaluationData> GetEvaluationData()
+        {
+            return db.DeliveryDetails.Where(d => d.StatusID == 5).Select(d => new EvaluationData
+            {
+                DeliveryID = d.DeliveryID,
+                DeliveryDetailID = d.DeliveryDetailID,
+                Status = d.Status.StatusName,
+                StatusID = d.StatusID,
+                DecisionID = d.DecisionID.HasValue ? d.DecisionID.Value : d.DecisionID,
+                DecisionName = d.DecisionID.HasValue ? d.Decision.Name : "",
+                EvaluatorID = d.Inspection.EvaluatorID.HasValue ? d.Inspection.EvaluatorID.Value : d.Inspection.EvaluatorID,
+                EvaluatorName = d.Inspection.EvaluatorID.HasValue ? d.Inspection.User1.FirstName +" "+ d.Inspection.User1.LastName : "", // User1 is for getting user data for Evaluator
+                InspectionID = d.InspectionID.HasValue ? d.InspectionID.Value : d.InspectionID,
+                UserID = d.UserID.HasValue ? d.UserID.Value : d.UserID,
+                UserName = d.UserID.HasValue ? d.User.FirstName + " " + d.User.LastName  : " ",
+                ControlNumber = d.Inspection.ControlNumber,
+                InspectorComments = d.Inspection.InspectionComments,
+                DateFinished = d.Inspection.DateEnd,
+                PartCode = d.Delivery.Part.Code,
+                PartName = d.Delivery.Part.Name,
+                LotNumber = d.LotNumber,
+                LotQuantity = d.LotQuantity,
+                DRNumber = d.Delivery.DRNumber,
+                Time = d.Inspection.InspectionDuration.HasValue ? d.Inspection.InspectionDuration.Value : d.Inspection.InspectionDuration,
+                Comments = d.Inspection.Comments,
+                NCRID = 0, // TODO: Create a NCR Table and Model
+                NCRNumber = "", // TODO: Create NCR Table
+                Purpose = "", // TODO: Find Connection for purpose
+                DeliveryVersion = d.Delivery.VERSION,
+                DeliveryDetailVersion = d.VERSION,
+                InspectionVersion = d.Inspection.VERSION,
+                
+            }).ToList();
+        }
+
+        public ResponseData CreatePendingEvaluations()
+        {
+            try
+            {
+                var evalData = db.DeliveryDetails.Where(d => d.StatusID == 5).ToList();
+
+                if (evalData.Count > 0)
+                {
+                    foreach (var deliveryDetail in evalData)
+                    {
+                        deliveryDetail.DecisionID = 1;
+                    }
+
+                    db.SaveChanges();
+                }
+
+                return new ResponseData
+                {
+                    Success = true,
+                };
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Success = false,
+                    Message = $"{ex.Message}"
+                };
+            }
+            
+        }
+        #endregion
     }
 }

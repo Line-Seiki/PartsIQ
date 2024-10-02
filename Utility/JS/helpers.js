@@ -35,3 +35,15 @@ function convertDateStringToFormattedString(date) {
 
     return `${year}-${month}-${day}`;
 }
+
+function convertIntToTimeFormat(intTime) {
+    let ms = Math.floor(intTime / 1000);
+    const days = String(Math.floor(ms / (24 * 3600)));
+    ms %= (24 * 3600);
+    const hours = String(Math.floor(ms / 3600));
+    ms %= 3600;
+    const minutes = String(Math.floor(ms / 60));
+    const seconds = String(ms % 60);
+
+    return `${days.padStart(2, '0')}:${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`;
+}
