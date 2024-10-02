@@ -41,5 +41,10 @@ namespace PartsIq.Models
         //DEV FUNCTIONALITY
         ResponseData DevAssignInspector(int id, int version);
         #endregion
+
+        #region Evaluation
+        List<EvaluationData> GetEvaluationData();
+        ResponseData CreatePendingEvaluations();
+        #endregion
     }
 }
