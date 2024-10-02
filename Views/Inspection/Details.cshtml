@@ -240,6 +240,7 @@
                 let checkpointID = $(this).data('checkpointid');
                 let inspectionID = $(this).data('inspectionid');
                 let isMeasurement = $(this).data('measurement');
+                let attribute = null;
                 let Judgement = 0;
 
                 // Explicitly fetch the updated data-cavityid directly from the DOM
@@ -258,13 +259,11 @@
                     }
                 } else {
                     Judgement = $(this).data("judgement");
+                    attribute = measurement;
                 } 
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
-
-
-
                 let data = {
                     SampleNumber: sampleNumber,
                     CavityName: cavityNumber,
@@ -282,6 +281,8 @@
                 formData.append("CavityNumber", cavityNumber);
                 formData.append("SampleNumber", sampleNumber);
                 formData.append("__RequestVerificationToken", token);
+                formData.append("IsMeasurement", isMeasurement);
+                formData.append("Attribute", attribute);
 
                 $.ajax({
                     url: '@Url.Action("CreateInspectionItem", "InspectionItems")',
@@ -323,7 +324,10 @@
                 { data: "SampleNumber" },
                 { data: "CavityName" },
                 { data: "Measurement" },
-                { data: "OrigMeasurement" },
+                {
+                    data: "OrigMeasurement",
+                   
+                },
                 {
                     data: "Judgement",
                     render: function (data, type, row) {

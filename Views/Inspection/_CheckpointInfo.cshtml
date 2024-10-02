@@ -83,10 +83,10 @@
                     }
                     else
                     {
-                        <button class="submit-inspection-item btn btn-success" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
+                        <button class="submit-inspection-item btn btn-success" data-judgement="1" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
                             <i class="mdi mdi-check-bold"></i> Good
                         </button>
-                        <button class="submit-inspection-item btn btn-danger ms-2" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
+                        <button class="submit-inspection-item btn btn-danger ms-2" data-judgement="0" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
                             <i class="mdi mdi-close"></i> No Good
                         </button>
                     }
