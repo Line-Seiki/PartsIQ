@@ -299,6 +299,8 @@
                                 $('#SampleNumber').val(response.SampleNumber);
                                 checkSampleNumber(response.SampleNumber, cavityID);  // Pass the updated cavityID
                             }
+                        } else {
+                            alertify.error(`Error ${response.message}.`)
                         }
                     }
                 });

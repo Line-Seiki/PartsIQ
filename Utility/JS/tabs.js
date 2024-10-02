@@ -29,6 +29,7 @@ class DynamicTabs {
     }
 
     addTab(content) {
+        
         const id = `${this.id}`;
         const tabId = `${this.id}-tab`;
         const contentId = `${this.id}-content`;
@@ -199,6 +200,7 @@ class DynamicTabs {
                             <div class="mb-3">
                                 <label for="DateDelivered-${id}" class="form-label">Date Delivered</label>
                                 <input type="date" class="form-control" id="DateDelivered-${id}" name="DateDelivered" value="${convertDateStringToFormattedString(rowData.DateDelivered)}" readonly>
+                                                         
                             </div>
 
                             <div class="mb-3">
@@ -266,6 +268,7 @@ class DynamicTabs {
                             <div class="mb-3">
                                 <label for="Code-${id}" class="form-label">Code</label>
                                 <input type="text" class="form-control" id="Code-${id}" name="Code" value="${rowData.Code}">
+                                 <input type="hidden" id="PartID" value="${rowData.PartID}" name="PartID">
                             </div>
 
                             <div class="mb-3">
@@ -277,6 +280,7 @@ class DynamicTabs {
                                 <div>
                                     <label for="Specification-${id}" class="form-label">Specification</label>
                                     <input type="text" class="form-control" id="Specification-${id}" name="Specification" value="${rowData.Specification}">
+                                    <input type="hidden" name="SpecificationRange" value="${rowData.SpecificationRange}">
                                 </div>
                                 <div>
                                     <label for="UpperLimit-${id}" class="form-label">Upper Limit</label>
@@ -338,6 +342,7 @@ class DynamicTabs {
 
     // For Saving Checkpoint Functionality
     saveCheckpoint(id, tabId, contentId) {
+        
         const form = document.getElementById(`checkpointForm-${id}`);
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);

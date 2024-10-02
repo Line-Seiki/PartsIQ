@@ -143,13 +143,13 @@ namespace PartsIq.Controllers
                 var DateCreated = DateTime.Now;
                 var IsGood = form.Get("IsGood") == "1";
                 var isMeasurement = form.Get("IsMeasurement");
-                int? measurement = null; // Initialize as nullable for later use
+                float? measurement = null; // Initialize as nullable for later use
                 string attribute = null; // For non-measurement types
 
                 // Handle measurement if applicable
                 if (isMeasurement != "0")
                 {
-                    if (!int.TryParse(form.Get("Measurement"), out var tempMeasurement))
+                    if (!float.TryParse(form.Get("Measurement"), out var tempMeasurement))
                     {
                         return Json(new { success = false, message = "Invalid Measurement value" }, JsonRequestBehavior.AllowGet);
                     }

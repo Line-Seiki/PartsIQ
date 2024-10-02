@@ -43,8 +43,12 @@ namespace PartsIq.Controllers
         }
 
         // GET: Checkpoints/Create
-        public ActionResult Create(int? id = null)
+        public ActionResult Create(int id)
         {
+            var part = db.Parts.Find(id);
+            if (part == null)
+                return HttpNotFound();
+            
             ViewBag.PartId = id;
             return View();
         }
@@ -58,6 +62,11 @@ namespace PartsIq.Controllers
         {
             if (ModelState.IsValid)
             {
+                var part = db.Parts.Find(checkpoint.Part_ID);
+                if (part == null)
+                {
+                    return HttpNotFound();
+                }
                 db.Checkpoints.Add(checkpoint);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -221,8 +230,12 @@ namespace PartsIq.Controllers
             return Json(htmlJson, JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult UploadPartCheckpoints(HttpPostedFileBase excelFile)
+        public JsonResult UploadPartCheckpoints(HttpPostedFileBase excelFile, int PartID)
         {
+            if (PartID <= 0)
+            {
+                return Json(new {message= "PartID not found", success=false}, JsonRequestBehavior.AllowGet);
+            }
             string[] headers = { "Code", "InspectionPart", "Specification", "SpecificationRange", "CurrentTolerance", "Tool", "MethodSampling", "Level", "Level_1", "Note" };
             var data = new List<Dictionary<string, string>>();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -253,8 +266,7 @@ namespace PartsIq.Controllers
                         rowData[headers[7]] = worksheet.Cells[row, 16].GetValue<string>();
                         rowData[headers[8]] = worksheet.Cells[row, 17].GetValue<string>();
                         rowData[headers[9]] = worksheet.Cells[row, 18].GetValue<string>();
-
-                        
+                        rowData["PartID"] = PartID.ToString();                        
                         data.Add(rowData);
                     }
                 }
@@ -267,10 +279,48 @@ namespace PartsIq.Controllers
         }
 
 
-        // POST: /Checkpoints/UploadCheckpoint
+        // POST: /Checkpoints/UploadCheckpoint  
+        [HttpPost]
         public JsonResult UploadCheckpoint(FormCheckpoint data)
         {
-            return Json(data, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var form = Request.Form;
+                if (form == null)
+                {
+                    return Json(new { success = false, message = "Form is not valid" }, JsonRequestBehavior.AllowGet);
+                }
+                var part = db.Parts.Find(data.PartID);
+                if (part == null)
+                {
+                    return Json(new { success = false, message = "No parts found." }, JsonRequestBehavior.AllowGet);
+                }
+
+                var Specification = data.IsMeasurement == 1  ? data.SpecificationRange : data.Specification;
+                var checkpoint = new Checkpoint()
+                {
+                    Part_ID = data.PartID,
+                    Code = data.Code,
+                    InspectionPart = data.InspectionPart,
+                    IsActive = 1,
+                    IsMeasurement = data.IsMeasurement ,
+                    LimitLower = data.LowerLimit,
+                    LimitUpper = data.UpperLimit,
+                    Note = data.Note,
+                    SamplingMethod = data.MethodSmapling,
+                    Specification = Specification,
+                    Tools = data.Tool,
+                };
+                db.Checkpoints.Add(checkpoint);
+                db.SaveChanges();
+
+                return Json(data, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex) 
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+            
         }
 
 
