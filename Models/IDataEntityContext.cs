@@ -43,8 +43,13 @@ namespace PartsIq.Models
         #endregion
 
         #region Evaluation
-        List<EvaluationData> GetEvaluationData();
+        List<EvaluationData> GetEvaluationsData();
+        EvaluationData GetEvaluationDataById(int id);
         ResponseData CreatePendingEvaluations();
+        #endregion
+
+        #region User
+        UserData GetUserDataByID(int id);
         #endregion
     }
 }

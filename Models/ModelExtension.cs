@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Ajax.Utilities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Entity.Infrastructure;
@@ -103,6 +104,12 @@ namespace PartsIq.Models
         public int UserId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
+    }
+
+    public class UserData
+    {
+        public int UserId { get; set; }
+        public string Name { get; set; }
     }
     #endregion
     
@@ -227,6 +234,21 @@ namespace PartsIq.Models
         public string NCRNumber { get; set; }
         public int NCRID { get; set; }
         public string Purpose { get; set; }
+        public int CavityNum { get; set; }
+        public string TimeString 
+        { get 
+            {
+                if (Time.HasValue)
+                {
+                    TimeSpan timeSpan = TimeSpan.FromMilliseconds(Time.Value);
+                    return $"{timeSpan.Hours:D2}h {timeSpan.Minutes:D2}m {timeSpan.Seconds}s";
+                }
+                else
+                {
+                    return "";
+                }
+            } 
+        }
 
     }
 
