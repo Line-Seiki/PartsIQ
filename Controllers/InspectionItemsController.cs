@@ -141,7 +141,7 @@ namespace PartsIq.Controllers
 
                 // Gather form data and validate
                 var DateCreated = DateTime.Now;
-                var IsGood = form.Get("IsGood") == "1";
+                var IsGood = form.Get("Judgement") == "1";
                 var isMeasurement = form.Get("IsMeasurement");
                 float? measurement = null; // Initialize as nullable for later use
                 string attribute = null; // For non-measurement types
@@ -237,7 +237,7 @@ namespace PartsIq.Controllers
                 CavityName = s.Cavity.Name,  // Accessing the related Cavity's Name
                 s.Measurement,
                 s.OrigMeasurement,
-                s.IsGood,  // Handling possible nulls in IsGood
+                Judgement = s.IsGood == true ? "1" :"0",  // Handling possible nulls in IsGood
             }).ToList();
 
             // Returning the result as JSON
