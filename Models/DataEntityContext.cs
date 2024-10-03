@@ -725,7 +725,7 @@ namespace PartsIq.Models
         #endregion
 
         #region Evaluation
-        public List<EvaluationData> GetEvaluationData()
+        public List<EvaluationData> GetEvaluationsData()
         {
             return db.DeliveryDetails.Where(d => d.StatusID == 5).Select(d => new EvaluationData
             {
@@ -760,6 +760,45 @@ namespace PartsIq.Models
             }).ToList();
         }
 
+        public EvaluationData GetEvaluationDataById(int id)
+        {
+            var detail = db.DeliveryDetails.Find(id);
+            return new EvaluationData
+            {
+                DeliveryID = detail.DeliveryID,
+                DeliveryDetailID = detail.DeliveryDetailID,
+                Status = detail.Status.StatusName,
+                StatusID = detail.StatusID,
+                DecisionID = detail.DecisionID.HasValue ? detail.DecisionID.Value : detail.DecisionID,
+                DecisionName = detail.DecisionID.HasValue ? detail.Decision.Name : "",
+                EvaluatorID = detail.Inspection.EvaluatorID.HasValue ? detail.Inspection.EvaluatorID.Value : detail.Inspection.EvaluatorID,
+                EvaluatorName = detail.Inspection.EvaluatorID.HasValue ? detail.Inspection.User1.FirstName + " " + detail.Inspection.User1.LastName : "", // User1 is for getting user data for Evaluator
+                InspectionID = detail.InspectionID.HasValue ? detail.InspectionID.Value : detail.InspectionID,
+                UserID = detail.UserID.HasValue ? detail.UserID.Value : detail.UserID,
+                UserName = detail.UserID.HasValue ? detail.User.FirstName + " " + detail.User.LastName : " ",
+                ControlNumber = detail.Inspection.ControlNumber,
+                InspectorComments = detail.Inspection.InspectionComments,
+                DateDelivered = detail.Delivery.DateDelivered,
+                DateFinished = detail.Inspection.DateEnd,
+                PartCode = detail.Delivery.Part.Code,
+                PartName = detail.Delivery.Part.Name,
+                LotNumber = detail.LotNumber,
+                LotQuantity = detail.LotQuantity,
+                DRNumber = detail.Delivery.DRNumber,
+                Time = detail.Inspection.InspectionDuration.HasValue ? detail.Inspection.InspectionDuration.Value : detail.Inspection.InspectionDuration,
+                Comments = detail.Inspection.Comments,
+                SampleSize = detail.Inspection.SampleSize.ToString(),
+                Supplier = detail.Delivery.Supplier.Name,
+                CavityNum = detail.Inspection.NumberOfCavities,
+                NCRID = 0, // TODO: Create a NCR Table and Model
+                NCRNumber = "", // TODO: Create NCR Table
+                Purpose = "", // TODO: Find Connection for purpose
+                DeliveryVersion = detail.Delivery.VERSION,
+                DeliveryDetailVersion = detail.VERSION,
+                InspectionVersion = detail.Inspection.VERSION,
+            };
+        }
+
         public ResponseData CreatePendingEvaluations()
         {
             try
@@ -791,6 +830,18 @@ namespace PartsIq.Models
                 };
             }
             
+        }
+        #endregion
+
+        #region User
+       public UserData GetUserDataByID(int id)
+        {
+            var user = db.Users.Find(id);
+            return new UserData
+            {
+                UserId = user.UserID,
+                Name = $"{user.FirstName} {user.LastName}"
+            };
         }
         #endregion
     }
