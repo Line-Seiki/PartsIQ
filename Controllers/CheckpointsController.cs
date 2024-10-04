@@ -13,6 +13,8 @@ using System.Diagnostics;
 using System.Net.Http;
 using Microsoft.Ajax.Utilities;
 using System.Reflection;
+using System.ComponentModel.Design;
+using System.IO;
 
 namespace PartsIq.Controllers
 {
@@ -236,25 +238,75 @@ namespace PartsIq.Controllers
                     for (int row = 6; row < worksheet.Dimension.End.Row; row++)
                     {
                         string codeValue = worksheet.Cells[row, 1].GetValue<string>();
-
                         if (string.IsNullOrEmpty(codeValue) || codeValue.Contains("SPECIAL INSTRUCTION:"))
                         {
                             break;
                         }
 
-                        var rowData = new Dictionary<string, string>();
-                        rowData[headers[0]] = worksheet.Cells[row, 1].GetValue<string>();
-                        rowData[headers[1]] = worksheet.Cells[row, 2].GetValue<string>();
-                        rowData[headers[2]] = worksheet.Cells[row, 5].GetValue<string>();
-                        rowData[headers[3]] = worksheet.Cells[row, 7].GetValue<string>();
-                        rowData[headers[4]] = worksheet.Cells[row, 10].GetValue<string>();
-                        rowData[headers[5]] = worksheet.Cells[row, 12].GetValue<string>();
-                        rowData[headers[6]] = worksheet.Cells[row, 13].GetValue<string>();
-                        rowData[headers[7]] = worksheet.Cells[row, 16].GetValue<string>();
-                        rowData[headers[8]] = worksheet.Cells[row, 17].GetValue<string>();
-                        rowData[headers[9]] = worksheet.Cells[row, 18].GetValue<string>();
 
-                        
+                        var rowData = new Dictionary<string, string>();
+                        int currentHeaderFilled = 0;
+                        int col = 1;
+                        while (currentHeaderFilled < headers.Length && col <= worksheet.Dimension.End.Column)
+                        {
+                            var cell = worksheet.Cells[row, col];
+
+                            // Check if this cell is part of a merged range
+                            if (cell.Merge)
+                            {
+                                var mergeAddress = worksheet.MergedCells[cell.Start.Row, cell.Start.Column];
+                                if (mergeAddress != null)
+                                {
+                                    var mergeRange = worksheet.Cells[mergeAddress];
+
+                                    // Only process the first cell of the merged range
+                                    if (cell.Start.Row == mergeRange.Start.Row && cell.Start.Column == mergeRange.Start.Column)
+                                    {
+                                        string cellValue = cell.GetValue<string>();
+                                        // Record white spaces
+                                        if (string.IsNullOrWhiteSpace(cellValue))
+                                        {
+                                            cellValue = "";
+                                        }
+
+                                        if (headers[currentHeaderFilled] == "SpecificationRange" && string.IsNullOrWhiteSpace(cellValue))
+                                        {
+                                            rowData[headers[currentHeaderFilled]] = cellValue;
+                                            rowData[headers[currentHeaderFilled + 1]] = cellValue;
+                                            currentHeaderFilled += 2;
+                                        }
+                                        else
+                                        {
+                                            rowData[headers[currentHeaderFilled]] = cellValue;
+                                            currentHeaderFilled++;
+                                        }
+                                        
+
+                                        // Skip to the end of the merged range
+                                        col = mergeRange.End.Column + 1;
+                                        continue;
+                                    }
+                                }
+
+                                // If it's not the first cell of the merged range, skip it
+                                col++;
+                                continue;
+                            }
+                            else
+                            {
+                                // For non-merged cells, process as before
+                                string cellValue = cell.GetValue<string>();
+                                // Record white spaces
+                                if (string.IsNullOrWhiteSpace(cellValue))
+                                {
+                                    cellValue = "";
+                                }
+                                rowData[headers[currentHeaderFilled]] = cellValue;
+                                currentHeaderFilled++;
+                                col++;
+                            }
+                        }
+
                         data.Add(rowData);
                     }
                 }

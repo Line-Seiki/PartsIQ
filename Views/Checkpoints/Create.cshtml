@@ -267,8 +267,8 @@
                         processData: false,
                         success: function (success) {
                             console.log(processSpecifications(success.data));
-                            const res = processSpecifications(success.data);
-                            const addRows = res.map(data => new DynamicTabs('checkpoint-tab', 'checkpoint-content', 'checkpoint', data));
+                            // const res = processSpecifications(success.data);
+                            // const addRows = res.map(data => new DynamicTabs('checkpoint-tab', 'checkpoint-content', 'checkpoint', data));
 
                         },
                         else: function (err) {
