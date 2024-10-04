@@ -102,7 +102,43 @@
         $(document).ready(function () {
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
+  
 
+            function calculate(obj) {
+                // If there is NG., the overall judgement is No Good
+                let minMeasurement = obj.length > 0 ? obj[0].Measurement : 0;
+                let maxMeasurement = obj.length > 0 ? obj[0].Measurement : 0;
+
+                obj.forEach((checkpoint, index) => {
+                    var textColor = checkpoint.Judgement == 1 ? "" : "text-danger";
+                    if (checkpoint.Measurement < minMeasurement) {
+                        minMeasurement = checkpoint.Measurement;
+                    }
+                    if (checkpoint.Measurement > maxMeasurement) {
+                        maxMeasurement = checkpoint.Measurement;
+                    }
+                });
+
+                const annotation = {};
+                const data = obj.map(ob => ob.Measurement);
+                const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
+
+
+                // Calculate standard deviation
+                const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+                const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (data.length - 1);
+                const standardDeviation = Math.sqrt(variance);
+
+                // Assign calculated values to annotation object
+                annotation["stdv"] = standardDeviation;
+                annotation["avg"] = mean;
+                annotation["min"] = minMeasurement;
+                annotation["max"] = maxMeasurement;
+
+                
+
+                return annotation;
+            }
 
             $(document).on('change', '#CheckpointInfo', function () {
                 // Get selected option values
@@ -115,8 +151,6 @@
                 let cavityID = selectedOption.data('cavityid');
                 let lowerLimit = selectedOption.data('lowerlimit');
                 let upperLimit = selectedOption.data('upperlimit');
-
-                console.log(isMeasurement)
 
                 // Set the limits to corresponding inputs or elements
                 if ($('#UpperLimit').length) {
@@ -144,7 +178,6 @@
             function inspectionSendToggle(isMeasurement, checkpointID, inspectionID) {
                 let cavityID = $('.submit-inspection-item').attr('data-cavityid');
                 let buttonDiv = $('#inspection-buttons');
-                console.log(buttonDiv);
                 // Buttons for when measurement is required
                 let measurementBtn = `
                     <button class="submit-inspection-item btn btn-success"
@@ -187,6 +220,7 @@
 
 
             function checkSampleNumber(sampleNumber, cavityID) {
+
                 // Parse the sampleNumber to ensure it's treated as a number
                 let parsedSampleNumber = parseInt(sampleNumber, 10);
 
@@ -199,11 +233,6 @@
                     return false;
                 }
 
-                // Log for debugging
-                console.log('Cavity MaxSampleNumber:', cavity.MaxSampleNumber);
-                console.log('Parsed Sample Number:', parsedSampleNumber);
-                console.log('Original Sample Number:', sampleNumber);
-                console.log('Cavity Info:', cavity);
 
                 // Check if the current cavity can handle this sample number
                 if (cavity.MaxSampleNumber >= parsedSampleNumber) {
@@ -240,8 +269,8 @@
                 let checkpointID = $(this).data('checkpointid');
                 let inspectionID = $(this).data('inspectionid');
                 let isMeasurement = $(this).data('measurement');
+                let attribute = null;
                 let Judgement = 0;
-
                 // Explicitly fetch the updated data-cavityid directly from the DOM
                 let cavityID = $(this).attr('data-cavityid'); // This ensures you're getting the most recent value
 
@@ -252,19 +281,18 @@
                 // Check if this logs the correct cavityID
                 let upperLimit = $('#UpperLimit').val();
                 let lowerLimit = $('#LowerLimit').val();
-                if (isMeasurement == 1) {
+                if (isMeasurement == "1") {
+                    measurement = Number(measurement);
                     if (measurement <= upperLimit && measurement >= lowerLimit) {
                         Judgement = 1;
                     }
                 } else {
                     Judgement = $(this).data("judgement");
+                    attribute = measurement;
                 } 
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
-
-
-
                 let data = {
                     SampleNumber: sampleNumber,
                     CavityName: cavityNumber,
@@ -282,6 +310,9 @@
                 formData.append("CavityNumber", cavityNumber);
                 formData.append("SampleNumber", sampleNumber);
                 formData.append("__RequestVerificationToken", token);
+                formData.append("IsMeasurement", isMeasurement);
+                formData.append("Attribute", attribute);
+                formData.append("Judgement", Judgement);
 
                 $.ajax({
                     url: '@Url.Action("CreateInspectionItem", "InspectionItems")',
@@ -298,6 +329,8 @@
                                 $('#SampleNumber').val(response.SampleNumber);
                                 checkSampleNumber(response.SampleNumber, cavityID);  // Pass the updated cavityID
                             }
+                        } else {
+                            alertify.error(`Error ${response.message}.`)
                         }
                     }
                 });
@@ -322,8 +355,20 @@
             columns: [
                 { data: "SampleNumber" },
                 { data: "CavityName" },
-                { data: "Measurement" },
-                { data: "OrigMeasurement" },
+                {
+                    data: "Measurement",
+                    render: function (data, type, row) {
+                        if (data != null) {
+                            return data;
+                        } else {
+                            return row.Attribute;
+                        }
+                    }
+                },
+                {
+                    data: "OrigMeasurement",
+                   
+                },
                 {
                     data: "Judgement",
                     render: function (data, type, row) {
@@ -339,9 +384,11 @@
                 // Get the SampleItems from the current page rows
                 var data = api.rows({ page: 'current' }).data().toArray();
 
-                console.log(data);
-
                 if (data.length > 0 && data) {
+                    let flags = calculate(data);
+                    $("#maxvalue").text(flags.max);
+                    $("#minValue").text(flags.min);
+                    $("#standardDev").text(flags.stdv);
                     var sampleItemsArray = data.map(function (item) {
                         return item.SampleNumber;
                     });
@@ -351,17 +398,20 @@
 
                     if ($('#SampleSize').val() > maxSampleItem) {
                         $('#SampleNumber').val(maxSampleItem + 1);
-                        enableDisableToggle(false)
+                        enableDisableToggle(false);
+                        
                     } else {
                         $('#SampleNumber').val(maxSampleItem);
                         enableDisableToggle(true);
 
                     }
                     // Log the next sample number
+                   
 
                 } else {
                     $('#SampleNumber').val(1);
                 }
+                checkSampleNumber($('#SampleNumber').val(), cavities[0].CavityID);
 
 
             }
