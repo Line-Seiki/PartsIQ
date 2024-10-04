@@ -187,6 +187,7 @@
 
 
             function checkSampleNumber(sampleNumber, cavityID) {
+                console.log(`${sampleNumber} ** ${cavityID}`)
                 // Parse the sampleNumber to ensure it's treated as a number
                 let parsedSampleNumber = parseInt(sampleNumber, 10);
 
@@ -357,17 +358,20 @@
 
                     if ($('#SampleSize').val() > maxSampleItem) {
                         $('#SampleNumber').val(maxSampleItem + 1);
-                        enableDisableToggle(false)
+                        enableDisableToggle(false);
+                        
                     } else {
                         $('#SampleNumber').val(maxSampleItem);
                         enableDisableToggle(true);
 
                     }
                     // Log the next sample number
+                   
 
                 } else {
                     $('#SampleNumber').val(1);
                 }
+                checkSampleNumber($('#SampleNumber').val(), cavities[0].CavityID);
 
 
             }
