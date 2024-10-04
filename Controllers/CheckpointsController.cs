@@ -244,8 +244,7 @@ namespace PartsIq.Controllers
                 using (var package = new ExcelPackage(excelFile.InputStream))
                 {
                     // Get the first worksheet
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];  
                     for (int row = 6; row < worksheet.Dimension.End.Row; row++)
                     {
                         string codeValue = worksheet.Cells[row, 1].GetValue<string>();
