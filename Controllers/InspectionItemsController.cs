@@ -233,6 +233,7 @@ namespace PartsIq.Controllers
             var inspectionItems = query.Select(s => new
             {
                 s.InspectionItemID,
+                s.Attribute,
                 s.SampleNumber,
                 CavityName = s.Cavity.Name,  // Accessing the related Cavity's Name
                 s.Measurement,
