@@ -193,7 +193,7 @@ namespace PartsIq.Models
 
         public int SampleSize { get; set; }
 
-        public byte IsMeasurement { get; set; }  
+        public bool IsMeasurement { get; set; }  
     }
 
     public class FormCheckpoint
@@ -204,7 +204,7 @@ namespace PartsIq.Models
         public string SpecificationRange {  get; set; } 
         public double UpperLimit { get; set; }
         public double LowerLimit { get; set; }
-        public byte IsMeasurement { get; set; }
+        public bool IsMeasurement { get; set; }
         public string Tool { get; set; }
         public string MethodSampling { get; set; }
         public string Level { get; set; }

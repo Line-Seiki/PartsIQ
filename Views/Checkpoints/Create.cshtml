@@ -122,8 +122,11 @@
                     var fileInput = $('#excelFile')[0].files[0];
                     formData.append('excelFile', fileInput);
                     formData.append('PartID', partID);
+                    if (document.getElementById('clear-all')) {
+                        document.getElementById('clear-all').remove();
+                    }
                     clearCheckpoints();
-                
+              
                     $.ajax({
                         url: '@Url.Action("UploadPartCheckpoints", "Checkpoints")',
                         type: "POST",
@@ -134,6 +137,10 @@
                             console.log(processSpecifications(success.data));
                             const res = processSpecifications(success.data);
                             const addRows = res.map(data => new DynamicTabs('checkpoint-tab', 'checkpoint-content', 'checkpoint', data));
+                            if (document.getElementById('clear-all')) {
+                                document.getElementById('clear-all').remove();
+                                checkpointContainer.classList.add('d-none');
+                            }
                             clearCheckpointsContainer();
 
                         },
