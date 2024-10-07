@@ -201,14 +201,16 @@ namespace PartsIq.Models
         public string Code { get; set; }
         public string InspectionPart { get; set; }
         public string Specification { get; set; }
+        public string SpecificationRange {  get; set; } 
         public double UpperLimit { get; set; }
         public double LowerLimit { get; set; }
-        public bool IsMeasurement { get; set; }
+        public byte IsMeasurement { get; set; }
         public string Tool { get; set; }
         public string MethodSmapling { get; set; }
         public string Level { get; set; }
         public double LevelNum { get; set; }
         public string Note { get; set; }
+        public int PartID { get; set; }
     }
 
     #endregion

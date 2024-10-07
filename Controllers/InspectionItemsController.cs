@@ -139,53 +139,84 @@ namespace PartsIq.Controllers
                     return Json(new { success = false, message = "Form is not valid" }, JsonRequestBehavior.AllowGet);
                 }
 
-                // Gather form data
+                // Gather form data and validate
                 var DateCreated = DateTime.Now;
-                var IsGood = form.Get("IsGood") == "1";
-                var Measurement = Convert.ToInt16(form.Get("Measurement"));
-                var OrigMeasurement = Measurement;
-                var SampleNumber = Convert.ToInt16(form.Get("SampleNumber"));
-                var TimeSpan = DateTime.Now;
-                var CheckpointID = Convert.ToInt16(form.Get("CheckpointID"));
-                var InspectionID = Convert.ToInt16(form.Get("InspectionID"));
-                var CavityID = Convert.ToInt16(form.Get("CavityID")); // Fixed CavityID retrieval
+                var IsGood = form.Get("Judgement") == "1";
+                var isMeasurement = form.Get("IsMeasurement");
+                float? measurement = null; // Initialize as nullable for later use
+                string attribute = null; // For non-measurement types
+
+                // Handle measurement if applicable
+                if (isMeasurement != "0")
+                {
+                    if (!float.TryParse(form.Get("Measurement"), out var tempMeasurement))
+                    {
+                        return Json(new { success = false, message = "Invalid Measurement value" }, JsonRequestBehavior.AllowGet);
+                    }
+                    measurement = tempMeasurement;
+                }
+                else
+                {
+                    // If not measurement, use Attribute instead
+                    attribute = form.Get("Attribute");
+                }
+
+                // OrigMeasurement is the same as measurement unless it's not a measurement case
+                var OrigMeasurement = measurement;
+
+                // Validate SampleNumber
+                if (!int.TryParse(form.Get("SampleNumber"), out var sampleNumber))
+                {
+                    return Json(new { success = false, message = "Invalid SampleNumber value" }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Validate IDs
+                if (!int.TryParse(form.Get("CheckpointID"), out var checkpointID) ||
+                    !int.TryParse(form.Get("InspectionID"), out var inspectionID) ||
+                    !int.TryParse(form.Get("CavityID"), out var cavityID))
+                {
+                    return Json(new { success = false, message = "Invalid ID values" }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Set timestamp
+                var Timestamp = DateTime.Now;
 
                 // Create a new InspectionItem
                 var inspectionItem = new InspectionItem
                 {
-
-                    Measurement = Measurement,
+                    Attribute = attribute,
+                    Measurement = measurement,
                     IsGood = IsGood,
                     OrigMeasurement = OrigMeasurement,
-                    SampleNumber = SampleNumber,
-                    TimeSpan = TimeSpan,
-                    CheckpointID = CheckpointID,
-                    InspectionID = InspectionID,
-                    CavityID = CavityID,
-                    DateCreated = DateCreated,
+                    SampleNumber = sampleNumber,
+                    TimeSpan = Timestamp,
+                    CheckpointID = checkpointID,
+                    InspectionID = inspectionID,
+                    CavityID = cavityID,
+                    DateCreated = DateCreated
                 };
 
                 // Add the new item to the context and save
                 db.InspectionItems.Add(inspectionItem);
                 db.SaveChanges();
 
-                //Get SampleNumber in backend
-
-                var SampleSize = db.Inspections.Find(InspectionID).SampleSize;
-                if (SampleSize > SampleNumber )
+                // Update SampleNumber in backend
+                var inspection = db.Inspections.Find(inspectionID);
+                if (inspection != null)
                 {
-                    SampleNumber++;
-                } else
-                {
-                    SampleNumber = 0;
+                    var sampleSize = inspection.SampleSize;
+                    sampleNumber = (sampleNumber < sampleSize) ? sampleNumber + 1 : 0;
                 }
-                return Json(new { success = true, SampleNumber = SampleNumber }, JsonRequestBehavior.AllowGet);
+
+                return Json(new { success = true, SampleNumber = sampleNumber }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
+
 
         //GET
         public ActionResult GetInspectionItems(int CheckpointID, int InspectionID)
@@ -202,11 +233,12 @@ namespace PartsIq.Controllers
             var inspectionItems = query.Select(s => new
             {
                 s.InspectionItemID,
+                s.Attribute,
                 s.SampleNumber,
                 CavityName = s.Cavity.Name,  // Accessing the related Cavity's Name
                 s.Measurement,
                 s.OrigMeasurement,
-                s.IsGood,  // Handling possible nulls in IsGood
+                Judgement = s.IsGood == true ? "1" :"0",  // Handling possible nulls in IsGood
             }).ToList();
 
             // Returning the result as JSON
