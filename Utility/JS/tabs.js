@@ -46,7 +46,7 @@ class DynamicTabs {
 
         this.setupTabContent(contentType, id);
         this.showTab(tabLink);
-        if (content !== 'checkpoint') this.addCloseTabListener(tabLink, tabId, contentId);
+        if (content !== 'checkpoint' || this.rowData.Manual) this.addCloseTabListener(tabLink, tabId, contentId);
     }
 
     // dynamic tab methods link and content creation
@@ -57,6 +57,7 @@ class DynamicTabs {
         if (!model) {
             tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
                                     checkpoint ${tabId.split(`-`)[0]}
+                                    ${this.rowData.Manual ? `<span class="close-tab">&times;</span>`: ``}
                                 </a>`
         } else {
             tabLink.innerHTML = `<a id="${tabId}" class="nav-link" data-bs-toggle="tab" href="#${contentId}" role="tab">
@@ -150,6 +151,7 @@ class DynamicTabs {
         if (tabLink && tabContent) {
             tabLink.remove();
             tabContent.remove();
+            if (this.rowData.Manual) DynamicTabs.tabCounter--;
             this.updateTabsAfterRemoval();
         }
     }
@@ -267,20 +269,20 @@ class DynamicTabs {
                 return `<form id="checkpointForm-${id}">
                             <div class="mb-3">
                                 <label for="Code-${id}" class="form-label">Code</label>
-                                <input type="text" class="form-control" id="Code-${id}" name="Code" value="${rowData.Code}">
-                                 <input type="hidden" id="PartID" value="${rowData.PartID}" name="PartID">
+                                <input type="text" class="form-control" id="Code-${id}" name="Code" value="${rowData.Code ? rowData.Code : ``}">
+                                 <input type="hidden" id="PartID" value="${rowData.PartID ? rowData.PartID : ``}" name="PartID">
                             </div>
 
                             <div class="mb-3">
                                 <label for="InspectionPart-${id}" class="form-label">Inspection Part</label>
-                                <input type="text" class="form-control" id="InspectionPart-${id}" name="InspectionPart" value="${rowData.InspectionPart}">
+                                <input type="text" class="form-control" id="InspectionPart-${id}" name="InspectionPart" value="${rowData.InspectionPart ? rowData.InspectionPart : ``}">
                             </div>
 
                             <div class="d-flex mb-3 gap-4">
                                 <div>
                                     <label for="Specification-${id}" class="form-label">Specification</label>
-                                    <input type="text" class="form-control" id="Specification-${id}" name="Specification" value="${rowData.Specification}">
-                                    <input type="hidden" name="SpecificationRange" value="${rowData.SpecificationRange}">
+                                    <input type="text" class="form-control" id="Specification-${id}" name="Specification" value="${rowData.Specification ? rowData.Specification : ``}">
+                                    <input type="hidden" name="SpecificationRange" value="${rowData.SpecificationRange ? rowData.SpecificationRange : ``}">
                                 </div>
                                 <div>
                                     <label for="UpperLimit-${id}" class="form-label">Upper Limit</label>
@@ -307,11 +309,11 @@ class DynamicTabs {
 
                             <div class="mb-3">
                                 <label for="Tool-${id}" class="form-label">Tool</label>
-                                <input type="text" class="form-control" id="Tool-${id}" name="Tool" value="${rowData.Tool}">
+                                <input type="text" class="form-control" id="Tool-${id}" name="Tool" value="${rowData.Tool ? rowData.Tool : ``}">
                             </div>
                             <div class="mb-3">
                                 <label for="MethodSampling-${id}" class="form-label">Sampling Method</label>
-                                <input type="text" class="form-control" id="MethodSampling-${id}" name="MethodSampling" value="${rowData.MethodSampling}">
+                                <input type="text" class="form-control" id="MethodSampling-${id}" name="MethodSampling" value="${rowData.MethodSampling ? rowData.MethodSampling : ``}">
                             </div>
                             <div class="d-flex mb-3 gap-4">
                                 <div>

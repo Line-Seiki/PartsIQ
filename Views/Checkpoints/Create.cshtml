@@ -33,18 +33,21 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">New Checkpoint</h5>
+                        <div class="d-flex justify-content-between card-header">
+                            <h5 class="card-title">Create Checkpoint</h5>
+                            <button id="add-checkpoint" class="btn btn-secondary">Add Checkpoint</button>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-12">
                                     <form id="upload-form" enctype="multipart/form-data">
                                         <div class="form-group">
-                                            <label for="example-fileinput">Default file input</label>
+                                            <label for="example-fileinput">Upload Checkpoints (.xlsx)</label>
                                             <input name="excelFile" type="file" id="excelFile" class="form-control">
                                         </div>
-                                        <button type="submit" value="Upload" class="btn btn-info waves-effect waves-light " data-effect="wave">Sign in</button>
+                                        <div id="checkpoint-btns" class="d-flex justify-content-start gap-2">
+                                            <button id="upload-form-btn" type="submit" value="Upload" class="btn btn-primary waves-effect waves-light " data-effect="wave">Generate</button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -72,6 +75,10 @@
 @section scripts {
     <script src="~/Utility/JS/tabs.js"></script>
     <script>
+        const partID = @ViewBag.PartId;
+        const addCheckpoint = document.getElementById('add-checkpoint');
+        console.log('partId', partID);
+
             $(document).ready(function () {
 
                 function processSpecifications(data) {
@@ -114,8 +121,9 @@
                     var formData = new FormData();
                     var fileInput = $('#excelFile')[0].files[0];
                     formData.append('excelFile', fileInput);
-                    formData.append('PartID', '@ViewBag.PartId');
-
+                    formData.append('PartID', partID);
+                    clearCheckpoints();
+                
                     $.ajax({
                         url: '@Url.Action("UploadPartCheckpoints", "Checkpoints")',
                         type: "POST",
@@ -126,6 +134,7 @@
                             console.log(processSpecifications(success.data));
                             const res = processSpecifications(success.data);
                             const addRows = res.map(data => new DynamicTabs('checkpoint-tab', 'checkpoint-content', 'checkpoint', data));
+                            clearCheckpointsContainer();
 
                         },
                         else: function (err) {
@@ -161,10 +170,51 @@
                     $('#LimitUpper').val(upperLimit);
                 });
 
-                // For Saving Checkpoint Functionality
+                // For Adding Checkpoint
+                if (addCheckpoint) {
+                    addCheckpoint.addEventListener('click', function () {
+                        console.log('click');
+                        createCheckpointForm();
+                    });
+                }
                 
 
             });
+
+        function createCheckpointForm() {
+            const data = {
+                PartID: partID,
+                Manual: true,
+            }
+            const checkpointContainer = document.getElementById('checkpoint-container');
+            if (checkpointContainer) {
+                checkpointContainer.classList.remove('d-none');
+                const item = new DynamicTabs('checkpoint-tab', 'checkpoint-content', 'checkpoint', data);
+            }
+        }
+
+        function clearCheckpoints() {
+            DynamicTabs.tabCounter = 0;
+            const checkpointList = document.getElementById('checkpoint-tab');
+            const checkpointContent = document.getElementById('checkpoint-content');
+            const checkpointContainer = document.getElementById('checkpoint-container');
+            checkpointList.innerHTML = '';
+            checkpointContent.innerHTML = '';
+            if (document.getElementById('clear-all')) {
+                document.getElementById('clear-all').remove();
+                checkpointContainer.classList.add('d-none');
+            }
+        }
+
+        function clearCheckpointsContainer() {
+            const checkpointBtns = document.getElementById('checkpoint-btns');
+            if (!document.getElementById('clear-all')) {
+                const clearAllCheckpointsBtn = `<button id="clear-all" class="btn btn-secondary" onclick="clearCheckpoints()">Clear Checkpoints</button>`
+                checkpointBtns.insertAdjacentHTML('beforeend', clearAllCheckpointsBtn)
+            }
+        }
+
+        
     </script>
 
 }
