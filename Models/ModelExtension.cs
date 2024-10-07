@@ -206,7 +206,7 @@ namespace PartsIq.Models
         public double LowerLimit { get; set; }
         public byte IsMeasurement { get; set; }
         public string Tool { get; set; }
-        public string MethodSmapling { get; set; }
+        public string MethodSampling { get; set; }
         public string Level { get; set; }
         public double LevelNum { get; set; }
         public string Note { get; set; }

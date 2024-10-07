@@ -318,6 +318,7 @@ namespace PartsIq.Controllers
                                 col++;
                             }
                         }
+                        rowData.Add("PartID", PartID.ToString());
                         data.Add(rowData);
                     }
                 }
@@ -358,7 +359,7 @@ namespace PartsIq.Controllers
                     LimitLower = data.LowerLimit,
                     LimitUpper = data.UpperLimit,
                     Note = data.Note,
-                    SamplingMethod = data.MethodSmapling,
+                    SamplingMethod = data.MethodSampling,
                     Specification = Specification,
                     Tools = data.Tool,
                 };
@@ -380,6 +381,15 @@ namespace PartsIq.Controllers
         {
             Debug.WriteLine(formData);
             return Json(formData, JsonRequestBehavior.AllowGet);
+        }
+
+        // DELETE: /Checkpoints/DeleteCheckpoint/:id
+        public JsonResult DeleteCheckpoint(int id)
+        {
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
+            db.Checkpoints.Remove(checkpoint);
+            db.SaveChanges();
+            return Json(new {success = true, message="successfully deleted checkpoint"}, JsonRequestBehavior.AllowGet);
         }
 
         //Functions for Upload Checkpoint 
