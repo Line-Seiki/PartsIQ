@@ -54,6 +54,14 @@ namespace PartsIq.Controllers
             return Json(new { data }, JsonRequestBehavior.AllowGet);
         }
 
+        //POST /Evaluation/Create/
+        public ActionResult CreateEvaluation()
+        {
+            var form = Request.Form;
+
+            return Json("test", JsonRequestBehavior.AllowGet);
+        }
+
         #region HELPERS
         /// <summary>
         /// Convert Decisions from the database into a list of SelectListItem

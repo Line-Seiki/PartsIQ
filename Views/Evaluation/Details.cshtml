@@ -131,7 +131,7 @@
                                                 <label for="Decision" class="form-label">Decision:</label>
                                                 <select type="text" class="form-control w-50" id="Decision" placeholder="Select decision" required></select>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Save Evaluation</button>
+                                            <button type="submit" id="save-evaluation-btn" data-id="@Model.DeliveryDetailID" class="btn btn-primary">Save Evaluation</button>
                                         </form>
                                     </div>
                                 </div>
@@ -146,30 +146,64 @@
 
 @section scripts{
     <script>
-        let decisionList = @Html.Raw(Json.Encode(ViewBag.DecisionList));
-        const evalForm = document.getElementById('save-evaluation');
+       $(document).ready(function () {
 
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeDynamicSelectize();
-
-            evalForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const decisionSelected = document.getElementById('Decision').selectize.getValue();
-                const formData = new FormData(evalForm);
-                formData.append("Decision", decisionSelected);
-                const data = Object.fromEntries(formData);
-                console.log(data);
-            });
-        });
-
+        // Initialize the selectize dropdown with options
         function initializeDynamicSelectize() {
-            return $(`#Decision`).selectize({
+            return $('#Decision').selectize({
                 valueField: 'Value',
                 labelField: 'Text',
                 searchField: 'Text',
                 options: decisionList,
                 create: false,
-            });
+            })[0].selectize;  // This ensures you get the selectize API object
         }
+
+        // Get the decision list from the ViewBag
+        let decisionList = @Html.Raw(Json.Encode(ViewBag.DecisionList));
+
+        // Initialize the selectize plugin and save the instance for later use
+        const decisionSelectize = initializeDynamicSelectize();
+
+        // Form submission handler
+        $(document).on("submit", '#save-evaluation', function (e) {
+            e.preventDefault();
+
+            let detailID = $('#save-evaluation-btn').data("id");
+
+            // Use the decisionSelectize instance to get the selected value
+            const decisionSelected = decisionSelectize.getValue();
+
+            // Collect form data
+            const formData = new FormData(this);  // 'this' refers to the form element
+            formData.append("Decision", decisionSelected);
+            formData.append("DeliveryDetailID", detailID);
+
+            // Convert form data to a plain object for logging or sending via AJAX
+            const data = Object.fromEntries(formData);
+
+            $.ajax({
+                url: '@Url.Action("CreateEvaluation", "Evaluation")',
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    
+                }, error: function (err) {
+                    
+                },
+            });
+            // Here you could send data via AJAX or handle it as needed
+            // $.ajax({ /* AJAX call */ });
+        });
+
+});
+
+
+
+
+
+
     </script>
 }
