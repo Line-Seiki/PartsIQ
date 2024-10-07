@@ -15,6 +15,7 @@ using Microsoft.Ajax.Utilities;
 using System.Reflection;
 using System.ComponentModel.Design;
 using System.IO;
+using Microsoft.SqlServer.Server;
 
 namespace PartsIq.Controllers
 {
@@ -158,13 +159,14 @@ namespace PartsIq.Controllers
                 c.Code,
                 c.CheckpointId,
                 c.InspectionPart,
-                VariableType = c.IsMeasurement == 1 ? "Measurement" : "Attribute",
+                VariableType = c.IsMeasurement ? "Measurement" : "Attribute",
                 c.Specification,
                 c.LimitUpper,
                 c.LimitLower,
                 c.SamplingMethod,
                 c.Tools,
-                Status = c.IsActive == 1 ? "Active" : "Inactive",
+                c.IsActive,
+                Status = c.IsActive ? "Active" : "Inactive",
             }).ToList();
 
             return Json(new { success = true, data = checkpoints }, JsonRequestBehavior.AllowGet);
@@ -348,14 +350,14 @@ namespace PartsIq.Controllers
                     return Json(new { success = false, message = "No parts found." }, JsonRequestBehavior.AllowGet);
                 }
 
-                var Specification = data.IsMeasurement == 1  ? data.SpecificationRange : data.Specification;
+                var Specification = data.IsMeasurement  ? data.SpecificationRange : data.Specification;
                 var checkpoint = new Checkpoint()
                 {
                     Part_ID = data.PartID,
                     Code = data.Code,
                     InspectionPart = data.InspectionPart,
-                    IsActive = 1,
-                    IsMeasurement = data.IsMeasurement ,
+                    IsActive = true,
+                    IsMeasurement = data.IsMeasurement,
                     LimitLower = data.LowerLimit,
                     LimitUpper = data.UpperLimit,
                     Note = data.Note,
@@ -387,9 +389,18 @@ namespace PartsIq.Controllers
         public JsonResult DeleteCheckpoint(int id)
         {
             Checkpoint checkpoint = db.Checkpoints.Find(id);
-            db.Checkpoints.Remove(checkpoint);
-            db.SaveChanges();
-            return Json(new {success = true, message="successfully deleted checkpoint"}, JsonRequestBehavior.AllowGet);
+            if(checkpoint != null)
+            {
+                checkpoint.IsActive = !checkpoint.IsActive;
+                db.Entry(checkpoint).Property(s => s.IsActive).IsModified = true;
+                db.SaveChanges();
+                return Json(new { success = true, message = "successfully deleted checkpoint" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { success = false, message = "failArchivingCheckpoint" }, JsonRequestBehavior.AllowGet);
+            }
+            
         }
 
         //Functions for Upload Checkpoint 

@@ -24,8 +24,8 @@ namespace PartsIq.Models
         public int Part_ID { get; set; }
         public string Code { get; set; }
         public string InspectionPart { get; set; }
-        public Nullable<byte> IsActive { get; set; }
-        public Nullable<byte> IsMeasurement { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsMeasurement { get; set; }
         public Nullable<double> LimitLower { get; set; }
         public Nullable<double> LimitUpper { get; set; }
         public string Note { get; set; }
