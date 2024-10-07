@@ -79,7 +79,7 @@
                     return data.map(item => {
                         let { Specification, SpecificationRange } = item;
                         let leftTolerance, rightTolerance;
-                        if (Specification.includes('Ø')) Specification = Specification.replace(/[Ø]/g, '');
+                        if (Specification.includes('Ø') || Specification.includes('ø')) Specification = Specification.replace(/[Øø]/g, '');
 
                         if (!SpecificationRange) {
                             return item;
@@ -94,8 +94,8 @@
                         }
 
                         if (SpecificationRange) {
-                            const upperLimit = (parseFloat(Specification.replace(/[Ø]/g,'')) + leftTolerance).toFixed(2);
-                            const lowerLimit = (parseFloat(Specification.replace(/[Ø]/g, '')) + rightTolerance).toFixed(2);
+                            const upperLimit = (parseFloat(Specification.replace(/[Øø]/g,'')) + leftTolerance).toFixed(2);
+                            const lowerLimit = (parseFloat(Specification.replace(/[Øø]/g, '')) + rightTolerance).toFixed(2);
 
                             return {
                                 ...item,
