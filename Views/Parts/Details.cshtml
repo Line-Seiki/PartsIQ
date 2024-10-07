@@ -1045,8 +1045,9 @@
                                 </div>
                                 <div class="tab-pane fade active show" id="pills-settings" role="tabpanel" aria-labelledby="pills-tasks-tab">
                                     <div class="card mb-0 shadow-none">
-                                        <div class="card-header p-0">
+                                        <div class="card-header d-flex justify-content-between p-0">
                                             <h5 class="card-title">Checkpoints</h5>
+                                            <button id="add-checkpoint" class="btn btn-primary">Add Checkpoint/s</button>
                                         </div>
                                         <div class="card-body px-0">
                                             <form action="#" novalidate="novalidate" id="addprofileform" data-type="edit">
@@ -1170,7 +1171,15 @@
 
 @section scripts {
     <script>
+        const partId = @Model.PartID;
+        const addCheckpoint = document.getElementById('add-checkpoint');
         $(document).ready(function () {
+
+            if (addCheckpoint) {
+                addCheckpoint.addEventListener('click', function () {
+                    rerouteCreateCheckpoint(partId)
+                });
+            }
 
         $(document).on("click", "#statusBtn", function () {
 
@@ -1302,7 +1311,7 @@
                     render: function (data, type, row) {
                         return `
                         <button data-id="${data}"class="btn btn-sm btn-secondary waves-effect waves-light mb-1"><i class="mdi mdi-pencil"></i></button>
-                        <button data-id="${data}"class="btn btn-sm btn-danger waves-effect waves-light mb-1"><i class="mdi mdi-trash-can"></i></button>`
+                        <button typr="button" data-id="${data}"class="btn btn-sm btn-danger waves-effect waves-light mb-1" onclick="deleteCheckpoint(${data})"><i class="mdi mdi-trash-can"></i></button>`
 
                     }
                 },
@@ -1314,6 +1323,19 @@
 
 
     });
+
+        function deleteCheckpoint(id) {
+            $.ajax({
+                url: `/Checkpoints/DeleteCheckpoint/${id}`,
+                method: 'POST',
+                success: (res) => { console.log(res) },
+                error: (err) => { console.log(err) }   
+            })
+        }
+
+        function rerouteCreateCheckpoint(id) {
+            window.location.href = `/Checkpoints/Create/${id}`;
+        }
 
     </script>
 
