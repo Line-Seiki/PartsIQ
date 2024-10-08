@@ -47,11 +47,11 @@
                                             </div>
                                             <div>
                                                 <label for="UpperLimit" class="form-label">Upper Limit</label>
-                                                <input type="text" class="form-control" id="UpperLimit" name="UpperLimit" value="@Model.LimitUpper">
+                                                <input type="number" class="form-control" id="UpperLimit" name="UpperLimit" value="@Model.LimitUpper">
                                             </div>
                                             <div>
                                                 <label for="LowerLimit" class="form-label">Lower Limit</label>
-                                                <input type="text" class="form-control" id="LowerLimit" name="LowerLimit" value="@Model.LimitLower">
+                                                <input type="number" class="form-control" id="LowerLimit" name="LowerLimit" value="@Model.LimitLower">
                                             </div>
                                         </div>
 
@@ -121,6 +121,11 @@
                         if (res.success) {
                             alertify.success(res.message);
                         }
+                        window.scroll({
+                            top: 0,
+                            left: 0,
+                            behavior: 'smooth'
+                        });
                         console.log(res);
                     },
                     error: (err) => {
@@ -129,10 +134,6 @@
                 })
             })
         })
-        window.scroll({
-            top: 0,
-            left: 0,
-            behavior: 'smooth'
-        });
+        
     </script>
 }
