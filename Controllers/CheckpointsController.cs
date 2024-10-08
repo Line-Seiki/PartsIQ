@@ -51,8 +51,8 @@ namespace PartsIq.Controllers
         {
             var part = db.Parts.Find(id);
             if (part == null)
-                return HttpNotFound();
-            
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             ViewBag.PartId = id;
             return View();
         }

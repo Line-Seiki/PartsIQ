@@ -244,11 +244,11 @@
                 <form class="px-3" id="inspectionForm" data-user="" data-detail="" data-detailversion="">
                     <div class="form-group">
                         <label for="iSampleSize">Sample Size</label>
-                        <input class="form-control" type="number" id="iSampleSize" name="SampleSize" required>
+                        <input class="form-control" type="number" min="1" id="iSampleSize" name="SampleSize" required>
                     </div>
                     <div class="form-group">
                         <label for="iCavities">Number of Cavities</label>
-                        <input class="form-control" type="number" id="iCavities" name="NumberOfCavities" required>
+                        <input class="form-control" type="number" min="1" id="iCavities" name="NumberOfCavities" required>
                     </div>
                     <div class="d-flex flex-column" id="CavityContainer"></div>
                     <div class="form-group">
@@ -260,7 +260,7 @@
                         <input class="form-control" type="number" id="iHumidity" name="Humidity" step=".001" required>
                     </div>
                     <div class="form-group text-center">
-                        <button class="btn btn-secondary" type="submit" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
                         <button class="btn btn-primary" type="submit">Continue</button>
                     </div>
                 </form>
@@ -521,32 +521,36 @@
                         delete data[key];
                     }
                 });
-
-                data.CavityList = cavityArray.join(',');
-                data.UserID = inspectionForm.dataset.user;
-                data.DeliveryDetailID = inspectionForm.dataset.detail;
-                data.DeliveryDetailVersion = inspectionForm.dataset.detailversion
-                data['Humidity'] = Number(data['Humidity']);
-                data['Temperature'] = Number(data['Temperature']);
-                console.log(data);
-                $.ajax({
-                    url: '/Inspection/CreateInspection',
-                    type: 'GET',
-                    data,
-                    success(res) {
-                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                        else alertify.error(`${res.Status}: ${res.Message}`);
-                        inspectionForm.reset();
-                        refreshTables();
-                        if (res.RouteInspectionID) {
-                            const url = `/Inspection/Details/${res.RouteInspectionID}`;
-                            window.open(url, '_blank');
+                if (data.SampleSize > 0 && data.NumberOfCavities > 0) {
+                    data.CavityList = cavityArray.join(',');
+                    data.UserID = inspectionForm.dataset.user;
+                    data.DeliveryDetailID = inspectionForm.dataset.detail;
+                    data.DeliveryDetailVersion = inspectionForm.dataset.detailversion
+                    data['Humidity'] = Number(data['Humidity']);
+                    data['Temperature'] = Number(data['Temperature']);
+                    console.log(data);
+                    $.ajax({
+                        url: '/Inspection/CreateInspection',
+                        type: 'GET',
+                        data,
+                        success(res) {
+                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                            else alertify.error(`${res.Status}: ${res.Message}`);
+                            inspectionForm.reset();
+                            refreshTables();
+                            if (res.RouteInspectionID) {
+                                const url = `/Inspection/Details/${res.RouteInspectionID}`;
+                                window.open(url, '_blank');
+                            }
+                        },
+                        error(err) {
+                            alertify.error(`${err}`);
                         }
-                    },
-                    error(err) {
-                        alertify.error(`${err}`);
-                    }
-                });
+                    });
+                } else {
+                    alertify.error("use non negative numbers");
+                }
+                
             });
 
         }); // - END DOMCONTENTLOADED
