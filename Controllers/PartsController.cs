@@ -115,7 +115,7 @@ namespace PartsIq.Controllers
             }
         }
 
-            public ActionResult GetPISTable()
+            public JsonResult GetPISTable()
         {
             try
             {
@@ -135,17 +135,88 @@ namespace PartsIq.Controllers
                     s.Name,
                     s.Priority,
                     s.Version,
+                    s.IsSearchable,
                     // Handle null FileAttachment case
                     FilePath = s.FileAttachment != null ? s.FileAttachment.FilePath : string.Empty
                 });
 
                 // Return the result as JSON
-                return Json(parts, JsonRequestBehavior.AllowGet);
+                return Json(new {data = parts}, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 // Handle any errors and return an appropriate response
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // /Parts/CreatePart
+        public JsonResult CreatePart(PartFormData data)
+        {
+            try
+            {
+                var newPart = new Part
+                {
+                    Code = data.Code,
+                    DocNumber = data.DocNumber,
+                    Model = data.Model,
+                    Name = data.Name,
+                    Priority = data.Priority,
+                    Type = data.Type,
+                    Version = 1,
+                    IsMonitored = false,
+                    IsActive = true,
+                    DateMonitored = DateTime.Now,
+                    IsSearchable = true,
+                };
+                db.Parts.Add(newPart);
+                db.SaveChanges();
+                return Json(new {message = "successfully added part", data }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+
+                return Json( new { message = "failed to save new part", error = $"Error: {ex.Message}"});
+            }
+            
+        }
+
+        // /Parts/MonitorPart/:id
+        public JsonResult MonitorPart(int id)
+        {
+            var part = db.Parts.Find(id);
+            if (part != null)
+            {
+                part.IsMonitored = !part.IsMonitored;
+                if (part.IsMonitored == true)
+                {
+                    part.DateMonitored = DateTime.Now;
+                    db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
+                }
+                db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
+                db.SaveChanges();
+                return Json(new { success = true, message = "successfully changed monitoring status" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { success = false, message = "failed to change monitoring status" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // /Parts/ToggleSearch/:id
+        public JsonResult ToggleSearch(int id)
+        {
+            var part = db.Parts.Find(id);
+            if (part != null)
+            {
+                part.IsSearchable = !part.IsSearchable;
+                db.Entry(part).Property(p => p.IsSearchable).IsModified = true;
+                db.SaveChanges();
+                return Json(new { success = true, message = "successfully changed searchable status" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { success = false, message = "failed to change searchable status" }, JsonRequestBehavior.AllowGet);
             }
         }
 

@@ -16,6 +16,7 @@ using System.Reflection;
 using System.ComponentModel.Design;
 using System.IO;
 using Microsoft.SqlServer.Server;
+using System.Runtime.CompilerServices;
 
 namespace PartsIq.Controllers
 {
@@ -91,7 +92,6 @@ namespace PartsIq.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.CheckpointId = new SelectList(db.Parts, "PartId", "Code", checkpoint.CheckpointId);
             return View(checkpoint);
         }
 
@@ -170,6 +170,62 @@ namespace PartsIq.Controllers
             }).ToList();
 
             return Json(new { success = true, data = checkpoints }, JsonRequestBehavior.AllowGet);
+        }
+
+        // /Checkpoints/EditCheckpoint
+        public JsonResult EditCheckpoint(FormCheckpoint data)
+        {
+            var checkpoint = db.Checkpoints.Find(data.CheckpointID);
+            if (checkpoint == null) return Json(new { success = false, message = "checkpoint cannot be found" });
+
+            if (checkpoint.Code != data.Code)
+            {
+                checkpoint.Code = data.Code;
+                db.Entry(checkpoint).Property(s => s.Code).IsModified = true;
+            }
+            if (checkpoint.InspectionPart != data.InspectionPart)
+            {
+                checkpoint.InspectionPart = data.InspectionPart;
+                db.Entry(checkpoint).Property(s => s.InspectionPart).IsModified = true;
+            }
+            if (checkpoint.Specification != data.Specification)
+            {
+                checkpoint.Specification = data.Specification;
+                db.Entry(checkpoint).Property(s => s.Specification).IsModified = true;
+            }
+            if (checkpoint.LimitUpper != data.UpperLimit)
+            {
+                checkpoint.LimitUpper = data.UpperLimit;
+                db.Entry(checkpoint).Property(s => s.LimitUpper).IsModified = true;
+            }
+            if (checkpoint.LimitLower != data.LowerLimit)
+            {
+                checkpoint.LimitLower = data.LowerLimit;
+                db.Entry(checkpoint).Property(s => s.LimitLower).IsModified = true;
+            }
+            if (checkpoint.IsMeasurement != data.IsMeasurement)
+            {
+                checkpoint.IsMeasurement = data.IsMeasurement;
+                db.Entry(checkpoint).Property(s => s.IsMeasurement).IsModified = true;
+            }
+            if (checkpoint.Tools != data.Tool)
+            {
+                checkpoint.Tools = data.Tool;
+                db.Entry(checkpoint).Property(s => s.Tools).IsModified = true;
+            }
+            if (checkpoint.SamplingMethod != data.MethodSampling)
+            {
+                checkpoint.SamplingMethod = data.MethodSampling;
+                db.Entry(checkpoint).Property(s => s.SamplingMethod).IsModified = true;
+            }
+            if (checkpoint.Note != data.Note)
+            {
+                checkpoint.Note = data.Note;
+                db.Entry(checkpoint).Property(s => s.Note).IsModified = true;
+            }
+            db.SaveChanges();
+            return Json(new { success = true,message = "Edit Successful" }, JsonRequestBehavior.AllowGet);
+
         }
 
 
