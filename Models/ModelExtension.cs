@@ -211,8 +211,21 @@ namespace PartsIq.Models
         public double LevelNum { get; set; }
         public string Note { get; set; }
         public int PartID { get; set; }
+        public int CheckpointID { get; set; }
     }
 
+    #endregion
+
+    #region PIS
+    public class PartFormData
+    {
+        public string Code { get; set; }
+        public string DocNumber { get; set; }
+        public string Model { get; set; }
+        public string Name { get; set; }
+        public int Priority { get; set; }
+        public string Type { get; set; }
+    }
     #endregion
 
     #region Cavity

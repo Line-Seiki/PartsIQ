@@ -5,25 +5,27 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Web;
 using System.Web.Mvc;
+using PartsIq.Utility;
 
 namespace PartsIq.Controllers
 {
     public class SchedulingController : Controller
     {
         private IDataEntityContext  _db;
-
+        private readonly GetSelectLists _getSelectLists;
 
         public SchedulingController()
         {
             _db = new DataEntityContext();
+            _getSelectLists = new GetSelectLists();
         }
 
         // GET: /Scheduling/
         public ActionResult Index()
         {
-            var partsList = PartListItems();
+            var partsList = _getSelectLists.PartListItems();
             ViewBag.PartsList = partsList;
-            var suppliersList = SupplierListItems();
+            var suppliersList = _getSelectLists.SupplierListItems();
             ViewBag.SuppliersList = suppliersList;
 
             return View();
@@ -40,14 +42,14 @@ namespace PartsIq.Controllers
         // GET: /Scheduling/GetPartsList
         public JsonResult GetPartsList()
         {
-            var partsList = PartListItems();
+            var partsList = _getSelectLists.PartListItems();
             return Json(partsList, JsonRequestBehavior.AllowGet);
         }
 
         // GET: /Scheduling/GetSuppliersList
         public JsonResult GetSuppliersList()
         {
-            var suppliersList = SupplierListItems();
+            var suppliersList = _getSelectLists.SupplierListItems();
             return Json(suppliersList, JsonRequestBehavior.AllowGet);
         }
 
@@ -55,8 +57,8 @@ namespace PartsIq.Controllers
         // GET: /Scheduling/GetSuppliersAndPartsList
         public JsonResult GetSuppliersAndPartsList()
         {
-            var partsList = PartListItems();
-            var suppliersList = SupplierListItems();
+            var partsList = _getSelectLists.PartListItems();
+            var suppliersList = _getSelectLists.SupplierListItems();
             return Json(new { suppliersList, partsList }, JsonRequestBehavior.AllowGet);
         }
 
@@ -115,33 +117,6 @@ namespace PartsIq.Controllers
             var response = _db.ArchiveDelivery(deliveryDetailId, version);
             return Json(response, JsonRequestBehavior.AllowGet);
         }
-
-        #region HELPERS
-        /// <summary>
-        /// Convert Parts from the database into a list of SelectListItem
-        /// </summary>
-        /// <returns>returns a List(SelectListItem) of SelectListItem from Parts</returns>
-        public List<SelectListItem> PartListItems()
-        {
-            return _db.GetParts().Select(p => new SelectListItem
-            {
-                Value = p.PartID.ToString(),
-                Text = p.Code,
-            }).ToList();
-        }
-        /// <summary>
-        /// Convert Suppliers from the database into a list of SelectListItem
-        /// </summary>
-        /// <returns>returns a list of SelectListItem from Suppliers</returns>
-        public List<SelectListItem> SupplierListItems()
-        {
-            return _db.GetSuppliers().Select(s => new SelectListItem
-            {
-                Value = s.SupplierID.ToString(),
-                Text = s.Name,
-            }).ToList();
-        }
-        #endregion
     }
 }
 

@@ -1,118 +1,138 @@
 ﻿@model PartsIq.Models.Checkpoint
 
-@{
-    ViewBag.Title = "Edit";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-
-<h2>Edit</h2>
-
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Checkpoint</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.CheckpointId)
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Part_ID, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Part_ID, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Part_ID, "", new { @class = "text-danger" })
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Edit Checkpoint</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Edit</li>
+                        </ol>
+                    </div>
+                </div>
             </div>
-        </div>
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                </div>
+                                <div class="card-body">
+                                    <form id="checkpointEditForm">
+                                        <div class="mb-3">
+                                            <label for="Code" class="form-label">Code</label>
+                                            <input type="text" class="form-control" id="Code" name="Code" value="@Model.Code">
+                                            <input type="hidden" id="PartID" value="@Model.Part_ID" name="PartID">
+                                            <input type="hidden" id="CheckpointID" value="@Model.CheckpointId" name="CheckpointID"/>
+                                        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Code, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Code, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                                        <div class="mb-3">
+                                            <label for="InspectionPart" class="form-label">Inspection Part</label>
+                                            <input type="text" class="form-control" id="InspectionPart" name="InspectionPart" value="@Model.InspectionPart">
+                                        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.InspectionPart, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.InspectionPart, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.InspectionPart, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                                        <div class="d-flex mb-3 gap-4">
+                                            <div>
+                                                <label for="Specification" class="form-label">Specification</label>
+                                                <input type="text" class="form-control" id="Specification" name="Specification" value="@Model.Specification">
+                                            </div>
+                                            <div>
+                                                <label for="UpperLimit" class="form-label">Upper Limit</label>
+                                                <input type="text" class="form-control" id="UpperLimit" name="UpperLimit" value="@Model.LimitUpper">
+                                            </div>
+                                            <div>
+                                                <label for="LowerLimit" class="form-label">Lower Limit</label>
+                                                <input type="text" class="form-control" id="LowerLimit" name="LowerLimit" value="@Model.LimitLower">
+                                            </div>
+                                        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.IsActive, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
-            </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.IsMeasurement, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.IsMeasurement, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.IsMeasurement, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                                        <div class="mb-3">
+                                            <p class="form-label">Measurement?</p>
+                                            <div class="form-check custom-radio">
+                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="1" @(Model.IsMeasurement ? "checked": "") />
+                                                <label class="form-check-label" for="IsMeasurementT">True</label>
+                                            </div>
+                                            <div class="form-check custom-radio">
+                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="0" @(!Model.IsMeasurement ? "checked": "")/>
+                                                <label class="form-check-label" for="IsMeasurementF">False</label>
+                                            </div>
+                                        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.LimitLower, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.LimitLower, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.LimitLower, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.LimitUpper, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.LimitUpper, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.LimitUpper, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Note, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Note, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.SamplingMethod, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.SamplingMethod, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.SamplingMethod, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Specification, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Specification, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Specification, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Tools, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Tools, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Tools, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+                                        <div class="mb-3">
+                                            <label for="Tool" class="form-label">Tool</label>
+                                            <input type="text" class="form-control" id="Tool" name="Tool" value="@Model.Tools">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="MethodSampling" class="form-label">Sampling Method</label>
+                                            <input type="text" class="form-control" id="MethodSampling" name="MethodSampling" value="@Model.SamplingMethod">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Note" class="form-label">Note</label>
+                                            <input type="text" class="form-control" id="Note" name="Note" value="@Model.Note">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-12 order-md-first order-lg-last">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Part Name: <b>@Model.Part.Name</b></h5>
+                                    <p>Code: @Model.Part.Code</p>
+                                    <p>Model: @Model.Part.Model</p>
+                                </div>
+                                <div class="card-body">
+                                    <a href="~/Parts/Details/@Model.Part_ID" class="btn btn-secondary"><i class="mdi mdi-arrow-left-bold"></i> Back to details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
+
+@section scripts {
+    <script>
+        const checkpointForm = document.getElementById('checkpointEditForm');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkpointForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(checkpointForm);
+                const data = Object.fromEntries(formData);
+                $.ajax({
+                    url: '/Checkpoints/EditCheckpoint',
+                    method: 'POST',
+                    data,
+                    success: (res) => {
+                        if (res.success) {
+                            alertify.success(res.message);
+                        }
+                        console.log(res);
+                    },
+                    error: (err) => {
+                        console.log(err);
+                    }
+                })
+            })
+        })
+        window.scroll({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    </script>
+}
