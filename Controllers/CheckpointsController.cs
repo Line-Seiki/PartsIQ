@@ -85,12 +85,12 @@ namespace PartsIq.Controllers
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new HttpStatusCodeResult(400);
             }
             Checkpoint checkpoint = db.Checkpoints.Find(id);
             if (checkpoint== null)
             {
-                return HttpNotFound();
+                return new HttpStatusCodeResult(404);
             }
             return View(checkpoint);
         }
