@@ -193,7 +193,7 @@ namespace PartsIq.Models
 
         public int SampleSize { get; set; }
 
-        public byte IsMeasurement { get; set; }  
+        public bool IsMeasurement { get; set; }  
     }
 
     public class FormCheckpoint
