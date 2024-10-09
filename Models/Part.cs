@@ -25,14 +25,15 @@ namespace PartsIq.Models
         public string Code { get; set; }
         public System.DateTime DateMonitored { get; set; }
         public string DocNumber { get; set; }
-        public byte IsMonitored { get; set; }
+        public bool IsMonitored { get; set; }
         public string Model { get; set; }
         public string Name { get; set; }
         public Nullable<int> Priority { get; set; }
         public Nullable<int> Version { get; set; }
         public Nullable<int> FileAtttachment_ID { get; set; }
         public string Type { get; set; }
-        public Nullable<bool> IsActive { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsSearchable { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Checkpoint> Checkpoints { get; set; }
