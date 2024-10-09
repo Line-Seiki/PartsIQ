@@ -176,6 +176,10 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+<<<<<<< Updated upstream
+=======
+    <Compile Include="Controllers\CheckpointsController.cs" />
+>>>>>>> Stashed changes
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\EvaluationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -185,6 +189,11 @@
     <Compile Include="Controllers\PartsController.cs" />
     <Compile Include="Controllers\SchedulingController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
+<<<<<<< Updated upstream
+=======
+    <Compile Include="Controllers\UserGroupPermissionsController.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
+>>>>>>> Stashed changes
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -2975,6 +2984,7 @@
     <Content Include="Views\Checkpoints\Create - Copy.cshtml" />
     <Content Include="Views\Parts\AddCheckpoint.cshtml" />
     <Content Include="Views\Scheduling\Index.cshtml" />
+<<<<<<< Updated upstream
     <Content Include="Views\Evaluation\Index.cshtml" />
     <Content Include="Views\Inspection\Details.cshtml" />
     <Content Include="Views\Inspection\Index.cshtml" />
@@ -2987,11 +2997,27 @@
     <Content Include="Views\Error\BadRequest.cshtml" />
     <Content Include="Views\Error\InternalError.cshtml" />
     <Content Include="Views\Error\General.cshtml" />
+=======
+    <Content Include="Views\Inspection\Details.cshtml" />
+    <Content Include="Views\Inspection\Index.cshtml" />
+    <Content Include="Views\Suppliers\Index.cshtml" />
+    <Content Include="Views\Parts\_PISTable.cshtml" />
+    <Content Include="Views\Inspection\_CheckpointInfo.cshtml" />
+    <Content Include="Views\Inspection\Test.cshtml" />
+    <Content Include="Views\Login\Index.cshtml" />
+    <Content Include="Views\Evaluation\Index.cshtml" />
+    <Content Include="Views\Shared\_LoginLayout.cshtml" />
+    <Content Include="Views\Evaluation\Details.cshtml" />
+    <Content Include="Views\Error\BadRequest.cshtml" />
+    <Content Include="Views\Error\General.cshtml" />
+    <Content Include="Views\Error\InternalError.cshtml" />
+>>>>>>> Stashed changes
     <Content Include="Views\Error\NotFound.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="assets\template\" />
+    <Folder Include="Views\InspectionItems\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
