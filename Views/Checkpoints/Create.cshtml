@@ -115,6 +115,7 @@
                 }
 
                 $('#upload-form').submit(function (event) {
+                    let token = $('input[name="__RequestVerificationToken"]').val();
                     event.preventDefault();                  
                     const checkpointContainer = document.getElementById('checkpoint-container');
                     checkpointContainer.classList.remove('d-none');

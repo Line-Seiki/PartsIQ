@@ -115,6 +115,7 @@
                                 <div class="d-flex flex-column">
                                     <h5>Evaluation Decision</h5>
                                     <div class="mt-4">
+                                        @Html.AntiForgeryToken()
                                         <form id="save-evaluation">
                                             <div class="d-flex gap-3 mb-3">
                                                 <label for="Evaluator" class="form-label">Evaluator:</label>
@@ -166,37 +167,45 @@
         const decisionSelectize = initializeDynamicSelectize();
 
         // Form submission handler
-        $(document).on("submit", '#save-evaluation', function (e) {
-            e.preventDefault();
+          $(document).on("submit", '#save-evaluation', function (e) {
+                e.preventDefault();
 
-            let detailID = $('#save-evaluation-btn').data("id");
+                let token = $('input[name="__RequestVerificationToken"]').val();
+                let detailID = $('#save-evaluation-btn').data("id");
 
-            // Use the decisionSelectize instance to get the selected value
-            const decisionSelected = decisionSelectize.getValue();
+                // Use the decisionSelectize instance to get the selected value
+                const decisionSelected = decisionSelectize.getValue();
 
-            // Collect form data
-            const formData = new FormData(this);  // 'this' refers to the form element
-            formData.append("Decision", decisionSelected);
-            formData.append("DeliveryDetailID", detailID);
+                // Collect form data
+                const formData = new FormData(this);  // 'this' refers to the form element
+                formData.append("Decision", decisionSelected);
+                formData.append("DeliveryDetailID", detailID);
+                formData.append("__RequestVerificationToken", token);
 
-            // Convert form data to a plain object for logging or sending via AJAX
-            const data = Object.fromEntries(formData);
-
-            $.ajax({
-                url: '@Url.Action("CreateEvaluation", "Evaluation")',
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (response) {
-                    
-                }, error: function (err) {
-                    
-                },
+                // AJAX call
+                $.ajax({
+                    url: '@Url.Action("CreateEvaluation", "Evaluation")',
+                    type: "POST",
+                    data: formData,
+                    contentType: false, // Important to send FormData correctly
+                    processData: false, // Prevent jQuery from processing the data
+                    success: function (response) {
+                        if (response.success) {
+                            // Handle success, e.g., display a success message or redirect
+                            alert("Evaluation saved successfully!");
+                        } else {
+                            // Handle validation errors or other issues
+                            alert("An error occurred: " + response.message);
+                        }
+                    },
+                    error: function (err) {
+                        // Handle any errors that occur during the request
+                        console.error("Error:", err);
+                        alert("An unexpected error occurred.");
+                    },
+                });
             });
-            // Here you could send data via AJAX or handle it as needed
-            // $.ajax({ /* AJAX call */ });
-        });
+
 
 });
 

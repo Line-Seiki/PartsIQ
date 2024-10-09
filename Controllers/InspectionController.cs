@@ -95,7 +95,7 @@ namespace PartsIq.Controllers
                     Specification = "12", // Placeholder for specification, modify as needed
                     UpperLimit = checkpoints.Select(c => c.LimitUpper).FirstOrDefault() ?? 0,
                     LowerLimit = checkpoints.Select(c => c.LimitLower).FirstOrDefault() ?? 0,
-                    IsMeasurement = checkpoints.Select(c => c.IsMeasurement).FirstOrDefault() ?? 0
+                    IsMeasurement = checkpoints.Select(c => c.IsMeasurement).FirstOrDefault() ? true : false,
                 }
             };
 
