@@ -204,15 +204,28 @@ namespace PartsIq.Models
         public string SpecificationRange {  get; set; } 
         public double UpperLimit { get; set; }
         public double LowerLimit { get; set; }
-        public byte IsMeasurement { get; set; }
+        public bool IsMeasurement { get; set; }
         public string Tool { get; set; }
         public string MethodSampling { get; set; }
         public string Level { get; set; }
         public double LevelNum { get; set; }
         public string Note { get; set; }
         public int PartID { get; set; }
+        public int CheckpointID { get; set; }
     }
 
+    #endregion
+
+    #region PIS
+    public class PartFormData
+    {
+        public string Code { get; set; }
+        public string DocNumber { get; set; }
+        public string Model { get; set; }
+        public string Name { get; set; }
+        public int Priority { get; set; }
+        public string Type { get; set; }
+    }
     #endregion
 
     #region Cavity

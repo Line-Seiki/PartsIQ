@@ -1,4 +1,5 @@
 ﻿using PartsIq.Models;
+using PartsIq.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -13,16 +14,18 @@ namespace PartsIq.Controllers
     {
         private PartsIQEntities db = new PartsIQEntities();
         private IDataEntityContext dbContext;
+        private readonly GetSelectLists _getSelectLists;
 
         public InspectionController()
         {
             dbContext = new DataEntityContext();
+            _getSelectLists = new GetSelectLists();
         }
 
         // GET: Inspection
         public ActionResult Index()
         {
-            var suppliersList = SupplierListItems();
+            var suppliersList = _getSelectLists.SupplierListItems();
             ViewBag.SuppliersList = suppliersList;
 
             return View();
@@ -95,19 +98,12 @@ namespace PartsIq.Controllers
                     Specification = "12", // Placeholder for specification, modify as needed
                     UpperLimit = checkpoints.Select(c => c.LimitUpper).FirstOrDefault() ?? 0,
                     LowerLimit = checkpoints.Select(c => c.LimitLower).FirstOrDefault() ?? 0,
-                    IsMeasurement = checkpoints.Select(c => c.IsMeasurement).FirstOrDefault() ? true : false,
+                    IsMeasurement = checkpoints.Select(c => c.IsMeasurement).FirstOrDefault()
                 }
             };
 
             return View("Details", inspectionViewModel); // Pass the correct view model to the view
         }
-
-
-
-
-
-
-
 
         // GET: /Inspection/GetAvailableInspections
         public JsonResult GetAvailableInspections()
@@ -218,10 +214,6 @@ namespace PartsIq.Controllers
             return Json(new { message = "Inspection ended.", success = true }, JsonRequestBehavior.AllowGet);
         }
 
-
-
-
-
         #region DEV Controller Actions
         // POST: /Inspection/DevAssign
         public JsonResult DevAssignInspector(int delDetailID, int delDetailVersion)
@@ -237,23 +229,6 @@ namespace PartsIq.Controllers
         {
             DateTimeOffset dateTimeOffset = new DateTimeOffset(dateTime);
             return dateTimeOffset.ToUnixTimeSeconds();
-        }
-        public List<SelectListItem> PartListItems()
-        {
-            return dbContext.GetParts().Select(p => new SelectListItem
-            {
-                Value = p.PartID.ToString(),
-                Text = p.Code,
-            }).ToList();
-        }
-
-        public List<SelectListItem> SupplierListItems()
-        {
-            return dbContext.GetSuppliers().Select(s => new SelectListItem
-            {
-                Value = s.SupplierID.ToString(),
-                Text = s.Name,
-            }).ToList();
         }
 
         private List<CavityMaxSample> GetMaxSampleNumber (int SampleSize, List<CavityMaxSample> cavities)

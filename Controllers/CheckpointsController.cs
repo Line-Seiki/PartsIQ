@@ -15,6 +15,8 @@ using Microsoft.Ajax.Utilities;
 using System.Reflection;
 using System.ComponentModel.Design;
 using System.IO;
+using Microsoft.SqlServer.Server;
+using System.Runtime.CompilerServices;
 
 namespace PartsIq.Controllers
 {
@@ -49,8 +51,8 @@ namespace PartsIq.Controllers
         {
             var part = db.Parts.Find(id);
             if (part == null)
-                return HttpNotFound();
-            
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             ViewBag.PartId = id;
             return View();
         }
@@ -83,14 +85,13 @@ namespace PartsIq.Controllers
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new HttpStatusCodeResult(400);
             }
             Checkpoint checkpoint = db.Checkpoints.Find(id);
             if (checkpoint== null)
             {
-                return HttpNotFound();
+                return new HttpStatusCodeResult(404);
             }
-            ViewBag.CheckpointId = new SelectList(db.Parts, "PartId", "Code", checkpoint.CheckpointId);
             return View(checkpoint);
         }
 
@@ -158,16 +159,73 @@ namespace PartsIq.Controllers
                 c.Code,
                 c.CheckpointId,
                 c.InspectionPart,
-                VariableType = c.IsMeasurement == 1 ? "Measurement" : "Attribute",
+                VariableType = c.IsMeasurement ? "Measurement" : "Attribute",
                 c.Specification,
                 c.LimitUpper,
                 c.LimitLower,
                 c.SamplingMethod,
                 c.Tools,
-                Status = c.IsActive == 1 ? "Active" : "Inactive",
+                c.IsActive,
+                Status = c.IsActive ? "Active" : "Inactive",
             }).ToList();
 
             return Json(new { success = true, data = checkpoints }, JsonRequestBehavior.AllowGet);
+        }
+
+        // /Checkpoints/EditCheckpoint
+        public JsonResult EditCheckpoint(FormCheckpoint data)
+        {
+            var checkpoint = db.Checkpoints.Find(data.CheckpointID);
+            if (checkpoint == null) return Json(new { success = false, message = "checkpoint cannot be found" });
+
+            if (checkpoint.Code != data.Code)
+            {
+                checkpoint.Code = data.Code;
+                db.Entry(checkpoint).Property(s => s.Code).IsModified = true;
+            }
+            if (checkpoint.InspectionPart != data.InspectionPart)
+            {
+                checkpoint.InspectionPart = data.InspectionPart;
+                db.Entry(checkpoint).Property(s => s.InspectionPart).IsModified = true;
+            }
+            if (checkpoint.Specification != data.Specification)
+            {
+                checkpoint.Specification = data.Specification;
+                db.Entry(checkpoint).Property(s => s.Specification).IsModified = true;
+            }
+            if (checkpoint.LimitUpper != data.UpperLimit)
+            {
+                checkpoint.LimitUpper = data.UpperLimit;
+                db.Entry(checkpoint).Property(s => s.LimitUpper).IsModified = true;
+            }
+            if (checkpoint.LimitLower != data.LowerLimit)
+            {
+                checkpoint.LimitLower = data.LowerLimit;
+                db.Entry(checkpoint).Property(s => s.LimitLower).IsModified = true;
+            }
+            if (checkpoint.IsMeasurement != data.IsMeasurement)
+            {
+                checkpoint.IsMeasurement = data.IsMeasurement;
+                db.Entry(checkpoint).Property(s => s.IsMeasurement).IsModified = true;
+            }
+            if (checkpoint.Tools != data.Tool)
+            {
+                checkpoint.Tools = data.Tool;
+                db.Entry(checkpoint).Property(s => s.Tools).IsModified = true;
+            }
+            if (checkpoint.SamplingMethod != data.MethodSampling)
+            {
+                checkpoint.SamplingMethod = data.MethodSampling;
+                db.Entry(checkpoint).Property(s => s.SamplingMethod).IsModified = true;
+            }
+            if (checkpoint.Note != data.Note)
+            {
+                checkpoint.Note = data.Note;
+                db.Entry(checkpoint).Property(s => s.Note).IsModified = true;
+            }
+            db.SaveChanges();
+            return Json(new { success = true,message = "Edit Successful" }, JsonRequestBehavior.AllowGet);
+
         }
 
 
@@ -348,14 +406,14 @@ namespace PartsIq.Controllers
                     return Json(new { success = false, message = "No parts found." }, JsonRequestBehavior.AllowGet);
                 }
 
-                var Specification = data.IsMeasurement == 1  ? data.SpecificationRange : data.Specification;
+                var Specification = data.IsMeasurement  ? data.SpecificationRange : data.Specification;
                 var checkpoint = new Checkpoint()
                 {
                     Part_ID = data.PartID,
                     Code = data.Code,
                     InspectionPart = data.InspectionPart,
-                    IsActive = 1,
-                    IsMeasurement = data.IsMeasurement ,
+                    IsActive = true,
+                    IsMeasurement = data.IsMeasurement,
                     LimitLower = data.LowerLimit,
                     LimitUpper = data.UpperLimit,
                     Note = data.Note,
@@ -387,9 +445,18 @@ namespace PartsIq.Controllers
         public JsonResult DeleteCheckpoint(int id)
         {
             Checkpoint checkpoint = db.Checkpoints.Find(id);
-            db.Checkpoints.Remove(checkpoint);
-            db.SaveChanges();
-            return Json(new {success = true, message="successfully deleted checkpoint"}, JsonRequestBehavior.AllowGet);
+            if(checkpoint != null)
+            {
+                checkpoint.IsActive = !checkpoint.IsActive;
+                db.Entry(checkpoint).Property(s => s.IsActive).IsModified = true;
+                db.SaveChanges();
+                return Json(new { success = true, message = "successfully deleted checkpoint" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { success = false, message = "failArchivingCheckpoint" }, JsonRequestBehavior.AllowGet);
+            }
+            
         }
 
         //Functions for Upload Checkpoint 

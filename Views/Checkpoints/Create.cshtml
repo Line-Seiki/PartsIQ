@@ -10,7 +10,7 @@
     <div class="page-title-box">
         <div class="container-fluid">
             <div class="page-title dflex-between-center">
-                <h3 class="mb-1 fw-bold">Checkpoints</h3>
+                <a href="~/Parts/Details/@ViewBag.PartId" class="mb-1 fw-bold card-title text-white"><i class="mdi mdi-arrow-left-bold"></i> Go back</a>
                 <ol class="breadcrumb mb-0 mt-1">
                     <li class="breadcrumb-item">
                         <a href="../index.html">
@@ -35,7 +35,7 @@
                     <div class="card">
                         <div class="d-flex justify-content-between card-header">
                             <h5 class="card-title">Create Checkpoint</h5>
-                            <button id="add-checkpoint" class="btn btn-secondary">Add Checkpoint</button>
+                            <button id="add-checkpoint" class="btn btn-secondary"><i class="mdi mdi-plus"></i> Add Checkpoint</button>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -123,8 +123,11 @@
                     var fileInput = $('#excelFile')[0].files[0];
                     formData.append('excelFile', fileInput);
                     formData.append('PartID', partID);
+                    if (document.getElementById('clear-all')) {
+                        document.getElementById('clear-all').remove();
+                    }
                     clearCheckpoints();
-                
+              
                     $.ajax({
                         url: '@Url.Action("UploadPartCheckpoints", "Checkpoints")',
                         type: "POST",
@@ -135,6 +138,10 @@
                             console.log(processSpecifications(success.data));
                             const res = processSpecifications(success.data);
                             const addRows = res.map(data => new DynamicTabs('checkpoint-tab', 'checkpoint-content', 'checkpoint', data));
+                            if (document.getElementById('clear-all')) {
+                                document.getElementById('clear-all').remove();
+                                checkpointContainer.classList.add('d-none');
+                            }
                             clearCheckpointsContainer();
 
                         },

@@ -4,8 +4,8 @@
     ViewBag.Title = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var Status = Model.IsActive.HasValue && Model.IsActive.Value ? "Inactive" : "Active";
-    var StatusClass = Model.IsActive.HasValue && Model.IsActive.Value ? "danger" : "success";
+    var Status = Model.IsActive ? "Inactive" : "Active";
+    var StatusClass = Model.IsActive ? "danger" : "success";
 }
 
 
@@ -64,7 +64,7 @@
                                             </tr>
                                             <tr>
                                                 <th class="pl-0" scope="row">Priority</th>
-                                                <td>@Model.Priority</td>
+                                                <td>@(Model.Priority == 1 ? "Low Priority" : Model.Priority == 2 ? "Normal Priority" : "High Priority")</td>
                                             </tr>
                                             <tr>
                                                 <th class="pl-0" scope="row">File</th>
@@ -75,7 +75,7 @@
                                                     }
                                                     else
                                                     {
-                                                        @:"NULL"
+                                                        @:"No File Attachment"
                                                     }
                                                 </td>
                                             </tr>
@@ -1050,28 +1050,28 @@
                                             <button id="add-checkpoint" class="btn btn-primary">Add Checkpoint/s</button>
                                         </div>
                                         <div class="card-body px-0">
-                                            <form action="#" novalidate="novalidate" id="addprofileform" data-type="edit">
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <table class="table table-centered dt-responsive w-100 dataTable no-footer dtr-inline fs-12" id="checkpointTable">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Code</th>
-                                                                    <th>Inspection Part</th>
-                                                                    <th>Variable Type</th>
-                                                                    <th>Specification</th>
-                                                                    <th>Upper Limit</th>
-                                                                    <th>Lower Limit</th>
-                                                                    <th>Sampling Method</th>
-                                                                    <th>Tool</th>
-                                                                    <th>Status</th>
-                                                                    <th>Action</th>
-                                                                </tr>
-                                                            </thead>
-                                                        </table>
-                                                    </div>
+                                            <!--<form action="#" novalidate="novalidate" id="addprofileform" data-type="edit">-->
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <table class="table table-centered dt-responsive w-100 dataTable no-footer dtr-inline fs-12" id="checkpointTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Code</th>
+                                                                <th>Inspection Part</th>
+                                                                <th>Variable Type</th>
+                                                                <th>Specification</th>
+                                                                <th>Upper Limit</th>
+                                                                <th>Lower Limit</th>
+                                                                <th>Sampling Method</th>
+                                                                <th>Tool</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                    </table>
                                                 </div>
-                                            </form>
+                                            </div>
+                                            <!--</form>-->
                                         </div>
                                     </div>
                                 </div>
@@ -1173,6 +1173,8 @@
     <script>
         const partId = @Model.PartID;
         const addCheckpoint = document.getElementById('add-checkpoint');
+        let checkpointTable;
+
         $(document).ready(function () {
 
             if (addCheckpoint) {
@@ -1282,12 +1284,15 @@
         });
 
 
-        let id = @Html.Raw(Json.Encode(Model.PartID));
-        $('#checkpointTable').DataTable({
+            let id = @Html.Raw(Json.Encode(Model.PartID));
+        checkpointTable =  $('#checkpointTable').DataTable({
             ajax: {
                 url: '@Url.Action("GetCheckpoints", "Checkpoints")',
                 data: { id: id },
-                dataSrc: 'data'
+                dataSrc: 'data',
+                error: function () {
+                    $('#checkpointTable tbody').html('<tr><td class="w-100 text-center">No results found</td></tr>');
+                }
             },
             responsive: true,
             lengthChange: false,
@@ -1307,11 +1312,13 @@
                 { data: 'Status' },
                 {
                     data: "CheckpointId",
-                    orderable: !1,
+                    orderable: false,
                     render: function (data, type, row) {
+                        let icon = row.IsActive ? 'mdi-trash-can' : 'mdi-delete-restore';
+                        let btnclass = row.IsActive ? 'btn-danger' : 'btn-warning';
                         return `
-                        <button data-id="${data}"class="btn btn-sm btn-secondary waves-effect waves-light mb-1"><i class="mdi mdi-pencil"></i></button>
-                        <button typr="button" data-id="${data}"class="btn btn-sm btn-danger waves-effect waves-light mb-1" onclick="deleteCheckpoint(${data})"><i class="mdi mdi-trash-can"></i></button>`
+                        <button data-id="${data}"class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="rerouteToEdit(${data})"><i class="mdi mdi-pencil"></i></button>
+                        <button typr="button" data-id="${data}"class="btn btn-sm ${btnclass} waves-effect waves-light mb-1" onclick="deleteCheckpoint(${data})"><i class="mdi ${icon}"></i></button>`
 
                     }
                 },
@@ -1328,13 +1335,20 @@
             $.ajax({
                 url: `/Checkpoints/DeleteCheckpoint/${id}`,
                 method: 'POST',
-                success: (res) => { console.log(res) },
+                success: (res) => {
+                    console.log(res);
+                    checkpointTable.ajax.reload();
+                },
                 error: (err) => { console.log(err) }   
             })
         }
 
         function rerouteCreateCheckpoint(id) {
             window.location.href = `/Checkpoints/Create/${id}`;
+        }
+
+        function rerouteToEdit(id) {
+            window.location.href = `/Checkpoints/Edit/${id}`;
         }
 
     </script>
