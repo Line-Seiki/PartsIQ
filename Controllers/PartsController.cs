@@ -42,6 +42,14 @@ namespace PartsIq.Controllers
             return View(part);
         }
 
+        // GET: PARTIAL 
+        public ActionResult GetPartCard(int id)
+        {
+            var model = db.Parts.Find(id);
+
+            return PartialView("_PartCard", model);
+        }
+
 
         // GET: Parts/Create
         public ActionResult Create()
@@ -217,6 +225,30 @@ namespace PartsIq.Controllers
             else
             {
                 return Json(new { success = false, message = "failed to change searchable status" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult ToggleActive(int id)
+        {
+            try
+            {
+                var part = db.Parts.Find(id);
+                if (part != null)
+                {
+                    part.IsActive = !part.IsActive;
+                    db.Entry(part).Property(p => p.IsActive).IsModified = true;
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "successfully changed status" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "failed to change status" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { success = false, message = $"{ex.Message}" }, JsonRequestBehavior.AllowGet);
             }
         }
 

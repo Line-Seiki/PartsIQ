@@ -1,6 +1,7 @@
 ﻿using PartsIq.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.WebPages.Html;
@@ -35,7 +36,7 @@ namespace PartsIq.Utility
         /// <returns>returns a List(SelectListItem) of SelectListItem from Parts</returns>
         public List<SelectListItem> PartListItems()
         {
-            return _db.GetParts().Where(p => p.IsSearchable).Select(p => new SelectListItem
+            return _db.GetParts().Where(p => p.IsSearchable && (p.Checkpoints.Any() && p.Checkpoints.Any(c => c.IsActive))).Select(p => new SelectListItem
             {
                 Value = p.PartID.ToString(),
                 Text = p.Code,

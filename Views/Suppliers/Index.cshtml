@@ -1,4 +1,12 @@
-﻿<div class="page-content">
+﻿@section styles{
+    <style>
+        .order-sm-first{
+            order: -1 !important;
+        }
+    </style>
+}
+
+<div class="page-content">
     <div class="row" id="mainContent">
         <div class="page-content">
             <!-- Title -->
@@ -20,7 +28,7 @@
             <div class="page-content-wrapper mt--45">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-lg-6 col-md-12">
+                        <div class="col-lg-6 col-md-12 order-lg-first order-md-last order-sm-last">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -38,7 +46,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-6 col-md-12 order-lg-last order-md-first">
+                        <div class="col-lg-6 col-md-12 order-lg-last order-md-first order-sm-first">
                             <div class="card">
                                 <div class="card-body p-4">
                                     <form id="SupplierForm" data-type="add" data-id="" data-version="">
