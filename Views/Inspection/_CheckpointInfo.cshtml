@@ -75,7 +75,7 @@
             </div>
             <div class="d-flex flex-column align-items-start w-100">
                 <div class="d-flex justify-content-center w-100" id="inspection-buttons">
-                    @if (Model.CheckpointInfo.IsMeasurement == 1)
+                    @if (Model.CheckpointInfo.IsMeasurement)
                     {
                         <button class="submit-inspection-item btn btn-success" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
                             <i class="mdi mdi-check-bold"></i> Submit

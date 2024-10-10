@@ -92,22 +92,45 @@
                                 <div class="d-flex justify-content-between">
                                     <div class="d-flex">
                                         <h5>Checkpoints</h5>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Checkpoint Number</b>:</p>
+                                            <p>
+                                                <select id="CheckpointInfo" class="form-control">
+                                                    @foreach (var checkpoint in ViewBag.Checkpoints)
+                                                    {
+                                                        <option value="@checkpoint.CheckpointId" data-measurement="@checkpoint.IsMeasurement" data-upperlimit="@checkpoint.LimitUpper" data-lowerlimit="@checkpoint.LimitLower">
+                                                            @checkpoint.Code
+                                                        </option>
+                                                    }
+                                                </select>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table id="evaluation-table" class="table table-centered mb-0 fs-13">
+                                    <table id="evaluation-table" class="table mb-0 fs-13 nowrap table-striped w-100 text-center">
                                         <thead>
                                             <tr>
                                                 <th>Sample Number</th>
                                                 <th>Cavity Number</th>
-                                                <th>Measurement</th>
+                                                <th>Measurement/Attribute</th>
                                                 <th>Original Measurement</th>
                                                 <th>Judgement</th>
                                             </tr>
                                         </thead>
                                     </table>
+                                    <button class="btn btn-secondary mt-2" disabled><i class="mdi mdi-pencil"></i> Edit Items</button>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
+                                            <span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span>
+                                            <span class="badge badge-soft-secondary badge-pill"><b>Min Value: </b> #</span><span id="maxvalue"></span>
+                                        </div>
+                                        <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
+                                            <span class="badge badge-soft-primary badge-pill"><b>Standard Deviation: </b> #</span> <span id="standardDev"></span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="my-3">
                                     <div class="divider"></div>
@@ -115,6 +138,7 @@
                                 <div class="d-flex flex-column">
                                     <h5>Evaluation Decision</h5>
                                     <div class="mt-4">
+                                        @Html.AntiForgeryToken()
                                         <form id="save-evaluation">
                                             <div class="d-flex gap-3 mb-3">
                                                 <label for="Evaluator" class="form-label">Evaluator:</label>
@@ -131,7 +155,7 @@
                                                 <label for="Decision" class="form-label">Decision:</label>
                                                 <select type="text" class="form-control w-50" id="Decision" placeholder="Select decision" required></select>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Save Evaluation</button>
+                                            <button type="submit" id="save-evaluation-btn" data-id="@Model.DeliveryDetailID" class="btn btn-primary">Save Evaluation</button>
                                         </form>
                                     </div>
                                 </div>
@@ -146,30 +170,227 @@
 
 @section scripts{
     <script>
-        let decisionList = @Html.Raw(Json.Encode(ViewBag.DecisionList));
-        const evalForm = document.getElementById('save-evaluation');
+        $(document).ready(function () {
 
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeDynamicSelectize();
-
-            evalForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const decisionSelected = document.getElementById('Decision').selectize.getValue();
-                const formData = new FormData(evalForm);
-                formData.append("Decision", decisionSelected);
-                const data = Object.fromEntries(formData);
-                console.log(data);
+            $(document).on('change', '#CheckpointInfo', function () {
+                inspectionTable.ajax.reload();
             });
-        });
 
+            function calculate(obj) {
+                // If there is NG., the overall judgement is No Good
+                let minMeasurement = obj.length > 0 ? obj[0].Measurement : 0;
+                let maxMeasurement = obj.length > 0 ? obj[0].Measurement : 0;
+
+                obj.forEach((checkpoint, index) => {
+                    var textColor = checkpoint.Judgement == 1 ? "" : "text-danger";
+                    if (checkpoint.Measurement < minMeasurement) {
+                        minMeasurement = checkpoint.Measurement;
+                    }
+                    if (checkpoint.Measurement > maxMeasurement) {
+                        maxMeasurement = checkpoint.Measurement;
+                    }
+                });
+
+                const annotation = {};
+                const data = obj.map(ob => ob.Measurement);
+                const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
+
+
+                // Calculate standard deviation
+                const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+                const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (data.length - 1);
+                const standardDeviation = Math.sqrt(variance);
+
+                // Assign calculated values to annotation object
+                annotation["stdv"] = standardDeviation;
+                annotation["avg"] = mean;
+                annotation["min"] = minMeasurement;
+                annotation["max"] = maxMeasurement;
+                return annotation;
+            }
+
+            //Initialization of DataTable
+            var inspectionTable = $('#evaluation-table').DataTable({
+                ajax: {
+                    url: '@Url.Action("GetInspectionItems", "InspectionItems")',
+                    data: function (d) {
+                        d.CheckpointID = $('#CheckpointInfo').val();
+                        d.InspectionID = @Html.Raw(Model.InspectionID);
+                    },
+                    dataSrc: 'data'
+                },
+                responsive: false,
+                searching: false,
+                scrollX: true,
+                paging: false,
+                columns: [
+                    { data: "SampleNumber" },
+                    { data: "CavityName" },
+                    {
+                        data: "Measurement",
+                        render: function (data, type, row) {
+                            if (data != null) {
+                                return data;
+                            } else {
+                                return row.Attribute;
+                            }
+                        }
+                    },
+                    { data: "OrigMeasurement" },
+                    {
+                        data: "Judgement",
+                        render: function (data, type, row) {
+                            let decision = data == "1" ? "GOOD" : "NOT GOOD";
+                            return `<span>${decision}</span>`;
+                        }
+                    },
+                ],
+                order: [[0, 'asc']],
+                rowCallback: function (row, data, index) {
+                    // Check the judgment value and apply the class to the entire row
+                    if (data.Judgement == "0") {
+                        $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
+                    } else if (data.Judgement == "1") {
+                        $('td', row).addClass(''); // Apply class to all <td> in the row
+                    }
+                },
+                drawCallback: function (settings) {
+                    var api = this.api();
+
+                    // Get the SampleItems from the current page rows
+                    var data = api.rows({ page: 'current' }).data().toArray();
+
+                    if (data.length > 0 && data) {
+                        let flags = calculate(data);
+                        $("#maxvalue").text(flags.max);
+                        $("#minValue").text(flags.min);
+                        $("#standardDev").text(flags.stdv);
+                        var sampleItemsArray = data.map(function (item) {
+                            return item.SampleNumber;
+                        });
+
+                        // Find the maximum value in the SampleItems array
+                        var maxSampleItem = Math.max(...sampleItemsArray);
+
+                        if ($('#SampleSize').val() > maxSampleItem) {
+                            $('#SampleNumber').val(maxSampleItem + 1);
+                        } else {
+                            $('#SampleNumber').val(maxSampleItem);
+                        }
+                    } else {
+                        $("#maxvalue").text("");
+                        $("#minValue").text("");
+                        $("#standardDev").text("");
+                    }
+                }
+            });
+
+
+        // Initialize the selectize dropdown with options
         function initializeDynamicSelectize() {
-            return $(`#Decision`).selectize({
+            return $('#Decision').selectize({
                 valueField: 'Value',
                 labelField: 'Text',
                 searchField: 'Text',
                 options: decisionList,
                 create: false,
-            });
+            })[0].selectize;  // This ensures you get the selectize API object
         }
+
+        // Get the decision list from the ViewBag
+        let decisionList = @Html.Raw(Json.Encode(ViewBag.DecisionList));
+
+        // Initialize the selectize plugin and save the instance for later use
+        const decisionSelectize = initializeDynamicSelectize();
+
+        // Form submission handler
+        $(document).on("submit", '#save-evaluation', function (e) {
+                e.preventDefault();  // Prevent the form's default submission
+
+                let token = $('input[name="__RequestVerificationToken"]').val();
+                let detailID = $('#save-evaluation-btn').data("id");
+
+                // Use the decisionSelectize instance to get the selected value
+                const decisionSelected = decisionSelectize.getValue();
+
+                // Collect form data
+                const formData = new FormData(this);  // 'this' refers to the form element
+                formData.append("Decision", decisionSelected);
+                formData.append("DeliveryDetailID", detailID);
+                formData.append("__RequestVerificationToken", token);
+
+                // Disable the submit button to prevent multiple submissions
+                $('#save-evaluation-btn').prop('disabled', true);
+
+                // SweetAlert confirmation before submitting
+                Swal.fire({
+                    title: "Save evaluation?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",  // Use 'icon' instead of 'type'
+                    showCancelButton: true,
+                    confirmButtonText: "Yes!",
+                    cancelButtonText: "No, cancel!",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    cancelButtonClass: "btn btn-danger ms-2 mt-2",
+                    buttonsStyling: false
+                }).then(function (result) {
+                    if (result.value) {  // If the user confirms the action
+                        $.ajax({
+                            url: '@Url.Action("CreateEvaluation", "Evaluation")',
+                            type: "POST",
+                            data: formData,
+                            contentType: false,  // Necessary for FormData handling
+                            processData: false,  // Prevent jQuery from processing the data
+                            success: function (response) {
+                                if (response.success) {
+                                    // Handle success, e.g., display a success message or redirect
+                                    Swal.fire({
+                                        title: "Success!",
+                                        text: "Evaluation saved successfully.",
+                                        icon: "success"
+                                    }).then(() => {
+                                        window.location.href = "@Url.Action("Index", "Evaluation")";
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: "Error!",
+                                        text: response.message || "An error occurred during saving.",
+                                        icon: "error"
+                                    });
+                                }
+                            },
+                            error: function (err) {
+                                Swal.fire({
+                                    title: "Error!",
+                                    text: "An error occurred while processing the request.",
+                                    icon: "error"
+                                });
+                                console.error("Error:", err);
+                            },
+                            complete: function () {
+                                // Re-enable the submit button once the request completes
+                                $('#save-evaluation-btn').prop('disabled', false);
+                            }
+                        });
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire({
+                            title: "Cancelled",
+                            text: "Your evaluation was not submitted.",
+                            icon: "error"
+                        });
+                        $('#save-evaluation-btn').prop('disabled', false); // Re-enable if cancelled
+                    }
+                });
+            });
+
+
+
+});
+
+
+
+
+
+
     </script>
 }

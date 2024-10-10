@@ -136,10 +136,11 @@
                     url: '/Evaluation/GetEvaluationData',
                     dataSrc: 'data'
                 },
+                lengthChange: false,
                 responsive: false,
                 columns: [
                     {
-                        data: null,
+                        data: "DeliveryDetailID",
                         render: function (data, type, row, meta) {
                             return `
                             <div class="d-flex gap-1 flex-lg-row flex-md-column">
@@ -151,7 +152,7 @@
                     { data: 'EvaluatorName' },
                     { data: 'UserName' },
                     { data: 'ControlNumber' },
-                    { data: 'InspectorComments' },
+                    { data: 'InspectorComments'},
                     {
                         data: 'DateFinished',
                         render: function (data, type, row) {

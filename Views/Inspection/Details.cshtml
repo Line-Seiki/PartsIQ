@@ -102,7 +102,7 @@
         $(document).ready(function () {
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
-  
+
 
             function calculate(obj) {
                 // If there is NG., the overall judgement is No Good
@@ -135,7 +135,7 @@
                 annotation["min"] = minMeasurement;
                 annotation["max"] = maxMeasurement;
 
-                
+
 
                 return annotation;
             }
@@ -161,7 +161,7 @@
                 }
                 if ($('.submit-inspection-item').length) {
                     $('.submit-inspection-item').attr('data-checkpointid', checkpointID);
-                    
+
                 }
                 // Update the data and reload the table
                 inspectionTable.ajax.reload();
@@ -289,7 +289,7 @@
                 } else {
                     Judgement = $(this).data("judgement");
                     attribute = measurement;
-                } 
+                }
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
@@ -344,7 +344,7 @@
                     let button = $('.submit-inspection-item');
                     d.CheckpointID = $('#CheckpointInfo').val();
                     d.InspectionID = $(button).data('inspectionid');
-  
+
                 },
                 dataSrc: 'data'
             },
@@ -367,7 +367,7 @@
                 },
                 {
                     data: "OrigMeasurement",
-                   
+
                 },
                 {
                     data: "Judgement",
@@ -378,6 +378,14 @@
                 },
             ],
             order: [[0, 'asc']],
+            rowCallback: function (row, data, index) {
+                // Check the judgment value and apply the class to the entire row
+                if (data.Judgement == "0") {
+                    $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
+                } else if (data.Judgement == "1") {
+                    $('td', row).addClass(''); // Apply class to all <td> in the row
+                }
+            },
             drawCallback: function (settings) {
                 var api = this.api();
 
@@ -399,14 +407,14 @@
                     if ($('#SampleSize').val() > maxSampleItem) {
                         $('#SampleNumber').val(maxSampleItem + 1);
                         enableDisableToggle(false);
-                        
+
                     } else {
                         $('#SampleNumber').val(maxSampleItem);
                         enableDisableToggle(true);
 
                     }
                     // Log the next sample number
-                   
+
 
                 } else {
                     $('#SampleNumber').val(1);
@@ -442,7 +450,9 @@
                                          title: "Success!",
                                          text: "Inspection ended.",
                                          type: "success",
-                                     })
+                                     }).then(() => {
+                                        window.location.href = "@Url.Action("Index", "Inspection")";
+                                    });
                                  } else {
                                      alertify.error(`Error ${response.message} occured.`);
                                  }
@@ -458,7 +468,7 @@
                             type: "error",
                         });
                 });
-               
+
             });
 
 
