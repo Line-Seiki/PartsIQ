@@ -278,7 +278,7 @@ class DynamicTabs {
                                 <input type="text" class="form-control" id="InspectionPart-${id}" name="InspectionPart" value="${rowData.InspectionPart ? rowData.InspectionPart : ``}">
                             </div>
 
-                            <div class="d-flex mb-3 gap-4">
+                            <div class="d-flex flex-lg-row flex-md-column flex-sm-column mb-3 gap-4">
                                 <div>
                                     <label for="Specification-${id}" class="form-label">Specification</label>
                                     <input type="text" class="form-control" id="Specification-${id}" name="Specification" value="${rowData.Specification ? rowData.Specification : ``}">
@@ -315,7 +315,7 @@ class DynamicTabs {
                                 <label for="MethodSampling-${id}" class="form-label">Sampling Method</label>
                                 <input type="text" class="form-control" id="MethodSampling-${id}" name="MethodSampling" value="${rowData.MethodSampling ? rowData.MethodSampling : ``}">
                             </div>
-                            <div class="d-flex mb-3 gap-4">
+                            <div class="d-flex flex-lg-row flex-md-column flex-sm-column mb-3 gap-4">
                                 <div>
                                     <label for="Level-${id}" class="form-label">Level</label>
                                     <input type="text" class="form-control" id="Level-${id}" name="Level" value="${rowData.Level ? rowData.Level : ``}">
