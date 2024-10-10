@@ -1,0 +1,215 @@
+﻿﻿@model PartsIq.Models.Inspection
+
+@section styles{
+    <style>
+        .divider {
+            background-color: #EEEEEE;
+            width: 100%;
+            height: 2px;
+            margin: 0.5rem 0;
+        }
+    </style>
+}
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">@Model.DeliveryDetails.FirstOrDefault().LotNumber</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="~/Inspection">
+                                    Inspection
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@Model.DeliveryDetails.FirstOrDefault().LotNumber</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>General Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Number</b>:</p>
+                                            <p>@Model.DeliveryDetails.FirstOrDefault().LotNumber</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Date Delivered</b>:</p>
+                                            <p>@Model.DeliveryDetails.FirstOrDefault().Delivery.DateDelivered.ToString("MMM dd, yyyy")</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Code</b>:</p>
+                                            <p>@Model.DeliveryDetails.FirstOrDefault().Delivery.Part.Code</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Quantity</b>:</p>
+                                            <p>@Model.DeliveryDetails.FirstOrDefault().LotQuantity</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Supplier</b>:</p>
+                                            <p>@Model.DeliveryDetails.FirstOrDefault().Delivery.Supplier.Name</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Name</b>:</p>
+                                            <p>@Model.DeliveryDetails.FirstOrDefault().Delivery.Part.Name</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Inspection Item -->
+            <div class="page-content-wrapper">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Checkpoint Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Checkpoint Number</b>:</p>
+                                            <p>DROP DOWN FOR CHECKPOINT NUMBER</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Inspection Part</b>:</p>
+                                            <p>INSPECTION PART</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Specification</b>:</p>
+                                            <p>SPECIFICATION #</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Notes</b>:</p>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Tools</b>:</p>
+                                            <p>TOOLS</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Sampling Method</b>:</p>
+                                            <p>SAMPLING METHOD</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Upper Limit</b>:</p>
+                                            <p>UPPER LIMIT #</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lower Limit</b>:</p>
+                                            <p>LOWER LIMIT #</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="divider mt-5"></div>
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="SampleSize">Sample Size:</label>
+                                                <input class="form-control w-25" type="number" id="SampleSize" name="SampleSize" value="@Model.SampleSize" readonly />
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <div class="form-group">
+                                                    <label for="SampleNumber">Sample Number:</label>
+                                                    <input class="form-control w-100" type="number" id="SampleNumber" name="SampleNumber" readonly />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="CavityNumber">Cavity Number:</label>
+                                                    <input class="form-control w-100" type="number" id="CavityNumber" name="CavityNumber" readonly />
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Measurement">Measurement</label>
+                                                <textarea class="form-control" id="Measurement" rows="5"></textarea>
+                                            </div>
+                                            <div class="d-flex flex-column align-items-start">
+                                                <button class="btn btn-success"><i class="mdi mdi-check-bold"></i> Submit</button>
+                                                <div class="d-flex flex-lg-row flex-md-column justify-content-between align-items-center w-100  mt-3">
+                                                    <div class="checkbox checkbox-primary">
+                                                        <input id="checkbox" type="checkbox" checked>
+                                                        <label for="checkbox">
+                                                            Auto Submit
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label hidden for="Mode">Input Select</label>
+                                                        <select class="form-control" id="Mode">
+                                                            <option>Mode 1</option>
+                                                            <option>Mode 2</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <div class="d-flex flex-column mt-3 gap-2">
+                                            <p class="mb-0">Overall Judgement: <span class="fs-1 text-success">Good</span></p>
+                                            <div class="divider"></div>
+                                            <div class="row">
+                                                <div class="col-lg-4 col-sm-12"><button class="btn btn-danger">End Inspection</button></div>
+                                                <div class="col-lg-4 col-sm-12"><button class="btn btn-primary">Send Notification</button></div>
+                                                <div class="col-lg-4 col-sm-12"><button class="btn btn-secondary">Edit Sample Size</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="table-responsive">
+                                            <table id="inspection-item-table" class="table table-centered mb-4 fs-13">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Sample Number</th>
+                                                        <th>Cavity Number</th>
+                                                        <th>Measurement/Attribute</th>
+                                                        <th>Original Measurement</th>
+                                                        <th>Judgement</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                            <button class="btn btn-secondary"><i class="mdi mdi-pencil"></i> Edit Items</button>
+                                            <div class="d-flex flex-column">
+                                                <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
+                                                    <p><b>Max Value: </b> #</p>
+                                                    <p><b>Min Value: </b> #</p>
+                                                </div>
+                                                <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
+                                                    <p><b>Standard Deviation: </b> #</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script></script>
+}

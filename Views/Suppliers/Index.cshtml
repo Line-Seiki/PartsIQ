@@ -1,0 +1,235 @@
+﻿<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Suppliers</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Suppliers</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="supplier-table" class="table table-centered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>In Charge</th>
+                                                    <th>Supplier</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12 order-lg-last order-md-first">
+                            <div class="card">
+                                <div class="card-body p-4">
+                                    <form id="SupplierForm" data-type="add" data-id="" data-version="">
+                                        <div class="mb-3">
+                                            <label for="InCharge" class="form-label">In Charge</label>
+                                            <input type="text" class="form-control" id="InCharge" name="InCharge" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="Name" class="form-label">Supplier</label>
+                                            <input type="text" class="form-control" id="Name" name="Name" required />
+                                        </div>
+                                        <div id="supplierBtns" class="d-flex justify-content-end gap-2 mt-4">
+                                            <button type="reset" class="btn btn-secondary">Reset</button>
+                                            <button type="submit" id="formBtn" class="btn btn-success">Add Supplier</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="delete-supplier-modal" class="modal fade" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-danger">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="bx bx-notification-off fs-xl text-white"></i>
+                    <h4 class="mt-2 text-white">Are You Sure!</h4>
+                    <p class="mt-3 text-white">
+                        You are about to delete Supplier: <strong id="supplier-modal-name"></strong>
+                    </p>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="confirmDeleteBtn" data-id="" class="btn btn-light text-black" data-bs-dismiss="modal">Yes</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+@section scripts{
+    <script>
+        let supplierDataTable;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            supplierDataTable = $('#supplier-table').DataTable({
+                ajax: {
+                    url: '/Suppliers/GetAll',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: "InCharge" },
+                    { data: "Name" },
+                    {
+                        data: "SupplierID", orderable: false, render(data, type, row, meta) {
+                            const rowData = JSON.stringify(row).replace(/['\/]/g, "");
+                            return `
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <button class="btn btn-secondary" onclick="editSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-pencil"></i></button>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-supplier-modal" onclick="deleteSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-trash-can"></i></button>
+                            </div>
+                            `;
+                        }
+                    }
+                ],
+            });
+        });
+
+        document.getElementById('SupplierForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(e.srcElement)
+            if (e.target.dataset.type === "add") {
+                const data = Object.fromEntries(formData);
+                data["InCharge"] = data["InCharge"].replace(/['"\/']/g, '');
+                data["Name"] = data["Name"].replace(/['"\/']/g, '');
+                $.ajax({
+                    url: '/Suppliers/Create',
+                    type: 'POST',
+                    data,
+                    success(res) {
+                        if (res.Success) {
+                            alertify.success(`${res.Status}: ${res.Message}`);
+                            supplierDataTable.ajax.reload();
+                            document.getElementById('SupplierForm').reset();
+
+                        } else {
+                            alertify.error(`${res.Status}: ${res.Message}`);
+                        }
+                        console.log(res);
+                    },
+                    error(err) {
+                        alertify.error(`Something went wrong! ${err}`);
+                        console.log(err);
+                    }
+                })
+            } else {
+                formData.append("SupplierID", e.target.dataset.id);
+                formData.append("Version", e.target.dataset.version);
+                const data = Object.fromEntries(formData);
+                data["InCharge"] = data["InCharge"].replace(/['"\/']/g, '');
+                data["Name"] = data["Name"].replace(/['"\/']/g, '');
+                $.ajax({
+                    url: '/Suppliers/Edit',
+                    type: 'POST',
+                    data,
+                    success(res) {
+                        if (res.Success) {
+                            alertify.success(`${res.Status}: ${res.Message}`);
+                            supplierDataTable.ajax.reload();
+                            const supplierForm = document.getElementById('SupplierForm');
+                            supplierForm.dataset.type = 'add';
+                            supplierForm.dataset.id = '';
+                            supplierForm.dataset.version = '';
+                            supplierForm.reset();
+                            document.getElementById('formBtn').innerText = "Add Supplier";
+                            document.getElementById("cancelBtn").remove();
+
+                        } else {
+                            alertify.error(`${res.Status}: ${res.Message}`);
+                        }
+                        console.log(res);
+                    },
+                    error(err) {
+                        console.log(err);
+                        alertify.error(`Something went wrong! ${err}`);
+                    }
+                })
+            }
+        });
+
+        function editSupplier(id, row) {
+            supplierObj = JSON.parse(decodeURIComponent(row));
+            console.log(id, supplierObj);
+            const supplierForm = document.getElementById('SupplierForm');
+            document.getElementById('formBtn').innerText = "Edit Supplier"
+            document.getElementById('Name').value = supplierObj.Name.replace(/['"\/']/g, '');
+            document.getElementById('InCharge').value = supplierObj.InCharge.replace(/['"\/']/g, '');
+            supplierForm.dataset.type = "edit";
+            supplierForm.dataset.id = id;
+            supplierForm.dataset.version = supplierObj.Version;
+            if (!document.getElementById('cancelBtn')) {
+                const stopEditBtnEl = `<button id="cancelBtn" class="btn btn-danger" onclick="cancelEdit()">Cancel Edit</button>`
+                document.getElementById('supplierBtns').insertAdjacentHTML('beforeend', stopEditBtnEl);
+            }
+            
+        }
+
+        function cancelEdit() {
+            const supplierForm = document.getElementById('SupplierForm');
+            supplierForm.dataset.type = 'add';
+            supplierForm.dataset.id = '';
+            supplierForm.dataset.version = '';
+            supplierForm.reset();
+            document.getElementById('formBtn').innerText = "Add Supplier";
+            document.getElementById("cancelBtn").remove();
+        }
+
+        function deleteSupplier(id, row) {
+            supplierObj = JSON.parse(decodeURIComponent(row));
+            document.getElementById('supplier-modal-name').innerText = supplierObj.Name;
+            document.getElementById('confirmDeleteBtn').dataset.id = id
+            console.log(id)
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function (e) {
+            console.log(e);
+            $.ajax({
+                url: '/Suppliers/Delete',
+                type: 'POST',
+                data: {
+                    id: e.target.dataset.id
+                },
+                success(res) {
+                    if (res.Success) {
+                        alertify.success(`${res.Status}: ${res.Message}`);
+                        supplierDataTable.ajax.reload();
+
+                    } else {
+                        alertify.error(`${res.Status}: ${res.Message}`);
+                    }
+                    console.log(res);
+                },
+                error(err) {
+                    console.error(err);
+                    alertify.error(`Something went wrong! ${err}`);
+                }
+            })
+        })
+    </script>
+}

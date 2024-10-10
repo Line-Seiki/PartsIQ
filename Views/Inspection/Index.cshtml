@@ -1,0 +1,749 @@
+﻿@section styles{
+    <style>
+        .badge-block {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #4B4B5A;
+            border-radius: 5px;
+        }
+
+        .low-priority {
+            background-color: #CDFAD5;
+            color: black;
+        }
+
+        .normal-priority {
+            background-color: #F6FDC3;
+            color: black;
+        }
+
+        .high-priority {
+            background-color: #FF9B9B;
+            color: black;
+        }
+
+        .priority-started {
+            background-color: #EEEEEE;
+            color: black;
+        }
+
+        .priority-reserved {
+            background-color: #C4DAD2;
+            color: black;
+        }
+
+        .priority-paused {
+            background-color: #FFF0D1;
+            color: black;
+        }
+
+        .priority-completed {
+            background-color: #347928;
+            color: white;
+        }
+
+        .urgent {
+            background-color: #FF0000;
+            color: white;
+        }
+
+        input:read-only {
+            background-color: #d4d4d4;
+        }
+
+        #DateDelivered {
+            background-color: transparent;
+        }
+
+        .selected-row {
+            background-color: #343131;
+            color: white;
+        }
+    </style>
+}
+
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Inspection</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    PartsIQ
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Inspection</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inspection Cards -->
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div id="left-column" class="col-lg-12">
+                            <!-- Inspection - Available -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                                        <div class="d-flex">
+                                            <h5>Available</h5>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <button id="editBtn" class="btn btn-secondary" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                            <button id="playpauseBtn" class="btn btn-info" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Pause/Unpause"><i class="mdi mdi-play-pause"></i></button>
+                                            <button id="memberBtn" class="btn btn-primary" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Unassign Member"><i class="mdi mdi-account-arrow-right"></i></button>
+                                            <button id="refreshBtn" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh Tables"><i class="mdi mdi-reload"></i></button>
+                                            <button id="devAssign" class="btn btn-warning text-black"><i class="mdi mdi-account"></i> DEV Assign</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="inspection-available" class="table table-centered mb-0 fs-13">
+                                            <thead>
+                                                <tr>
+                                                    <th>Priority</th>
+                                                    <th>Status</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Inspector</th>
+                                                    <th>Pard Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Date Delivered</th>
+                                                    <th>DR Number</th>
+                                                    <th>Total Quantity</th>
+                                                    <th>Supplier</th>
+                                                    <th>Deadline</th>
+                                                    <th>Date Started</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex">
+                                            <h5>Finished</h5>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-pencil"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="inspection-finished" class="table table-centered mb-0 fs-13">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Date Finished</th>
+                                                    <th>Decision</th>
+                                                    <th>Control Number</th>
+                                                    <th>DR Number</th>
+                                                    <th>Part Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Comments</th>
+                                                    <th>Inspector Comments</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="d-flex">
+                                            <h5>Pending</h5>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-file-pdf-outline"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive mb-3">
+                                        <table id="inspection-pending" class="table table-centered fs-13">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Priority</th>
+                                                    <th>DR Number</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Pard Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Sample Size</th>
+                                                    <th>Deadline</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <button id="inspection-btn" class="btn btn-primary"><i class="mdi mdi-magnify"></i> Start Inspection</button>
+                                    <button id="dev-inspection" class="btn btn-warning"><i class="mdi mdi-magnify"></i> DEV Start Inspection</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="right-column" class="col-lg-6 col-md-12 order-lg-last order-md-first d-none">
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul id="tab-list" class="nav nav-tabs">
+                                    </ul>
+                                    <div class="tab-content" id="tab-content">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Delivery Without Lot Number Modal-->
+<div id="lot-modal" class="modal fade" tabindex="-1" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="bx bx-info-circle fs-xl text-info"></i>
+                    <h4 class="mt-2">Heads up!</h4>
+                    <p class="mt-3">
+                        You are about to start inspection on <strong id="inspection-dr"></strong>. Add a Lot Number and Quantity.
+                    </p>
+                    <button type="button" class="btn btn-danger my-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="addLotBtn" data-index="" class="btn btn-info my-2" data-bs-dismiss="modal">Continue</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<!--Setup Inspection Modal-->
+<div id="inspection-modal" class="modal fade" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form class="px-3" id="inspectionForm" data-user="" data-detail="" data-detailversion="">
+                    <div class="form-group">
+                        <label for="iSampleSize">Sample Size</label>
+                        <input class="form-control" type="number" min="1" id="iSampleSize" name="SampleSize" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="iCavities">Number of Cavities</label>
+                        <input class="form-control" type="number" min="1" id="iCavities" name="NumberOfCavities" required>
+                    </div>
+                    <div class="d-flex flex-column" id="CavityContainer"></div>
+                    <div class="form-group">
+                        <label for="iTemperature">Temperature</label>
+                        <input class="form-control" type="number" id="iTemperature" name="Temperature" step=".001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="iHumidity">Humidity</label>
+                        <input class="form-control" type="number" id="iHumidity" name="Humidity" step=".001" required>
+                    </div>
+                    <div class="form-group text-center">
+                        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit">Continue</button>
+                    </div>
+                </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+@section scripts {
+    <script src="~/Utility/JS/helpers.js"></script>
+    <script src="~/Utility/JS/tabs.js"></script>
+    <script>
+
+        // DataTables
+        let availableTable;
+        let finishedTable;
+        let pendingTable;
+
+        // Selectize
+        let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
+
+        // BTN ELEMENTS
+        const editBtn = document.getElementById('editBtn');
+        const memberBtn = document.getElementById('memberBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const playpauseBtn = document.getElementById('playpauseBtn');
+        const inspectionBtn = document.getElementById('inspection-btn');
+        const addLotBtn = document.getElementById('addLotBtn');
+
+        // MODAL ELEMENTS
+        const lotModal = new bootstrap.Modal(document.getElementById('lot-modal'));
+        const drNumber = document.getElementById('inspection-dr');
+        const inspectionModal = new bootstrap.Modal(document.getElementById('inspection-modal'));
+        const cavityContainer = document.getElementById('CavityContainer');
+        const cavityInput = document.getElementById('iCavities');
+        const inspectionForm = document.getElementById('inspectionForm');
+
+        // DEV ELEMENTS
+        const devInspect = document.getElementById('dev-inspection');
+        const devAssign = document.getElementById('devAssign');
+
+        // DOM LOADED
+        document.addEventListener("DOMContentLoaded", function () {
+            // Available Table
+            availableTable = $('#inspection-available').DataTable({
+                ajax: {
+                    url: '/Inspection/GetAvailableInspections',
+                    dataSrc: 'data'
+                },
+                responsive: true,
+                ordering: false,
+                columns: [
+                    { data: "Priority" },
+                    { data: "Status" },
+                    { data: "LotNumber" },
+                    { data: "LotQuantity" },
+                    { data: "UserName" },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    {
+                        data: "DateDelivered", render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`;
+                        }
+                    },
+                    { data: "DRNumber" },
+                    { data: "TotalQuantity" },
+                    { data: "Supplier" },
+                    {
+                        data: "Deadline",
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    {
+                        data: "DateStarted",
+                        render: function (data, type, row) {
+                            if (!data) return "";
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    {
+                        data: null, orderable: false,
+                        render: function (data, type, row, meta) {
+                            return `<button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})"><i class="mdi mdi-pencil"></i></button>`
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                }
+            });
+
+            // Finished Table
+            finishedTable = $("#inspection-finished").DataTable({
+                ajax: {
+                    url: '/Inspection/GetFinishedInspections',
+                    dataSrc: 'data'
+                },
+                ordering: false,
+                columns: [
+                    { data: "Status" },
+                    {
+                        data: "DateFinished",
+                        render: function (data, type, row) {
+                            if (!data) return "";
+                            return `${convertDateStringToFormattedString(data)}`;
+                        }
+                    },
+                    { data: "Decision" },
+                    { data: "ControlNumber" },
+                    { data: "DRNumber" },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    { data: "LotNumber" },
+                    { data: "LotQuantity" },
+                    { data: "Comments" },
+                    { data: "InspectorComments" },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                }
+            });
+
+            // Pending Table
+            pendingTable = $('#inspection-pending').DataTable({
+                ajax: {
+                    url: '/Inspection/GetPendingInspections',
+                    dataSrc: 'data'
+                },
+                ordering: false,
+                columns: [
+                    { data: "Status" },
+                    { data: "Priority" },
+                    { data: "DRNumber" },
+                    { data: "LotNumber" },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    { data: "LotQuantity" },
+                    { data: "SampleSize" },
+                    {
+                        data: "Deadline",
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    console.log(data);
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                }
+            })
+
+            // FUNCTIONALITY: Available Table Row Selection
+            availableTable.on('click', 'tbody tr', function (e) {
+                let classList = e.currentTarget.classList;
+                const rowIndex = availableTable.row(this).index();
+
+                if (classList.contains('selected-row')) {
+                    classList.remove('selected-row');
+                    editBtn.dataset.index = '';
+                    memberBtn.dataset.index = '';
+                    playpauseBtn.dataset.index = '';
+                }
+                else {
+                    availableTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));
+                    classList.add('selected-row');
+                    editBtn.dataset.index = rowIndex;
+                    memberBtn.dataset.index = rowIndex;
+                    playpauseBtn.dataset.index = rowIndex;
+                }
+            });
+
+            // Refetch Data from DataTable
+            refreshBtn.addEventListener('click', refreshTables);
+
+            // Start Inspection
+            inspectionBtn.addEventListener('click', startInspection);
+
+            // Start Dev Inspection
+            devInspect.addEventListener('click', devInspection);
+
+            // Dev Assign (ASSIGN TO USER(FIXED))
+            devAssign.addEventListener('click', devAssignDelivery);
+
+            // EVENT: Edit Currently Selected Row
+            editBtn.addEventListener('click', function (e) {
+                if (!e.target.closest('#editBtn').dataset.index) {
+                    console.log('no index');
+                } else {
+                    const rowIndex = e.target.closest('#editBtn').dataset.index;
+                    editDelivery(rowIndex);
+                }
+            });
+
+            // EVENT: Pause/Unpause Selected Row
+            playpauseBtn.addEventListener('click', function (e) {
+                if (!e.target.closest('#playpauseBtn').dataset.index) {
+                    console.log('no index');
+                } else {
+                    const rowIndex = e.target.closest('#playpauseBtn').dataset.index;
+                    pauseUnpauseInspection(rowIndex);
+                }
+            });
+
+            // EVENT: Remove/Transfer Assigned Inspector
+            memberBtn.addEventListener('click', function(e) {
+                if (!e.target.closest('#memberBtn').dataset.index) {
+                    console.log('no index');
+                } else {
+                    const rowIndex = e.target.closest('#memberBtn').dataset.index;
+                    removeAssignedInspector(rowIndex);
+                }
+            });
+
+            // EVENT: Edit Delivery and add lot
+            addLotBtn.addEventListener('click', function (e) {
+                if (!e.target.closest('#addLotBtn').dataset.index) {
+                    console.log('no index');
+                } else {
+                    console.log(e.target.closest('#addLotBtn').dataset.index);
+                    const rowIndex = e.target.closest('#addLotBtn').dataset.index;
+                    editDelivery(rowIndex);
+                    window.scroll({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+
+            // EVENT: input listener when cavity amount is set
+            cavityInput.addEventListener('input', function (e) {
+                console.log(parseInt(e.target.value));
+                const cavityNum = parseInt(e.target.value);
+                cavityContainer.innerHTML = '';
+                if (cavityNum > 0) {
+                    for (let i = 1; i <= cavityNum; i++) {
+                        const div = document.createElement('div');
+                        div.classList.add('form-group')
+                        div.innerHTML = `
+                            <label for="icavity-${i}">Cavity Name ${i}</label>
+                            <input class="form-control" type="text" id="icavity-${i}" name="Cavity${i}" placeholder="Cavity Name ${i}..." required>
+                        `;
+                        cavityContainer.appendChild(div);
+                    }
+                }
+            });
+
+            // EVENT: inspection form on form submit
+            inspectionForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(e.srcElement)
+                const data = Object.fromEntries(formData);
+                const cavityArray = [];
+
+                Object.keys(data).forEach(key => {
+                    if (key.startsWith('Cavity')) {
+                        cavityArray.push(data[key]);
+                        delete data[key];
+                    }
+                });
+                if (data.SampleSize > 0 && data.NumberOfCavities > 0) {
+                    data.CavityList = cavityArray.join(',');
+                    data.UserID = inspectionForm.dataset.user;
+                    data.DeliveryDetailID = inspectionForm.dataset.detail;
+                    data.DeliveryDetailVersion = inspectionForm.dataset.detailversion
+                    data['Humidity'] = Number(data['Humidity']);
+                    data['Temperature'] = Number(data['Temperature']);
+                    console.log(data);
+                    $.ajax({
+                        url: '/Inspection/CreateInspection',
+                        type: 'GET',
+                        data,
+                        success(res) {
+                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                            else alertify.error(`${res.Status}: ${res.Message}`);
+                            inspectionForm.reset();
+                            refreshTables();
+                            if (res.RouteInspectionID) {
+                                const url = `/Inspection/Details/${res.RouteInspectionID}`;
+                                window.open(url, '_blank');
+                            }
+                        },
+                        error(err) {
+                            alertify.error(`${err}`);
+                        }
+                    });
+                } else {
+                    alertify.error("use non negative numbers");
+                }
+                
+            });
+
+        }); // - END DOMCONTENTLOADED
+
+        // FUNCTIONALITY: RefreshTables
+        function refreshTables() {
+            console.log('refresh');
+            availableTable.ajax.reload();
+            pendingTable.ajax.reload();
+            editBtn.dataset.index = '';
+            memberBtn.dataset.index = '';
+        }
+
+        // FUNCTIONALITY: Start Inspection
+        function startInspection() {
+            console.log('start inspection');
+        }
+
+        // FUNCTIONALITY: Pause/Unpause Inspection
+        function pauseUnpauseInspection(rowIndex) {
+            const { StatusID, DeliveryDetailID, DeliveryDetailVersion } = availableTable.row(rowIndex).data();
+            if (StatusID === 1 || StatusID === 2) {
+                alertify.notify('Cannot Pause/Unpause Scheduled Item')
+            } else {
+                $.ajax({
+                    url: '/Inspection/PauseUnPause',
+                    data: {
+                        StatusID,
+                        DeliveryDetailID,
+                        DeliveryDetailVersion,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        refreshTables();
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            }
+        }
+
+        // FUNCTIONALITY: Remove/Transfer Assigned Inspector
+        function removeAssignedInspector(rowIndex) {
+            const { DeliveryDetailID, DeliveryDetailVersion, UserID } = availableTable.row(rowIndex).data();
+            if (!UserID) {
+                alertify.notify('Item doesn\'t have an inspector!')
+            } else {
+                $.ajax({
+                    url: '/Inspection/UnAssignInspector',
+                    data: {
+                        DeliveryDetailID,
+                        DeliveryDetailVersion,
+                        UserID,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        refreshTables();
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            } 
+        }
+
+        // DEV-FUNCTIONALITY: Start Inspection
+        function devInspection() {
+            const hasPendingData = availableTable.data().toArray().length > 0;
+            if (hasPendingData) {
+                const dataPending = pendingTable.data().toArray();
+                const selectedData = dataPending.find(item => item.StatusID !== 4)
+                const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
+                if (!selectedData) {
+                    const dataAvailable = availableTable.data().toArray();
+                    const selectedData = dataAvailable.find(item => item.StatusID === 1)
+                    if (selectedData.InspectionID !== null) {
+                        console.log('get scheduled item and execute');
+                        $.ajax({
+                            url: '/Inspection/DevAssignInspector',
+                            type: 'POST',
+                            data: {
+                                delDetailID: selectedData.DeliveryDetailID,
+                                delDetailVersion: selectedData.DeliveryDetailVersion,
+                            },
+                            success(res) {
+                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                                else alertify.error(`${res.Status}: ${res.Message}`);
+                                const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                                window.open(url, '_blank');
+                                refreshTables();
+                            },
+                            error(err) {
+                                alertify.error(`${err}`);
+                            }
+                        });
+                    } else {
+                        console.log('open inspection modal');
+                        console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
+                        $.ajax({
+                            url: '/Inspection/DevAssignInspector',
+                            type: 'POST',
+                            data: {
+                                delDetailID: selectedData.DeliveryDetailID,
+                                delDetailVersion: selectedData.DeliveryDetailVersion,
+                            },
+                            success(res) {
+                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                                else alertify.error(`${res.Status}: ${res.Message}`);
+                                refreshTables();
+                                // TODO: Make retrieving data async
+                                setTimeout(() => {
+                                    const dataPending = pendingTable.data().toArray();
+                                    const newData = dataPending.find(item => item.StatusID !== 4);
+                                    console.log('new: ', dataPending);
+                                    console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
+                                    inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
+                                    inspectionForm.dataset.detail = newData.DeliveryDetailID;
+                                    inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
+                                    inspectionModal.show();
+                                }, 100);
+                                
+                            },
+                            error(err) {
+                                alertify.error(`${err}`);
+                            }
+                        });
+                    }
+                    console.log(selectedData);
+                } else {
+                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
+                        console.log('modal here');
+                        addLotBtn.dataset.index = selectedDataIndex;
+                        drNumber.innerText = selectedData.DRNumber;
+                        lotModal.show();
+                    } else if (selectedData.InspectionID !== null) {
+                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                        window.open(url, '_blank');
+                    } else {
+                        console.log(selectedData, selectedDataIndex);
+                        inspectionForm.dataset.user = selectedData.UserID;
+                        inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
+                        inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
+                        inspectionModal.show();
+                    }
+                }
+            } else {
+                const dataAvailable = availableTable.data().toArray();
+                const selectedData = dataAvailable.find(item => item.StatusID === 1)
+                console.log(selectedData);
+            }
+        }
+
+        // DEV-FUNCTIONALITY: Assign to Delivery
+        function devAssignDelivery() {
+            console.log('assigned');
+            const dataAvailable = availableTable.data().toArray();
+            const selectedData = dataAvailable.find(item => !item.UserName);
+            if (!selectedData) {
+                alertify.error('DEV Error - No Deliveries Without Inspector');
+            } else {
+                $.ajax({
+                    url: '/Inspection/DevAssignInspector',
+                    type: 'POST',
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        refreshTables();
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            }
+        }
+
+        // FUNCTIONALITY for Editing Deliveries
+        function editDelivery(rowIndex) {
+            const rowData = availableTable.row(rowIndex).data();
+            console.log(rowData);
+
+            document.getElementById('left-column').classList.remove('col-lg-12');
+            document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
+        }
+    </script>
+}
+

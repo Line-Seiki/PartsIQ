@@ -37,13 +37,24 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
-                        <div class="card-header">
-
+                        <div class="card-header dflex-between-center">
+                            <h5 class="card-title">Parts</h5>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createNewPart"><i class="mdi mdi-plus-thick"></i> Create Part</button>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-12" id="pis-table-container">
-
+                                <div class="col-md-12">
+                                    <table class="table table-centered dt-responsive w-100 dataTable no-footer dtr-inline " id="pis-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                                <th>Model</th>
+                                                <th>Document Number</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -53,22 +64,184 @@
         </div>
     </div>
 </div>
+<!--MODALS-->
+<!--Create Part Modal-->
+<div class="modal modal-lg fade" id="createNewPart" tabindex="-1" aria-labelledby="createNewPartLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-5">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deliveryLabelTitle">Create New Part</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row align-items-center mb-3">
+                    <form id="createPartForm">
+                        <div class="mb-3">
+                            <label for="Code" class="form-label">Code</label>
+                            <input type="text" class="form-control" id="Code" name="Code" recquired>
+                        </div>
+                        <div class="mb-3">
+                            <label for="DocNumber" class="form-label">Doc Number</label>
+                            <input type="text" class="form-control" id="DocNumber" name="DocNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="Model" name="Model" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="Name" name="Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Priority" class="form-label">Priority Level</label>
+                            <select class="form-control" name="Priority" id="Priority">
+                                <option value="1">Low Priority</option>
+                                <option value="2">Normal Priority</option>
+                                <option value="3">High Priority</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Type" class="form-label">Type</label>
+                            <input type="text" class="form-control" id="Type" name="Type" required>
+                        </div>
+                        <!--TODO: Add file attachment if possible-->
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" id="addDelivery" class="btn btn-success">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!--End Create Part Modal-->
 
 
 @section scripts {
     <script>
+        let pisTable;
+        const createPartForm = document.getElementById('createPartForm');
+        const createPartModal = document.getElementById('createNewPart');
+        const createModalInstance = new bootstrap.Modal(createPartModal);
+
         $(document).ready(function () {
-            $.ajax({
-                url: '@Url.Action("GetPISTable", "Parts")',
-                method: "GET",
-                success: function (response) {
 
-                    $('#pis-table-container').append(response);
+            if (createPartForm) {
+                createPartForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(createPartForm);
+                    const data = Object.fromEntries(formData);
+                    $.ajax({
+                        url: `/Parts/CreatePart`,
+                        method: 'POST',
+                        data,
+                        success: (res) => {
+                            console.log(res);
+                            createModalInstance.hide();
+                            createPartForm.reset();
+                            pisTable.ajax.reload();
+                        },
+                        error: (err) => {
+                            console.log(err);
+                        }
+                    });
+                });
+            }
 
-                }
-
+            $(document).on('click', '.viewPartBtn', function () {
+                let id = $(this).data('id');
+                window.location.href = `/Parts/Details/${id}`;
             });
+
+            pisTable = $('#pis-table').DataTable({
+                ajax: {
+                    url: '/Parts/GetPISTable',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: "Code" },
+                    { data: "Name" },
+                    { data: "Model" },
+                    { data: "FilePath" },
+                    {
+                        data: "PartID",
+                        render: function (data, type, row) {
+                            let searchIcon = row.IsSearchable ? 'mdi-magnify-remove-outline' : 'mdi-magnify';
+                            let searchTitle = row.IsSearchable ? 'Hide in Search' : 'Allow Search';
+                            let searchClass = row.IsSearchable ? 'btn-warning' : 'btn-success';
+                            let monitorIcon = row.IsMonitored ? 'mdi-stop-circle' : 'mdi-information';
+                            let monitorTitle = row.IsMonitored ? 'Stop Monitoring' : 'Monitor Part';
+                            let monitorClass = row.IsMonitored ? 'btn-secondary' : 'btn-primary';
+                            return `
+                                        <div class="d-flex gap-1">
+                                            <button data-id="${data}" class="btn btn-sm btn-info waves-effect waves-light viewPartBtn" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                            <button class="btn btn-sm btn-danger waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#archiveModal"><i class="mdi mdi-archive-arrow-down" title="Archive Part"></i></button>
+                                            <button class="btn btn-sm ${monitorClass} waves-effect waves-light" data-bs-toggle="tooltip" data-bs-placement="top" title="${monitorTitle}" onclick="monitorPart(${data})"><i class="mdi ${monitorIcon}"></i></button>
+                                            <button class="btn btn-sm ${searchClass} waves-effect waves-light" data-bs-toggle="tooltip" data-bs-placement="top" title="${searchTitle}" onclick="searchVisibility(${data})"><i class="mdi ${searchIcon}"></i></button>
+                                        </div>`;
+                        },
+                    }
+                ],
+                lengthChange: !1,
+                buttons: [
+                    { extend: "copy", className: "btn-light" },
+                    { extend: "csv", className: "btn-light" },
+                ],
+                scrollX: true,
+                rowId: "PartID",
+                scrollY: '300px',
+                responsive: false,
+                searching: true,
+                language: {
+                    paginate: {
+                        previous: "<i class='mdi mdi-chevron-left'>",
+                        next: "<i class='mdi mdi-chevron-right'>",
+                    },
+                },
+                drawCallback: function () {
+                    $(".dataTables_paginate > .pagination").addClass(
+                        "flat-rounded-pagination"
+                    ),
+                        $(".dataTables_filter")
+                            .find("label")
+                            .addClass("search-box d-inline-flex position-relative"),
+                        $(".dataTables_filter")
+                            .find(".form-control")
+                            .attr("placeholder", "Search...");
+                },
+            });
+
+
+
         });
+
+        function monitorPart(id) {
+            $.ajax({
+                url: `/Parts/MonitorPart/${id}`,
+                method: 'POST',
+                success: (res) => {
+                    console.log(res);
+                    pisTable.ajax.reload();
+                },
+                error: (res) => {
+                    console.log(res);
+                }
+            })
+        }
+
+        function searchVisibility(id) {
+            $.ajax({
+                url: `/Parts/ToggleSearch/${id}`,
+                method: 'POST',
+                success: (res) => {
+                    console.log(res);
+                    pisTable.ajax.reload();
+                },
+                error: (res) => {
+                    console.log(res);
+                }
+            })
+        }
 
     </script>
 

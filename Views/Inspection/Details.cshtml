@@ -1,0 +1,518 @@
+﻿@model PartsIq.Models.InspectionViewModel
+
+@section styles{
+    <style>
+        .divider {
+            background-color: #EEEEEE;
+            width: 100%;
+            height: 2px;
+            margin: 0.5rem 0;
+        }
+    </style>
+}
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">@Model.DeliveryDetail.LotNumber</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="~/Inspection">
+                                    Inspection
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@Model.DeliveryDetail.LotNumber</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>General Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Number</b>:</p>
+                                            <p>@Model.DeliveryDetail.LotNumber</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Date Delivered</b>:</p>
+                                            <p>@Model.DeliveryDetail.Delivery.DateDelivered.ToString("MMM dd, yyyy")</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Code</b>:</p>
+                                            <p>@Model.Part.Code</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Quantity</b>:</p>
+                                            <p>@Model.DeliveryDetail.LotQuantity</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Supplier</b>:</p>
+                                            <p>@Model.DeliveryDetail.Delivery.Supplier.Name</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Name</b>:</p>
+                                            <p>@Model.Part.Name</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Inspection Item -->
+            <div class="page-content-wrapper">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Checkpoint Information</h4>
+                            </div>
+                            <div class="card-body">
+                                @Html.Partial("_CheckpointInfo")
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+
+            let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
+  
+
+            function calculate(obj) {
+               
+                let judgement = "Good";
+                let judgementColor = "success";
+                let minMeasurement = Infinity; // Start with max value
+                let maxMeasurement = -Infinity; // Start with min value
+
+                // Check if the object is empty
+                if (obj.length === 0) {
+                    return {
+                        stdv: 0,
+                        avg: 0,
+                        min: 0,
+                        max: 0,
+                        judgement: judgement,
+                        color: judgementColor
+                    };
+                }
+
+                const data = obj// Filter to ensure only valid measurements
+                    .map(ob => ({
+                        Measurement: ob.Measurement,
+                        Judgement: ob.Judgement
+                    }));
+
+                console.log(data);
+
+                // Check if there's valid measurement data
+                if (data.length === 0) {
+                    return {
+                        stdv: 0,
+                        avg: 0,
+                        min: 0,
+                        max: 0,
+                        judgement: judgement,
+                        color: judgementColor
+                    };
+                }
+
+                // Calculate min, max, and judgement
+               
+
+                data.forEach((measurement) => {
+                    if (measurement.Measurement < minMeasurement) {
+                        minMeasurement = measurement.Measurement;
+                    }
+                    if (measurement.Measurement > maxMeasurement) {
+                        maxMeasurement = measurement.Measurement;
+                    }
+                    if (measurement.Judgement == "0") { // Change according to your logic
+                        judgement = "Not Good";
+                        judgementColor = "danger";
+                    }
+                });
+
+                const mean = data.reduce((acc, val) => acc + val.Measurement, 0) / data.length;
+
+                // Calculate standard deviation
+                const squaredDifferences = data.map(val => Math.pow(val.Measurement - mean, 2));
+                const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (data.length - 1);
+                const standardDeviation = Math.sqrt(variance);
+
+                return {
+                    stdv: standardDeviation,
+                    avg: mean,
+                    min: minMeasurement,
+                    max: maxMeasurement,
+                    judgement: judgement,
+                    color: judgementColor
+                };
+            }
+
+
+            $(document).on('change', '#CheckpointInfo', function () {
+                // Get selected option values
+                let checkpointID = $(this).val();
+                let inspectionID = $('.submit-inspection-item').attr('data-inspectionid');
+
+                // Use find(':selected') to access the data-* attributes
+                let selectedOption = $(this).find(':selected');
+                let isMeasurement = selectedOption.data('measurement');
+                let cavityID = selectedOption.data('cavityid');
+                let lowerLimit = selectedOption.data('lowerlimit');
+                let upperLimit = selectedOption.data('upperlimit');
+
+                // Set the limits to corresponding inputs or elements
+                if ($('#UpperLimit').length) {
+                    $('#UpperLimit').val(upperLimit).text(upperLimit);
+                }
+                if ($('#LowerLimit').length) {
+                    $('#LowerLimit').val(lowerLimit).text(lowerLimit);
+                }
+                if ($('.submit-inspection-item').length) {
+                    $('.submit-inspection-item').attr('data-checkpointid', checkpointID);
+                    
+                }
+                // Update the data and reload the table
+                inspectionTable.ajax.reload();
+
+                // Call the function to handle button toggles with necessary data
+                inspectionSendToggle(isMeasurement, checkpointID, inspectionID);
+            });
+
+
+            function enableDisableToggle(disabled) {
+                $('.submit-inspection-item').prop('disabled', disabled);
+            }
+
+            function inspectionSendToggle(isMeasurement, checkpointID, inspectionID) {
+                let cavityID = $('.submit-inspection-item').attr('data-cavityid');
+                let buttonDiv = $('#inspection-buttons');
+                // Buttons for when measurement is required
+                let measurementBtn = `
+                    <button class="submit-inspection-item btn btn-success"
+                            data-checkpointID="${checkpointID}"
+                            data-inspectionID="${inspectionID}"
+                            data-cavityID="${cavityID}"
+                            data-measurement="${isMeasurement}"
+                            type="button">
+                        <i class="mdi mdi-check-bold"></i> Submit
+                    </button>`;
+
+                // Buttons for attribute inspection (Good/No Good)
+                let attrBtn = `
+                    <button class="submit-inspection-item btn btn-success"
+                            data-checkpointID="${checkpointID}"
+                            data-inspectionID="${inspectionID}"
+                            data-cavityID="${cavityID}"
+                            data-measurement="${isMeasurement}"
+                            data-judgement="1"
+                            type="button">
+                        <i class="mdi mdi-check-bold"></i> Good
+                    </button>
+                    <button class="submit-inspection-item btn btn-danger ms-2"
+                            data-checkpointID="${checkpointID}"
+                            data-inspectionID="${inspectionID}"
+                            data-measurement="${isMeasurement}"
+                            data-cavityID="${cavityID}"
+                            data-judgement="0"
+                            type="button">
+                        <i class="mdi mdi-close"></i> No Good
+                    </button>`;
+
+                // Toggle button content based on isMeasurement value
+                if (isMeasurement == 1) {
+                    buttonDiv.html(measurementBtn);
+                } else if (isMeasurement == 0) {
+                    buttonDiv.html(attrBtn);
+                }
+            }
+
+
+            function checkSampleNumber(sampleNumber, cavityID) {
+
+                // Parse the sampleNumber to ensure it's treated as a number
+                let parsedSampleNumber = parseInt(sampleNumber, 10);
+
+                // Find the cavity with the given cavityID
+                let cavity = cavities.find(el => el.CavityID == cavityID);
+
+                // Check if the cavity exists
+                if (!cavity) {
+                    console.error('Cavity not found.');
+                    return false;
+                }
+
+
+                // Check if the current cavity can handle this sample number
+                if (cavity.MaxSampleNumber >= parsedSampleNumber) {
+                    // Set the CavityName in the input field
+                    $('#CavityNumber').val(cavity.Name);
+                    $('.submit-inspection-item').attr('data-cavityid', cavity.CavityID);
+
+                    console.log(`Cavity assigned: ${cavity.Name} with MaxSampleNumber: ${cavity.MaxSampleNumber}`);
+                    return true;
+                } else {
+                    console.warn('Sample number exceeds the max for this cavity. Looking for another cavity.');
+
+                    // Find the next cavity where the sampleNumber falls in the correct range
+                    let nextCavity = cavities.find(el => el.MaxSampleNumber >= parsedSampleNumber);
+
+                    if (nextCavity) {
+                        // Set the CavityName and update the submit button
+                        $('#CavityNumber').val(nextCavity.Name);
+                        $('.submit-inspection-item').attr('data-cavityid', nextCavity.CavityID);
+
+                        console.log(`New cavity assigned: ${nextCavity.Name} with MaxSampleNumber: ${nextCavity.MaxSampleNumber}`);
+                        return true;
+                    } else {
+                        console.error('No suitable cavity found for the given sample number.');
+                        return false;
+                    }
+                }
+            }
+
+
+            $(document).on('click', '.submit-inspection-item', function () {
+
+                let token = $('input[name="__RequestVerificationToken"]').val();
+                let checkpointID = $(this).data('checkpointid');
+                let inspectionID = $(this).data('inspectionid');
+                let isMeasurement = $(this).data('measurement');
+                let attribute = null;
+                let Judgement = 0;
+                // Explicitly fetch the updated data-cavityid directly from the DOM
+                let cavityID = $(this).attr('data-cavityid'); // This ensures you're getting the most recent value
+
+                let measurement = $(document).find('#Measurement').val();
+                let cavityNumber = $(document).find('#CavityNumber').val();
+                let sampleNumber = $(document).find('#SampleNumber').val();
+
+                // Check if this logs the correct cavityID
+                let upperLimit = $('#UpperLimit').val();
+                let lowerLimit = $('#LowerLimit').val();
+                if (isMeasurement == "1") {
+                    measurement = Number(measurement);
+                    if (measurement <= upperLimit && measurement >= lowerLimit) {
+                        Judgement = 1;
+                    }
+                } else {
+                    Judgement = $(this).data("judgement");
+                    attribute = measurement;
+                } 
+
+
+                //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
+                let data = {
+                    SampleNumber: sampleNumber,
+                    CavityName: cavityNumber,
+                    Measurement: measurement,
+                    OrigMeasurement: measurement,
+                    Judgement: Judgement
+                };
+
+                var formData = new FormData();
+                formData.append("CheckpointID", checkpointID);
+                formData.append("InspectionID", inspectionID);
+                formData.append("CavityID", cavityID);  // Append the most recent cavityID
+                formData.append("Measurement", measurement);
+                formData.append("OrigMeasurement", measurement);
+                formData.append("CavityNumber", cavityNumber);
+                formData.append("SampleNumber", sampleNumber);
+                formData.append("__RequestVerificationToken", token);
+                formData.append("IsMeasurement", isMeasurement);
+                formData.append("Attribute", attribute);
+                formData.append("Judgement", Judgement);
+
+                $.ajax({
+                    url: '@Url.Action("CreateInspectionItem", "InspectionItems")',
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            inspectionTable.row.add(data).draw();
+                            if (response.SampleNumber == "0") {
+                                alertify.success("End inspection");
+                            } else {
+                                $('#SampleNumber').val(response.SampleNumber);
+                                checkSampleNumber(response.SampleNumber, cavityID);  // Pass the updated cavityID
+                            }
+                        } else {
+                            alertify.error(`Error ${response.message}.`)
+                        }
+                    }
+                });
+            });
+
+
+        var inspectionTable = $('#inspection-item-table').DataTable({
+            ajax: {
+                url: '@Url.Action("GetInspectionItems", "InspectionItems")',
+                data: function (d) {
+                    let button = $('.submit-inspection-item');
+                    d.CheckpointID = $('#CheckpointInfo').val();
+                    d.InspectionID = $(button).data('inspectionid');
+  
+                },
+                dataSrc: 'data'
+            },
+            responsive: false,
+            searching: false,
+            scrollX: true,
+            paging: false,
+            columns: [
+                {
+                    data: "SampleNumber",
+                    sortable: false,
+                },
+                {
+                    data: "CavityName",
+                    sortable: false,
+                },
+                {
+                    data: "Measurement",
+                    sortable: false,
+                    render: function (data, type, row) {
+                        if (data != null) {
+                            return data;
+                        } else {
+                            return row.Attribute;
+                        }
+                    }
+                },
+                {
+                    data: "OrigMeasurement",
+                    sortable: false,
+                   
+                },
+                {
+                    data: "Judgement",
+                    sortable: false,
+                    render: function (data, type, row) {
+                        let decision = data == "1" ? "GOOD" : "NOT GOOD";
+                        return `<span> ${decision} </span> `;
+                    }
+                },
+            ],
+            order: [[0, 'asc']],
+            drawCallback: function (settings) {
+                var api = this.api();
+
+                // Get the SampleItems from the current page rows
+                var data = api.rows({ page: 'current' }).data().toArray();
+
+                if (data.length > 0 && data) {
+                   
+
+                    var sampleItemsArray = data.map(function (item) {
+                        return item.SampleNumber;
+                    });
+
+                    // Find the maximum value in the SampleItems array
+                    var maxSampleItem = Math.max(...sampleItemsArray);
+
+                    if ($('#SampleSize').val() > maxSampleItem) {
+                        $('#SampleNumber').val(maxSampleItem + 1);
+                        enableDisableToggle(false);
+                        
+                    } else {
+                        $('#SampleNumber').val(maxSampleItem);
+                        enableDisableToggle(true);
+
+                    }
+                    // Log the next sample number
+                   
+
+                } else {
+                    $('#SampleNumber').val(1);
+                }
+                let flags = calculate(data);
+                console.log(flags);
+                $("#maxvalue").text(flags.max);
+                $("#minValue").text(flags.min);
+                $("#standardDev").text(flags.stdv);
+                $('#overallJudgement').text(flags.judgement).attr('class', `fs-1 text-${flags.color}`);
+                checkSampleNumber($('#SampleNumber').val(), cavities[0].CavityID);
+
+
+            }
+        });
+
+            $(document).on('click', '#end-inspection-btn', function () {
+                let inspectionID = $(this).data('id');
+                Swal.fire({
+                    title: "End inspection?",
+                    text: "You won't be able to revert this!",
+                    type: "warning",
+                    showCancelButton: !0,
+                    confirmButtonText: "Yes!",
+                    cancelButtonText: "No, cancel!",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    cancelButtonClass: "btn btn-danger ms-2 mt-2",
+                    buttonsStyling: !1,
+                }).then(function (t) {
+                    t.value
+                        ?
+                         $.ajax({
+                            url: '@Url.Action("EndInspection", "Inspection")',
+                            data: { InspectionID: inspectionID },
+                            type: "POST",
+                             success: function (response) {
+                                 if (response.success) {
+                                     Swal.fire({
+                                         title: "Success!",
+                                         text: "Inspection ended.",
+                                         type: "success",
+                                     })
+                                 } else {
+                                     alertify.error(`Error ${response.message} occured.`);
+                                 }
+
+                            }, error: function (err) {
+                                alertify.error(`Error ${err} occured.`);
+                            }
+                        })
+                        : t.dismiss === Swal.DismissReason.cancel &&
+                        Swal.fire({
+                            title: "Cancelled",
+                            text: "Your imaginary file is safe :)",
+                            type: "error",
+                        });
+                });
+               
+            });
+
+
+
+        });
+    </script>
+}

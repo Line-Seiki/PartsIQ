@@ -1,0 +1,218 @@
+﻿@model PartsIq.Models.EvaluationData
+
+@section styles{
+    <style>
+        .divider {
+            background-color: #EEEEEE;
+            width: 100%;
+            height: 2px;
+            margin: 0.5rem 0;
+        }
+    </style>
+}
+
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Evaluation</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="~/Evaluation">
+                                    Evaluation
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@Model.LotNumber</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>General Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Number</b>:</p>
+                                            <p>@Model.LotNumber</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Date Delivered</b>:</p>
+                                            <p>@Model.DateDelivered.ToString("MMM dd, yyyy")</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Code</b>:</p>
+                                            <p>@Model.PartCode</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Sample Size</b>:</p>
+                                            <p>@Model.SampleSize</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Time</b>:</p>
+                                            <p>@Model.TimeString</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Quantity</b>:</p>
+                                            <p>@Model.LotQuantity</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Supplier</b>:</p>
+                                            <p>@Model.Supplier</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Name</b>:</p>
+                                            <p>@Model.PartName</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Number of Cavities</b>:</p>
+                                            <p>@Model.CavityNum</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex">
+                                        <h5>Checkpoints</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="evaluation-table" class="table table-centered mb-0 fs-13">
+                                        <thead>
+                                            <tr>
+                                                <th>Sample Number</th>
+                                                <th>Cavity Number</th>
+                                                <th>Measurement</th>
+                                                <th>Original Measurement</th>
+                                                <th>Judgement</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+                                <div class="my-3">
+                                    <div class="divider"></div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <h5>Evaluation Decision</h5>
+                                    <div class="mt-4">
+                                        @Html.AntiForgeryToken()
+                                        <form id="save-evaluation">
+                                            <div class="d-flex gap-3 mb-3">
+                                                <label for="Evaluator" class="form-label">Evaluator:</label>
+                                                <input type="hidden" class="form-control" id="Evaluator" name="Evaluator" value="@Model.EvaluatorID">
+                                                <p><b>@Model.EvaluatorName</b></p>
+                                            </div>
+
+                                            <div class="d-flex justify-content-start gap-3 mb-3">
+                                                <label for="Comments" class="form-label">Comments:</label>
+                                                <input type="text" class="form-control" id="Comments" name="Comments" value="">
+                                            </div>
+
+                                            <div class="d-flex justify-content-start gap-3 mb-3">
+                                                <label for="Decision" class="form-label">Decision:</label>
+                                                <select type="text" class="form-control w-50" id="Decision" placeholder="Select decision" required></select>
+                                            </div>
+                                            <button type="submit" id="save-evaluation-btn" data-id="@Model.DeliveryDetailID" class="btn btn-primary">Save Evaluation</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+       $(document).ready(function () {
+
+        // Initialize the selectize dropdown with options
+        function initializeDynamicSelectize() {
+            return $('#Decision').selectize({
+                valueField: 'Value',
+                labelField: 'Text',
+                searchField: 'Text',
+                options: decisionList,
+                create: false,
+            })[0].selectize;  // This ensures you get the selectize API object
+        }
+
+        // Get the decision list from the ViewBag
+        let decisionList = @Html.Raw(Json.Encode(ViewBag.DecisionList));
+
+        // Initialize the selectize plugin and save the instance for later use
+        const decisionSelectize = initializeDynamicSelectize();
+
+        // Form submission handler
+          $(document).on("submit", '#save-evaluation', function (e) {
+                e.preventDefault();
+
+                let token = $('input[name="__RequestVerificationToken"]').val();
+                let detailID = $('#save-evaluation-btn').data("id");
+
+                // Use the decisionSelectize instance to get the selected value
+                const decisionSelected = decisionSelectize.getValue();
+
+                // Collect form data
+                const formData = new FormData(this);  // 'this' refers to the form element
+                formData.append("Decision", decisionSelected);
+                formData.append("DeliveryDetailID", detailID);
+                formData.append("__RequestVerificationToken", token);
+
+                // AJAX call
+                $.ajax({
+                    url: '@Url.Action("CreateEvaluation", "Evaluation")',
+                    type: "POST",
+                    data: formData,
+                    contentType: false, // Important to send FormData correctly
+                    processData: false, // Prevent jQuery from processing the data
+                    success: function (response) {
+                        if (response.success) {
+                            // Handle success, e.g., display a success message or redirect
+                            alert("Evaluation saved successfully!");
+                        } else {
+                            // Handle validation errors or other issues
+                            alert("An error occurred: " + response.message);
+                        }
+                    },
+                    error: function (err) {
+                        // Handle any errors that occur during the request
+                        console.error("Error:", err);
+                        alert("An unexpected error occurred.");
+                    },
+                });
+            });
+
+
+});
+
+
+
+
+
+
+    </script>
+}

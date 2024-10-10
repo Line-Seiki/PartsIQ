@@ -1,0 +1,458 @@
+﻿@section styles{
+    <style>
+        .badge-block {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #4B4B5A;
+            border-radius: 5px;
+        }
+
+        .low-priority {
+            background-color: #CDFAD5;
+            color: black;
+        }
+
+        .normal-priority {
+            background-color: #F6FDC3;
+            color: black;
+        }
+
+        .high-priority {
+            background-color: #FF9B9B;
+            color: black;
+        }
+
+        .priority-reserved {
+            background-color: #C4DAD2;
+            color: black;
+        }
+
+        .priority-started {
+            background-color: #EEEEEE;
+            color: black;
+        }
+
+        .priority-paused {
+            background-color: #FFF0D1;
+            color: black;
+        }
+
+        .priority-completed {
+            background-color: #347928;
+            color: white;
+        }
+
+        .urgent {
+            background-color: #FF0000;
+            color: white;
+        }
+
+        input:read-only {
+            background-color: #d4d4d4;
+        }
+
+        #DateDelivered {
+            background-color: transparent;
+        }
+       
+
+    </style>
+}
+
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Scheduling</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Scheduling</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!--Scheduling DataTable Card-->
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Left Content (Table) -->
+                        <div id="left-column" class="col-lg-12">
+                            <div class="card">
+                                <div class="card-header d-flex flex-lg-row flex-md-column justify-content-between align-content-center">
+                                    <div class="float-left d-flex flex-wrap justify-content-start gap-3">
+                                        <div><b>Legend: </b></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block low-priority"></span><p>Low Priority</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block normal-priority"></span><p>Normal Priority</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block high-priority"></span><p>High Priority</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block priority-started"></span><p>Started</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block priority-paused"></span><p>Paused</p></div>
+                                        <div class="d-flex justify-content-start gap-1"><span class="badge-block priority-reserved"></span><p>Reserved</p></div>
+
+                                    </div>
+                                    <div class="d-flex justify-content-end align-items-center gap-2">
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-placement="top" title="Add Delivery" data-bs-target="#addNewDelivery"><i class="mdi mdi-text-box-plus-outline"></i></button>
+                                        <button class="btn btn-secondary" id="refreshTable" data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh Tables"><i class="mdi mdi-refresh"></i></button>
+                                    </div>
+
+                                </div>
+                                <div class="card-body">
+                                    <!--Scheduling DataTable-->
+                                    <div class="table-responsive">
+                                        <table id="scheduling-data-table" class="table table-centered mb-0 fs-13">
+                                            <thead>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Date Delivered</th>
+                                                    <th>Part Code</th>
+                                                    <th>Part Name</th>
+                                                    <th>Model</th>
+                                                    <th>Supplier</th>
+                                                    <th>DR Number</th>
+                                                    <th>Total Quantity</th>
+                                                    <th>Lot Number</th>
+                                                    <th>Lot Quantity</th>
+                                                    <th>Inspection Deadline</th>
+                                                    <th>Inspector</th>
+                                                    <th>Remaining Days</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody><!--CONTENT HERE--></tbody>
+                                        </table>
+                                    </div> <!-- end Scheduling DataTable-->
+                                </div>
+                            </div> <!-- end card-box-->
+                        </div> <!-- end col -->
+                        <div id="right-column" class="col-lg-6 col-md-12 order-lg-last order-md-first d-none">
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul id="tab-list" class="nav nav-tabs">
+                                    </ul>
+                                    <div class="tab-content" id="tab-content">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end row -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--MODALS-->
+<!-- Add New Delivery-->
+<div class="modal modal-lg fade" id="addNewDelivery" tabindex="-1" aria-labelledby="addNewDeliveryLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-5">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deliveryLabelTitle">Add New Delivery</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row align-items-center mb-3">
+                    <form id="addDeliveryForm">
+                        <div class="mb-3">
+                            <label for="DateDelivered" class="form-label">Date Delivered</label>
+                            <input type="text" class="form-control" id="DateDelivered" name="DateDelivered" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="PartCode" class="form-label">Part Code</label>
+                            <select class="form-control" id="PartCode" placeholder="Choose a Part..." required></select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Supplier" class="form-label">Supplier</label>
+                            <select class="form-control" id="Supplier" placeholder="Choose a Supplier..." required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="DRNumber" class="form-label">DR Number</label>
+                            <input type="text" class="form-control" id="DRNumber" name="DRNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="TotalQuantity" class="form-label">Total Quantity</label>
+                            <input type="number" min="1" class="form-control" id="TotalQuantity" name="TotalQuantity" required>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" id="addDelivery" class="btn btn-success">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> <!-- end AddLot Modal-->
+<!-- Archive Modal -->
+<div class="modal fade" id="archiveModal" tabindex="-1" style="display: none;" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header justify-content-end">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body align-content-center text-center">
+                <h3>Are you sure?</h3>
+                <p class="lead">You are about to archive this delivery</p>
+                <p id="archiveInfo" class="card-subtitle"></p>
+                <div id="archiveBtns" class="d-grid gap-2 d-md-flex justify-content-center mt-3"></div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /archive modal-->
+
+@section Scripts {
+    <script src="~/Utility/JS/helpers.js"></script>
+    <script src="~/Utility/JS/tabs.js"></script>
+    <script>
+
+        let partsList = @Html.Raw(Json.Encode(ViewBag.PartsList));
+        let suppliersList = @Html.Raw(Json.Encode(ViewBag.SuppliersList));
+        const addLotBtn = document.getElementById('addLot');
+        const saveLotBtn = document.getElementById('saveLots');
+        const refreshBtn = document.getElementById('refreshTable');
+        const addDeliveryModal = document.getElementById('addNewDelivery');
+        const addDeliveryForm = document.getElementById('addDeliveryForm');
+        let schedulingTable; // DataTable Variable
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // DATA TABLE
+            schedulingTable = $('#scheduling-data-table').DataTable({
+                ajax: {
+                    url: '/Scheduling/GetScheduledParts',
+                    dataSrc: 'data'
+                },
+                responsive: true,
+                ordering: false,
+                columns: [
+                    { data: "Status"},
+                    {
+                        data: "DateDelivered", render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`;
+                        }
+                    },
+                    { data: "PartCode" },
+                    { data: "PartName" },
+                    { data: "Model" },
+                    { data: "Supplier" },
+                    { data: "DRNumber" },
+                    { data: "TotalQuantity" },
+                    { data: "LotNumber" },
+                    { data: "LotQuantity" },
+                    {
+                        data: "InspectionDeadline",
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    { data: "UserName" },
+                    {
+                        data: "RemainingDays",
+                        render: function (data, type, row, meta) {
+                            return `${data < 0 ? 0 : data}`;
+                        }
+                    },
+                    {
+                        data: "IsUrgent", orderable: false,
+                        render: function (data, type, row, meta) {
+                            return `
+                            <div class="d-flex gap-1">
+                                <div class="d-flex gap-1 flex-lg-row flex-md-column">
+                                    <button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="editDelivery(${meta.row})" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                    <button class="btn btn-sm btn-primary waves-effect waves-light mb-1" onclick="addRow(${meta.row})" data-bs-toggle="tooltip" data-bs-placement="top" title="Duplicate"><i class="mdi mdi-content-duplicate"></i></button>
+                                </div>
+                                <div class="d-flex gap-1 flex-lg-row flex-md-column">
+                                    <button class="btn btn-sm btn-danger waves-effect waves-light mb-1" onclick="archiveDelivery(${meta.row})" data-bs-toggle="modal" data-bs-target="#archiveModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Archive"><i class="mdi mdi-archive-arrow-down"></i></button>
+                                    ${data ? `<button class="btn btn-sm btn-warning waves-effect waves-light mb-1" onclick="prioritizeDelivery(${meta.row},${data})" data-bs-toggle="tooltip" data-bs-placement="top" title="Deprioritize"><i class="mdi mdi-chevron-triple-down"></i></button>` :
+                                `<button class="btn btn-sm btn-success waves-effect waves-light mb-1" onclick="prioritizeDelivery(${meta.row}, ${data})" data-bs-toggle="tooltip" data-bs-placement="top" title="Prioritize"><i class="mdi mdi-chevron-triple-up"></i></button>`}
+                                </div>
+                            </div>
+                            `;
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
+                }
+            });
+
+            // Bootstrap Tooltip with Modal
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // DataTable Edit Functionality
+            document.getElementById('scheduling-data-table').addEventListener('click', function (e) {
+                const target = e.target;
+
+            });
+
+            // Refetch Data from DataTable
+            refreshBtn.addEventListener('click', function () {
+                schedulingTable.ajax.reload();
+                $.ajax({
+                    url: '/Scheduling/GetSuppliersAndPartsList',
+                    type: 'POST',
+                    success(res) {
+                        partsList = res.partsList;
+                        suppliersList = res.suppliersList;
+                        alertify.success('Reloaded!')
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                })
+            });
+
+            // Add Delivery Event Trigger
+            addDeliveryForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const partSelected = document.getElementById('PartCode').selectize.getValue();
+                const supplierSelected = document.getElementById('Supplier').selectize.getValue();
+                const formData = new FormData(addDeliveryForm);
+                formData.append('PartCode', partSelected);
+                formData.append('Supplier', supplierSelected);
+                const data = Object.fromEntries(formData);
+                console.log(data);
+                $.ajax({
+                    url: '/Scheduling/AddDelivery',
+                    type: 'POST',
+                    data,
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        schedulingTable.ajax.reload();
+                        $('#addNewDelivery').modal('hide');
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            })
+
+            // Reset Add Delivery Form When Closing Modal
+            addDeliveryModal.addEventListener('hidden.bs.modal', function () {
+                addDeliveryForm.reset();
+                document.getElementById('PartCode').selectize.clear();
+                document.getElementById('Supplier').selectize.clear();
+            })
+        });
+        // FUNCTIONALITY for Prioritizing
+        function prioritizeDelivery(rowIndex, isUrgent) {
+            const rowData = schedulingTable.row(rowIndex).data();
+            console.log(rowData);
+            $.ajax({
+                url: '/Scheduling/PrioritizeDelivery',
+                type: 'POST',
+                data: {
+                    deliveryDetailId: rowData.DeliveryDetailID,
+                    version: rowData.DeliveryDetailVersion,
+                    isUrgent: !isUrgent,
+                },
+                success(res) {
+                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                    else alertify.error(`${res.Status}: ${res.Message}`);
+                    schedulingTable.ajax.reload();
+                },
+                error(err) {
+                    alertify.error(`${err}`);
+                }
+            });
+        }
+
+        // FUNCTIONALITY for Archiving
+        function archiveDelivery(rowIndex) {
+            const rowData = schedulingTable.row(rowIndex).data();
+
+            const archiveInfo = document.getElementById('archiveInfo');
+            const archiveBtns = document.getElementById('archiveBtns');
+
+            archiveBtns.innerHTML = "";
+            archiveInfo.innerHTML = "";
+
+            archiveInfo.innerHTML = `<b>DR-Number:</b> ${rowData.DRNumber}  <b>Model:</b> ${rowData.Model}`;
+            archiveBtns.innerHTML = `<button class="btn btn-primary" type="button" onclick="approveArchive(${rowData.DeliveryDetailID}, ${rowData.DeliveryDetailVersion})">Yes, Archive it!</button>
+                                     <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>`;
+        }
+        // When Modal Accepted
+        function approveArchive(id, version) {
+            // AJAX function here
+            $.ajax({
+                url: "/Scheduling/ArchiveDelivery",
+                type: 'POST',
+                data: {
+                    deliveryDetailId: id,
+                    version
+                },
+                success(res) {
+                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                    else alertify.error(`${res.Status}: ${res.Message}`);
+                    schedulingTable.ajax.reload();
+                    $('#archiveModal').modal('hide');
+                },
+                error(err) {
+                    console.log(err);
+                }
+            })
+        }
+
+        // FUNCTIONALITY for Adding Deliveries
+        // flatpickr DATE PICKER
+        flatpickr("#DateDelivered", {
+            dateFormat: "Y-m-d",
+        })
+
+        // selectize PartCode
+        const partsSelectize = $('#PartCode').selectize({
+            valueField: 'Value',
+            labelField: 'Text',
+            searchField: 'Text',
+            options: partsList,
+            create: false,
+        });
+
+        const supplierSelectize = $('#Supplier').selectize({
+            valueField: 'Value',
+            labelField: 'Text',
+            searchField: 'Text',
+            options: suppliersList,
+            create: false,
+        });
+
+
+        // FUNCTIONALITY for Editing Deliveries
+        function editDelivery(rowIndex) {
+            const rowData = schedulingTable.row(rowIndex).data();
+            console.log(rowData);
+
+            document.getElementById('left-column').classList.remove('col-lg-12');
+            document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, schedulingTable);
+        }
+
+        // FUNCTIONALITY for Adding Lots
+        function addRow(rowIndex) {
+            const rowData = schedulingTable.row(rowIndex).data();
+
+            document.getElementById('left-column').classList.remove('col-lg-12');
+            document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const addRowTab = new DynamicTabs('tab-list', 'tab-content', 'duplicate', rowData, schedulingTable);
+        }
+    </script>
+}

@@ -1,0 +1,147 @@
+﻿@model PartsIq.Models.InspectionViewModel
+
+<div class="row">
+    <div class="col-lg-6 col-md-12">
+        <div class="d-flex gap-3">
+            <p><b>Checkpoint Number</b>:</p>
+            <p>
+                <select id="CheckpointInfo" class="form-control">
+                    @foreach (var checkpoint in Model.CheckpointInfo.Checkpoints)
+                    {
+                        <option value="@checkpoint.CheckpointId" data-measurement="@checkpoint.IsMeasurement" data-upperlimit="@checkpoint.LimitUpper" data-lowerlimit="@checkpoint.LimitLower">
+                            @checkpoint.Code
+                        </option>
+                    }
+                </select>
+            </p>
+        </div>
+
+
+
+        <div class="d-flex gap-3">
+            <p><b>Inspection Part</b>:</p>
+            <p>@Model.CheckpointInfo.InspectionPart</p>
+        </div>
+        <div class="d-flex gap-3">
+            <p><b>Specification</b>:</p>
+            <p>@Model.CheckpointInfo.Specification</p>
+        </div>
+        <div class="d-flex gap-3">
+            <p><b>Notes</b>:</p>
+            <p>@Model.CheckpointInfo.Notes</p>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-12">
+        <div class="d-flex gap-3">
+            <p><b>Tools</b>:</p>
+            <p>@Model.CheckpointInfo.Tools</p>
+        </div>
+        <div class="d-flex gap-3">
+            <p><b>Sampling Method</b>:</p>
+            <p>@Model.CheckpointInfo.SamplingMethod</p>
+        </div>
+        <div class="d-flex gap-3">
+            <p><b>Upper Limit</b>:</p>
+            <input class="form-control w-25" id="UpperLimit" value="@Model.CheckpointInfo.UpperLimit" name="SampleSize" readonly />
+        </div>
+        <div class="d-flex gap-3">
+            <p><b>Lower Limit</b>:</p>
+            <input class="form-control w-25" id="LowerLimit" value="@Model.CheckpointInfo.LowerLimit" name="SampleSize" readonly />
+        </div>
+    </div>
+</div>
+<div class="divider mt-5"></div>
+<div class="row">
+    <div class="col-lg-6 col-md-12">
+        @Html.AntiForgeryToken()
+        <form>
+            <div class="form-group">
+                <label for="SampleSize">Sample Size:</label>
+                <input class="form-control w-25" id="SampleSize" value="@Model.SampleSize" name="SampleSize" readonly />
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="form-group">
+                    <label for="SampleNumber">Sample Number:</label>
+                    <input class="form-control w-100" value="@Model.SampleNumber" id="SampleNumber" name="SampleNumber" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="CavityNumber">Cavity Number:</label>
+                    <input class="form-control w-100" value="@Model.CavityNumber" id="CavityNumber" name="CavityNumber" readonly />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="Measurement">Measurement</label>
+                <textarea class="form-control" id="Measurement" rows="5"></textarea>
+            </div>
+            <div class="d-flex flex-column align-items-start w-100">
+                <div class="d-flex justify-content-center w-100" id="inspection-buttons">
+                    @if (Model.CheckpointInfo.IsMeasurement == 1)
+                    {
+                        <button class="submit-inspection-item btn btn-success" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
+                            <i class="mdi mdi-check-bold"></i> Submit
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="submit-inspection-item btn btn-success" data-judgement="1" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
+                            <i class="mdi mdi-check-bold"></i> Good
+                        </button>
+                        <button class="submit-inspection-item btn btn-danger ms-2" data-judgement="0" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
+                            <i class="mdi mdi-close"></i> No Good
+                        </button>
+                    }
+                </div>
+
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center w-100 mt-3">
+                    <div class="checkbox checkbox-primary">
+                        <input id="checkbox" type="checkbox" checked>
+                        <label for="checkbox">Auto Submit</label>
+                    </div>
+
+                    <div class="form-group mt-3 mt-lg-0">
+                        <label hidden for="Mode">Input Select</label>
+                        <select class="form-control" id="Mode">
+                            <option>Mode 1</option>
+                            <option>Mode 2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+        <div class="d-flex flex-column mt-3 gap-2">
+            <p class="mb-0">Overall Judgement: <span class="fs-1 text-success" id="overallJudgement">Good</span></p>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="col-lg-4 col-sm-12"><button class="btn btn-danger" data-id="@Model.InspectionID" id="end-inspection-btn">End Inspection</button></div>
+                <div class="col-lg-4 col-sm-12"><button class="btn btn-primary" disabled>Send Notification</button></div>
+                <div class="col-lg-4 col-sm-12"><button class="btn btn-secondary" disabled>Edit Sample Size</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-12">
+        <div class="table-responsive">
+            <table id="inspection-item-table" class="table table-centered mb-4 fs-13">
+                <thead>
+                    <tr>
+                        <th>Sample Number</th>
+                        <th>Cavity Number</th>
+                        <th>Measurement/Attribute</th>
+                        <th>Original Measurement</th>
+                        <th>Judgement</th>
+                    </tr>
+                </thead>
+            </table>
+            <button class="btn btn-secondary" disabled><i class="mdi mdi-pencil"></i> Edit Items</button>
+            <div class="d-flex flex-column">
+                <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
+                    <span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span>
+                    <span class="badge badge-soft-secondary badge-pill" ><b>Min Value: </b> #</span><span id="maxvalue"></span>
+                </div>
+                <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
+                    <span class="badge badge-soft-primary badge-pill" ><b>Standard Deviation: </b> #</span> <span id="standardDev"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

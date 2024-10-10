@@ -11,6 +11,12 @@ using PartsIq.Models;
 using OfficeOpenXml;
 using System.Diagnostics;
 using System.Net.Http;
+using Microsoft.Ajax.Utilities;
+using System.Reflection;
+using System.ComponentModel.Design;
+using System.IO;
+using Microsoft.SqlServer.Server;
+using System.Runtime.CompilerServices;
 
 namespace PartsIq.Controllers
 {
@@ -19,20 +25,20 @@ namespace PartsIq.Controllers
         private PartsIQEntities db = new PartsIQEntities();
 
         // GET: Checkpoints
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            var checkpoints = db.Checkpoints.Include(c => c.Part);
-            return View(await checkpoints.ToListAsync());
+            var checkpoints =  db.Checkpoints.ToList();
+            return View( checkpoints);
         }
 
         // GET: Checkpoints/Details/5
-        public async Task<ActionResult> Details(int? id)
+        public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
             if (checkpoint == null)
             {
                 return HttpNotFound();
@@ -41,8 +47,12 @@ namespace PartsIq.Controllers
         }
 
         // GET: Checkpoints/Create
-        public ActionResult Create(int? id = null)
+        public ActionResult Create(int id)
         {
+            var part = db.Parts.Find(id);
+            if (part == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             ViewBag.PartId = id;
             return View();
         }
@@ -52,12 +62,17 @@ namespace PartsIq.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
+        public ActionResult Create([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
         {
             if (ModelState.IsValid)
             {
+                var part = db.Parts.Find(checkpoint.Part_ID);
+                if (part == null)
+                {
+                    return HttpNotFound();
+                }
                 db.Checkpoints.Add(checkpoint);
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
@@ -66,18 +81,17 @@ namespace PartsIq.Controllers
         }
 
         // GET: Checkpoints/Edit/5
-        public async Task<ActionResult> Edit(int? id)
+        public ActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return new HttpStatusCodeResult(400);
             }
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
-            if (checkpoint == null)
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
+            if (checkpoint== null)
             {
-                return HttpNotFound();
+                return new HttpStatusCodeResult(404);
             }
-            ViewBag.CheckpointId = new SelectList(db.Parts, "PartId", "Code", checkpoint.CheckpointId);
             return View(checkpoint);
         }
 
@@ -86,12 +100,12 @@ namespace PartsIq.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
+        public ActionResult Edit([Bind(Include = "CheckpointId,Part_ID,Code,InspectionPart,IsActive,IsMeasurement,LimitLower,LimitUpper,Note,SamplingMethod,Specification,Tools")] Checkpoint checkpoint)
         {
             if (ModelState.IsValid)
             {
                 db.Entry(checkpoint).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
             ViewBag.CheckpointId = new SelectList(db.Parts, "PartId", "Code", checkpoint.CheckpointId);
@@ -99,13 +113,13 @@ namespace PartsIq.Controllers
         }
 
         // GET: Checkpoints/Delete/5
-        public async Task<ActionResult> Delete(int? id)
+        public  ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
+            Checkpoint checkpoint =  db.Checkpoints.Find(id);
             if (checkpoint == null)
             {
                 return HttpNotFound();
@@ -116,27 +130,105 @@ namespace PartsIq.Controllers
         // POST: Checkpoints/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id)
         {
-            Checkpoint checkpoint = await db.Checkpoints.FindAsync(id);
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
             db.Checkpoints.Remove(checkpoint);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
             return RedirectToAction("Index");
         }
 
-        public async Task<ActionResult> GetCheckpoints(int? id)
+        public ActionResult GetCheckpoints(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            List<Checkpoint> checkpoint = await db.Checkpoints.Where(c => c.Part_ID == id).ToListAsync();
-            if (checkpoint == null)
+
+            // Fetch the checkpoints for the specified Part_ID
+            var query = db.Checkpoints.Where(c => c.Part_ID == id);
+
+            // Check if there are no results
+            if (!query.Any())
             {
                 return HttpNotFound();
             }
-            return PartialView("_PartCheckpoints",checkpoint);
+
+            var checkpoints = query.Select(c => new
+            {
+                c.Code,
+                c.CheckpointId,
+                c.InspectionPart,
+                VariableType = c.IsMeasurement ? "Measurement" : "Attribute",
+                c.Specification,
+                c.LimitUpper,
+                c.LimitLower,
+                c.SamplingMethod,
+                c.Tools,
+                c.IsActive,
+                Status = c.IsActive ? "Active" : "Inactive",
+            }).ToList();
+
+            return Json(new { success = true, data = checkpoints }, JsonRequestBehavior.AllowGet);
         }
+
+        // /Checkpoints/EditCheckpoint
+        public JsonResult EditCheckpoint(FormCheckpoint data)
+        {
+            var checkpoint = db.Checkpoints.Find(data.CheckpointID);
+            if (checkpoint == null) return Json(new { success = false, message = "checkpoint cannot be found" });
+
+            if (checkpoint.Code != data.Code)
+            {
+                checkpoint.Code = data.Code;
+                db.Entry(checkpoint).Property(s => s.Code).IsModified = true;
+            }
+            if (checkpoint.InspectionPart != data.InspectionPart)
+            {
+                checkpoint.InspectionPart = data.InspectionPart;
+                db.Entry(checkpoint).Property(s => s.InspectionPart).IsModified = true;
+            }
+            if (checkpoint.Specification != data.Specification)
+            {
+                checkpoint.Specification = data.Specification;
+                db.Entry(checkpoint).Property(s => s.Specification).IsModified = true;
+            }
+            if (checkpoint.LimitUpper != data.UpperLimit)
+            {
+                checkpoint.LimitUpper = data.UpperLimit;
+                db.Entry(checkpoint).Property(s => s.LimitUpper).IsModified = true;
+            }
+            if (checkpoint.LimitLower != data.LowerLimit)
+            {
+                checkpoint.LimitLower = data.LowerLimit;
+                db.Entry(checkpoint).Property(s => s.LimitLower).IsModified = true;
+            }
+            if (checkpoint.IsMeasurement != data.IsMeasurement)
+            {
+                checkpoint.IsMeasurement = data.IsMeasurement;
+                db.Entry(checkpoint).Property(s => s.IsMeasurement).IsModified = true;
+            }
+            if (checkpoint.Tools != data.Tool)
+            {
+                checkpoint.Tools = data.Tool;
+                db.Entry(checkpoint).Property(s => s.Tools).IsModified = true;
+            }
+            if (checkpoint.SamplingMethod != data.MethodSampling)
+            {
+                checkpoint.SamplingMethod = data.MethodSampling;
+                db.Entry(checkpoint).Property(s => s.SamplingMethod).IsModified = true;
+            }
+            if (checkpoint.Note != data.Note)
+            {
+                checkpoint.Note = data.Note;
+                db.Entry(checkpoint).Property(s => s.Note).IsModified = true;
+            }
+            db.SaveChanges();
+            return Json(new { success = true,message = "Edit Successful" }, JsonRequestBehavior.AllowGet);
+
+        }
+
+
         [HttpGet]
         public ActionResult Upload()
         {
@@ -198,11 +290,173 @@ namespace PartsIq.Controllers
             return Json(htmlJson, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult UploadPartCheckpoints(HttpPostedFileBase excelFile, int PartID)
+        {
+            if (PartID <= 0)
+            {
+                return Json(new {message= "PartID not found", success=false}, JsonRequestBehavior.AllowGet);
+            }
+            string[] headers = { "Code", "InspectionPart", "Specification", "SpecificationRange", "CurrentTolerance", "Tool", "MethodSampling", "Level", "Level_1", "Note" };
+            var data = new List<Dictionary<string, string>>();
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            if (excelFile != null && excelFile.ContentLength > 0)
+            {
+                using (var package = new ExcelPackage(excelFile.InputStream))
+                {
+                    // Get the first worksheet
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];  
+                    for (int row = 6; row < worksheet.Dimension.End.Row; row++)
+                    {
+                        string codeValue = worksheet.Cells[row, 1].GetValue<string>();
+                        if (string.IsNullOrEmpty(codeValue) || codeValue.Contains("SPECIAL INSTRUCTION:"))
+                        {
+                            break;
+                        }
+
+
+                        var rowData = new Dictionary<string, string>();
+                        int currentHeaderFilled = 0;
+                        int col = 1;
+                        while (currentHeaderFilled < headers.Length && col <= worksheet.Dimension.End.Column)
+                        {
+                            var cell = worksheet.Cells[row, col];
+
+                            // Check if this cell is part of a merged range
+                            if (cell.Merge)
+                            {
+                                var mergeAddress = worksheet.MergedCells[cell.Start.Row, cell.Start.Column];
+                                if (mergeAddress != null)
+                                {
+                                    var mergeRange = worksheet.Cells[mergeAddress];
+
+                                    // Only process the first cell of the merged range
+                                    if (cell.Start.Row == mergeRange.Start.Row && cell.Start.Column == mergeRange.Start.Column)
+                                    {
+                                        string cellValue = cell.GetValue<string>();
+                                        // Record white spaces
+                                        if (string.IsNullOrWhiteSpace(cellValue))
+                                        {
+                                            cellValue = "";
+                                        }
+
+                                        if (headers[currentHeaderFilled] == "SpecificationRange" && string.IsNullOrWhiteSpace(cellValue))
+                                        {
+                                            rowData[headers[currentHeaderFilled]] = cellValue;
+                                            rowData[headers[currentHeaderFilled + 1]] = cellValue;
+                                            currentHeaderFilled += 2;
+                                        }
+                                        else
+                                        {
+                                            rowData[headers[currentHeaderFilled]] = cellValue;
+                                            currentHeaderFilled++;
+                                        }
+                                        
+
+                                        // Skip to the end of the merged range
+                                        col = mergeRange.End.Column + 1;
+                                        continue;
+                                    }
+                                }
+
+                                // If it's not the first cell of the merged range, skip it
+                                col++;
+                                continue;
+                            }
+                            else
+                            {
+                                // For non-merged cells, process as before
+                                string cellValue = cell.GetValue<string>();
+                                // Record white spaces
+                                if (string.IsNullOrWhiteSpace(cellValue))
+                                {
+                                    cellValue = "";
+                                }
+                                rowData[headers[currentHeaderFilled]] = cellValue;
+                                currentHeaderFilled++;
+                                col++;
+                            }
+                        }
+                        rowData.Add("PartID", PartID.ToString());
+                        data.Add(rowData);
+                    }
+                }
+                return Json(new { success = true, message = "File uploaded and processed successfully!", data });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Please upload a valid Excel file.", data });
+            }
+        }
+
+
+        // POST: /Checkpoints/UploadCheckpoint  
+        [HttpPost]
+        public JsonResult UploadCheckpoint(FormCheckpoint data)
+        {
+            try
+            {
+                var form = Request.Form;
+                if (form == null)
+                {
+                    return Json(new { success = false, message = "Form is not valid" }, JsonRequestBehavior.AllowGet);
+                }
+                var part = db.Parts.Find(data.PartID);
+                if (part == null)
+                {
+                    return Json(new { success = false, message = "No parts found." }, JsonRequestBehavior.AllowGet);
+                }
+
+                var Specification = data.IsMeasurement  ? data.SpecificationRange : data.Specification;
+                var checkpoint = new Checkpoint()
+                {
+                    Part_ID = data.PartID,
+                    Code = data.Code,
+                    InspectionPart = data.InspectionPart,
+                    IsActive = true,
+                    IsMeasurement = data.IsMeasurement,
+                    LimitLower = data.LowerLimit,
+                    LimitUpper = data.UpperLimit,
+                    Note = data.Note,
+                    SamplingMethod = data.MethodSampling,
+                    Specification = Specification,
+                    Tools = data.Tool,
+                };
+                db.Checkpoints.Add(checkpoint);
+                db.SaveChanges();
+
+                return Json(data, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex) 
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+            
+        }
+
+
         [HttpPost]
         public ActionResult UploadList (FormCollection formData)
         {
             Debug.WriteLine(formData);
             return Json(formData, JsonRequestBehavior.AllowGet);
+        }
+
+        // DELETE: /Checkpoints/DeleteCheckpoint/:id
+        public JsonResult DeleteCheckpoint(int id)
+        {
+            Checkpoint checkpoint = db.Checkpoints.Find(id);
+            if(checkpoint != null)
+            {
+                checkpoint.IsActive = !checkpoint.IsActive;
+                db.Entry(checkpoint).Property(s => s.IsActive).IsModified = true;
+                db.SaveChanges();
+                return Json(new { success = true, message = "successfully deleted checkpoint" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                return Json(new { success = false, message = "failArchivingCheckpoint" }, JsonRequestBehavior.AllowGet);
+            }
+            
         }
 
         //Functions for Upload Checkpoint 
