@@ -240,8 +240,8 @@ namespace PartsIq.Models
                 {
                     Status = "Failed",
                     Message = "No Lot Added"
-                }; 
-                    
+                };
+
                 var partCode = multipleFormData.First().PartCode;
                 var part = db.Parts.Where(p => p.Code == partCode).FirstOrDefault();
 
@@ -571,7 +571,7 @@ namespace PartsIq.Models
                     Message = "Editing Conflict! Current item already edited try again"
                 };
 
-                if(StatusID == 3)
+                if (StatusID == 3)
                 {
                     delDetail.StatusID = 4;
                     db.Entry(delDetail).Property(d => d.StatusID).IsModified = true;
@@ -736,10 +736,10 @@ namespace PartsIq.Models
                 DecisionID = d.DecisionID.HasValue ? d.DecisionID.Value : d.DecisionID,
                 DecisionName = d.DecisionID.HasValue ? d.Decision.Name : "",
                 EvaluatorID = d.Inspection.EvaluatorID.HasValue ? d.Inspection.EvaluatorID.Value : d.Inspection.EvaluatorID,
-                EvaluatorName = d.Inspection.EvaluatorID.HasValue ? d.Inspection.User1.FirstName +" "+ d.Inspection.User1.LastName : "", // User1 is for getting user data for Evaluator
+                EvaluatorName = d.Inspection.EvaluatorID.HasValue ? d.Inspection.User1.FirstName + " " + d.Inspection.User1.LastName : "", // User1 is for getting user data for Evaluator
                 InspectionID = d.InspectionID.HasValue ? d.InspectionID.Value : d.InspectionID,
                 UserID = d.UserID.HasValue ? d.UserID.Value : d.UserID,
-                UserName = d.UserID.HasValue ? d.User.FirstName + " " + d.User.LastName  : " ",
+                UserName = d.UserID.HasValue ? d.User.FirstName + " " + d.User.LastName : " ",
                 ControlNumber = d.Inspection.ControlNumber,
                 InspectorComments = d.Inspection.InspectionComments,
                 DateFinished = d.Inspection.DateEnd,
@@ -756,7 +756,7 @@ namespace PartsIq.Models
                 DeliveryVersion = d.Delivery.VERSION,
                 DeliveryDetailVersion = d.VERSION,
                 InspectionVersion = d.Inspection.VERSION,
-                
+
             }).ToList();
         }
 
@@ -780,6 +780,7 @@ namespace PartsIq.Models
                 InspectorComments = detail.Inspection.InspectionComments,
                 DateDelivered = detail.Delivery.DateDelivered,
                 DateFinished = detail.Inspection.DateEnd,
+                PartID = detail.Delivery.Part.PartID,
                 PartCode = detail.Delivery.Part.Code,
                 PartName = detail.Delivery.Part.Name,
                 LotNumber = detail.LotNumber,
@@ -829,12 +830,12 @@ namespace PartsIq.Models
                     Message = $"{ex.Message}"
                 };
             }
-            
+
         }
         #endregion
 
         #region User
-       public UserData GetUserDataByID(int id)
+        public UserData GetUserDataByID(int id)
         {
             var user = db.Users.Find(id);
             return new UserData

@@ -34,15 +34,15 @@ namespace PartsIq.Controllers
             }
             var detail = dbContext.GetEvaluationDataById(id);
 
-            if (detail == null) 
+            if (detail == null)
             {
                 return HttpNotFound();
             }
-            if (detail.DecisionID != 1 )
+            if (detail.DecisionID != 1)
             {
                 return Json("Already evaluated or not yet inspected", JsonRequestBehavior.AllowGet);
             }
-           
+
             var decisions = DecisionListItem();
             decisions.RemoveAt(0);
             var defaultUserID = 5; // Change this to Session ID
@@ -51,15 +51,15 @@ namespace PartsIq.Controllers
             {
                 detail.EvaluatorName = defaultUser.Name;
                 detail.EvaluatorID = defaultUser.UserId;
-            } 
+            }
 
             var part = db.Parts.Find(detail.PartID);
             if (part == null)
             {
                 return HttpNotFound();
             }
-            var checkpoints  = part.Checkpoints.ToList();
-            
+            var checkpoints = part.Checkpoints.ToList();
+
             ViewBag.Checkpoints = checkpoints;
             ViewBag.DecisionList = decisions;
             return View("Details", detail);
@@ -72,7 +72,7 @@ namespace PartsIq.Controllers
             .Include(dr => dr.Inspection) // Eagerly load related Inspection
             .Select(s => new EvaluationData
             {
-                
+
                 DeliveryDetailID = s.DeliveryDetailID,
                 DecisionID = s.DecisionID,
                 DecisionName = s.Decision.Name, // Accessing related Decision entity
