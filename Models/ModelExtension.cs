@@ -24,6 +24,7 @@ namespace PartsIq.Models
         public int StatusID { get; set; }
         public DateTime DateDelivered { get; set; }
         public DateTime Deadline { get; set; }
+        public int PartID { get; set; }
         public string PartCode { get; set; }
         public string PartName { get; set; }
         public int? UserID { get; set; }
@@ -112,7 +113,7 @@ namespace PartsIq.Models
         public string Name { get; set; }
     }
     #endregion
-    
+
     #region Inspection
     public class InspectionData : SchedulingData
     {
@@ -170,7 +171,7 @@ namespace PartsIq.Models
         public string CavityNumber { get; set; }
         public int InspectionID { get; set; }
         public int CavityID { get; set; }
-        public int CheckpointID {  get; set; }
+        public int CheckpointID { get; set; }
 
 
 
@@ -193,7 +194,7 @@ namespace PartsIq.Models
 
         public int SampleSize { get; set; }
 
-        public bool IsMeasurement { get; set; }  
+        public bool IsMeasurement { get; set; }
     }
 
     public class FormCheckpoint
@@ -201,7 +202,7 @@ namespace PartsIq.Models
         public string Code { get; set; }
         public string InspectionPart { get; set; }
         public string Specification { get; set; }
-        public string SpecificationRange {  get; set; } 
+        public string SpecificationRange { get; set; }
         public double UpperLimit { get; set; }
         public double LowerLimit { get; set; }
         public bool IsMeasurement { get; set; }
@@ -231,7 +232,7 @@ namespace PartsIq.Models
     #region Cavity
     public class CavityMaxSample : Cavity
     {
-        public int? MaxSampleNumber {  get; set; }
+        public int? MaxSampleNumber { get; set; }
     }
     #endregion
 
@@ -248,8 +249,9 @@ namespace PartsIq.Models
         public int NCRID { get; set; }
         public string Purpose { get; set; }
         public int CavityNum { get; set; }
-        public string TimeString 
-        { get 
+        public string TimeString
+        {
+            get
             {
                 if (Time.HasValue)
                 {
@@ -260,7 +262,7 @@ namespace PartsIq.Models
                 {
                     return "";
                 }
-            } 
+            }
         }
 
     }
