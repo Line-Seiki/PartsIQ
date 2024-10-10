@@ -105,40 +105,76 @@
 
 
             function calculate(obj) {
-                // If there is NG., the overall judgement is No Good
-                let minMeasurement = obj.length > 0 ? obj[0].Measurement : 0;
-                let maxMeasurement = obj.length > 0 ? obj[0].Measurement : 0;
 
-                obj.forEach((checkpoint, index) => {
-                    var textColor = checkpoint.Judgement == 1 ? "" : "text-danger";
-                    if (checkpoint.Measurement < minMeasurement) {
-                        minMeasurement = checkpoint.Measurement;
+                let judgement = "Good";
+                let judgementColor = "success";
+                let minMeasurement = Infinity; // Start with max value
+                let maxMeasurement = -Infinity; // Start with min value
+
+                // Check if the object is empty
+                if (obj.length === 0) {
+                    return {
+                        stdv: 0,
+                        avg: 0,
+                        min: 0,
+                        max: 0,
+                        judgement: judgement,
+                        color: judgementColor
+                    };
+                }
+
+                const data = obj// Filter to ensure only valid measurements
+                    .map(ob => ({
+                        Measurement: ob.Measurement,
+                        Judgement: ob.Judgement
+                    }));
+
+
+                // Check if there's valid measurement data
+                if (data.length === 0) {
+                    return {
+                        stdv: 0,
+                        avg: 0,
+                        min: 0,
+                        max: 0,
+                        judgement: judgement,
+                        color: judgementColor
+                    };
+                }
+
+                // Calculate min, max, and judgement
+
+
+                data.forEach((measurement) => {
+                    if (measurement.Measurement < minMeasurement) {
+                        minMeasurement = measurement.Measurement;
                     }
-                    if (checkpoint.Measurement > maxMeasurement) {
-                        maxMeasurement = checkpoint.Measurement;
+                    if (measurement.Measurement > maxMeasurement) {
+                        maxMeasurement = measurement.Measurement;
+                    }
+                    if (measurement.Judgement == "0") { // Change according to your logic
+                        judgement = "Not Good";
+                        judgementColor = "danger";
                     }
                 });
 
-                const annotation = {};
-                const data = obj.map(ob => ob.Measurement);
-                const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
-
+                const mean = data.reduce((acc, val) => acc + val.Measurement, 0) / data.length;
 
                 // Calculate standard deviation
-                const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+                const squaredDifferences = data.map(val => Math.pow(val.Measurement - mean, 2));
                 const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (data.length - 1);
                 const standardDeviation = Math.sqrt(variance);
 
-                // Assign calculated values to annotation object
-                annotation["stdv"] = standardDeviation;
-                annotation["avg"] = mean;
-                annotation["min"] = minMeasurement;
-                annotation["max"] = maxMeasurement;
-
-
-
-                return annotation;
+                return {
+                    stdv: standardDeviation,
+                    avg: mean,
+                    min: minMeasurement,
+                    max: maxMeasurement,
+                    judgement: judgement,
+                    color: judgementColor
+                };
             }
+
 
             $(document).on('change', '#CheckpointInfo', function () {
                 // Get selected option values
@@ -211,9 +247,9 @@
                     </button>`;
 
                 // Toggle button content based on isMeasurement value
-                if (isMeasurement == 1) {
+                if (isMeasurement == "True") {
                     buttonDiv.html(measurementBtn);
-                } else if (isMeasurement == 0) {
+                } else if (isMeasurement == "False") {
                     buttonDiv.html(attrBtn);
                 }
             }
@@ -281,7 +317,7 @@
                 // Check if this logs the correct cavityID
                 let upperLimit = $('#UpperLimit').val();
                 let lowerLimit = $('#LowerLimit').val();
-                if (isMeasurement == "1") {
+                if (isMeasurement == "True") {
                     measurement = Number(measurement);
                     if (measurement <= upperLimit && measurement >= lowerLimit) {
                         Judgement = 1;
@@ -353,10 +389,17 @@
             scrollX: true,
             paging: false,
             columns: [
-                { data: "SampleNumber" },
-                { data: "CavityName" },
+                {
+                    data: "SampleNumber",
+                    sortable: false,
+                },
+                {
+                    data: "CavityName",
+                    sortable: false,
+                },
                 {
                     data: "Measurement",
+                    sortable: false,
                     render: function (data, type, row) {
                         if (data != null) {
                             return data;
@@ -367,10 +410,12 @@
                 },
                 {
                     data: "OrigMeasurement",
+                    sortable: false,
 
                 },
                 {
                     data: "Judgement",
+                    sortable: false,
                     render: function (data, type, row) {
                         let decision = data == "1" ? "GOOD" : "NOT GOOD";
                         return `<span> ${decision} </span> `;
@@ -393,10 +438,7 @@
                 var data = api.rows({ page: 'current' }).data().toArray();
 
                 if (data.length > 0 && data) {
-                    let flags = calculate(data);
-                    $("#maxvalue").text(flags.max);
-                    $("#minValue").text(flags.min);
-                    $("#standardDev").text(flags.stdv);
+
                     var sampleItemsArray = data.map(function (item) {
                         return item.SampleNumber;
                     });
@@ -405,6 +447,7 @@
                     var maxSampleItem = Math.max(...sampleItemsArray);
 
                     if ($('#SampleSize').val() > maxSampleItem) {
+
                         $('#SampleNumber').val(maxSampleItem + 1);
                         enableDisableToggle(false);
 
@@ -418,7 +461,14 @@
 
                 } else {
                     $('#SampleNumber').val(1);
+                    enableDisableToggle(false);
                 }
+                let flags = calculate(data);
+                console.log(flags);
+                $("#maxvalue").text(flags.max);
+                $("#minValue").text(flags.min);
+                $("#standardDev").text(flags.stdv);
+                $('#overallJudgement').text(flags.judgement).attr('class', `fs-1 text-${flags.color}`);
                 checkSampleNumber($('#SampleNumber').val(), cavities[0].CavityID);
 
 
@@ -451,8 +501,8 @@
                                          text: "Inspection ended.",
                                          type: "success",
                                      }).then(() => {
-                                        window.location.href = "@Url.Action("Index", "Inspection")";
-                                    });
+                            window.location.href = "@Url.Action("Index", "Inspection")";
+                        });
                                  } else {
                                      alertify.error(`Error ${response.message} occured.`);
                                  }

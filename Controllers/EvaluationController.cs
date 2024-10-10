@@ -69,7 +69,8 @@ namespace PartsIq.Controllers
         public JsonResult GetEvaluationData()
         {
             var delivery = db.DeliveryDetails.Include(drs => drs.Delivery)
-            .Include(dr => dr.Inspection) // Eagerly load related Inspection
+            .Include(dr => dr.Inspection)
+            .Include(u => u.User)// Eagerly load related Inspection
             .Select(s => new EvaluationData
             {
                 
@@ -77,7 +78,12 @@ namespace PartsIq.Controllers
                 DecisionID = s.DecisionID,
                 DecisionName = s.Decision.Name, // Accessing related Decision entity
                 EvaluatorID = s.Inspection.EvaluatorID, // Accessing related Inspection fields
-                EvaluatorName = s.Inspection.User.FirstName + " " + s.Inspection.User.LastName,
+                EvaluatorName = s.Inspection.EvaluatorID.HasValue
+                        ? s.Inspection.User.FirstName + " " + s.Inspection.User.LastName
+                        : " ",
+                InspectorName = s.Inspection.UserID.HasValue
+                        ? s.Inspection.User.FirstName + " " + s.Inspection.User.LastName
+                        : "No Inspector",
                 //InspectorID = s.Inspection.UserID,
                 //Inspector = s.Inspection.User.FirstName + " " + s.Inspection.User.LastName,
                 ControlNumber = s.Inspection.ControlNumber,
@@ -92,8 +98,6 @@ namespace PartsIq.Controllers
                 Purpose = "" // Placeholder for dynamic value
             }).Where(s => s.DecisionID == 1).ToList();
             return Json(new { message = "success", data = delivery.ToList() }, JsonRequestBehavior.AllowGet);
-
-
         }
 
         [HttpPost]

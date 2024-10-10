@@ -243,6 +243,7 @@ namespace PartsIq.Models
         public int? DecisionID { get; set; }
         public string DecisionName { get; set; }
         public int? EvaluatorID { get; set; }
+        public string InspectorName { get; set; }  
         public string EvaluatorName { get; set; }
         public int? Time { get; set; }
         public string NCRNumber { get; set; }
