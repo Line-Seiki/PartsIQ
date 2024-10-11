@@ -514,7 +514,8 @@
             inspectionForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const formData = new FormData(e.srcElement)
-                const data = Object.fromEntries(formData);
+                const { hasError: { status, message }, data: newData } = formDataValidator(formData)
+                const data = Object.fromEntries(newData);
                 const cavityArray = [];
 
                 Object.keys(data).forEach(key => {
@@ -523,36 +524,39 @@
                         delete data[key];
                     }
                 });
-                if (data.SampleSize > 0 && data.NumberOfCavities > 0) {
-                    data.CavityList = cavityArray.join(',');
-                    data.UserID = inspectionForm.dataset.user;
-                    data.DeliveryDetailID = inspectionForm.dataset.detail;
-                    data.DeliveryDetailVersion = inspectionForm.dataset.detailversion
-                    data['Humidity'] = Number(data['Humidity']);
-                    data['Temperature'] = Number(data['Temperature']);
-                    console.log(data);
-                    $.ajax({
-                        url: '/Inspection/CreateInspection',
-                        type: 'GET',
-                        data,
-                        success(res) {
-                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                            else alertify.error(`${res.Status}: ${res.Message}`);
-                            inspectionForm.reset();
-                            refreshTables();
-                            if (res.RouteInspectionID) {
-                                const url = `/Inspection/Details/${res.RouteInspectionID}`;
-                                window.open(url, '_blank');
-                            }
-                        },
-                        error(err) {
-                            alertify.error(`${err}`);
-                        }
-                    });
+                if (status) {
+                    alertify.error(message);
                 } else {
-                    alertify.error("use non negative numbers");
+                    if (data.SampleSize > 0 && data.NumberOfCavities > 0) {
+                        data.CavityList = cavityArray.join(',');
+                        data.UserID = inspectionForm.dataset.user;
+                        data.DeliveryDetailID = inspectionForm.dataset.detail;
+                        data.DeliveryDetailVersion = inspectionForm.dataset.detailversion
+                        data['Humidity'] = Number(data['Humidity']);
+                        data['Temperature'] = Number(data['Temperature']);
+                        console.log(data);
+                        $.ajax({
+                            url: '/Inspection/CreateInspection',
+                            type: 'GET',
+                            data,
+                            success(res) {
+                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                                else alertify.error(`${res.Status}: ${res.Message}`);
+                                inspectionForm.reset();
+                                refreshTables();
+                                if (res.RouteInspectionID) {
+                                    const url = `/Inspection/Details/${res.RouteInspectionID}`;
+                                    window.open(url, '_blank');
+                                }
+                            },
+                            error(err) {
+                                alertify.error(`${err}`);
+                            }
+                        });
+                    } else {
+                        alertify.error("use non negative numbers");
+                    }
                 }
-                
             });
 
         }); // - END DOMCONTENTLOADED
@@ -745,6 +749,25 @@
             document.getElementById('right-column').classList.remove('d-none');
 
             const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
+        }
+
+
+        // HELPER 
+        function formDataValidator(formData) {
+            const data = new FormData();
+            let hasError = { status: false, message: "" };
+            formData.forEach((value, key) => {
+                if (typeof value === "string") {
+                    value = value.trim();
+                    if (value === '') {
+                        hasError.status = true;
+                        hasError.message = "Avoid the use of white spaces ";
+                    }
+                    data.append(key, value);
+                }
+            });
+
+            return { hasError, data };
         }
     </script>
 }
