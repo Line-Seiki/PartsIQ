@@ -224,8 +224,7 @@ namespace PartsIq.Controllers
                 db.Entry(checkpoint).Property(s => s.Note).IsModified = true;
             }
             db.SaveChanges();
-            return Json(new { success = true,message = "Edit Successful" }, JsonRequestBehavior.AllowGet);
-
+            return Json(new { success = true, message = "Edit Successful" }, JsonRequestBehavior.AllowGet);
         }
 
 

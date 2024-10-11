@@ -123,63 +123,85 @@
             e.preventDefault();
             const formData = new FormData(e.srcElement)
             if (e.target.dataset.type === "add") {
-                const data = Object.fromEntries(formData);
-                data["InCharge"] = data["InCharge"].replace(/['"\/']/g, '');
-                data["Name"] = data["Name"].replace(/['"\/']/g, '');
-                $.ajax({
-                    url: '/Suppliers/Create',
-                    type: 'POST',
-                    data,
-                    success(res) {
-                        if (res.Success) {
-                            alertify.success(`${res.Status}: ${res.Message}`);
-                            supplierDataTable.ajax.reload();
-                            document.getElementById('SupplierForm').reset();
+                const { hasError: { status, message }, data } = formDataValidator(formData)
+                if (status) {
+                    alertify.error(message);
+                } else {
+                    $.ajax({
+                        url: '/Suppliers/Create',
+                        type: 'POST',
+                        data: Object.fromEntries(data),
+                        success(res) {
+                            if (res.Success) {
+                                alertify.success(`${res.Status}: ${res.Message}`);
+                                supplierDataTable.ajax.reload();
+                                document.getElementById('SupplierForm').reset();
 
-                        } else {
-                            alertify.error(`${res.Status}: ${res.Message}`);
+                            } else {
+                                alertify.error(`${res.Status}: ${res.Message}`);
+                            }
+                            console.log(res);
+                        },
+                        error(err) {
+                            alertify.error(`Something went wrong! ${err}`);
+                            console.log(err);
                         }
-                        console.log(res);
-                    },
-                    error(err) {
-                        alertify.error(`Something went wrong! ${err}`);
-                        console.log(err);
-                    }
-                })
+                    });
+                }
+                
             } else {
                 formData.append("SupplierID", e.target.dataset.id);
                 formData.append("Version", e.target.dataset.version);
-                const data = Object.fromEntries(formData);
-                data["InCharge"] = data["InCharge"].replace(/['"\/']/g, '');
-                data["Name"] = data["Name"].replace(/['"\/']/g, '');
-                $.ajax({
-                    url: '/Suppliers/Edit',
-                    type: 'POST',
-                    data,
-                    success(res) {
-                        if (res.Success) {
-                            alertify.success(`${res.Status}: ${res.Message}`);
-                            supplierDataTable.ajax.reload();
-                            const supplierForm = document.getElementById('SupplierForm');
-                            supplierForm.dataset.type = 'add';
-                            supplierForm.dataset.id = '';
-                            supplierForm.dataset.version = '';
-                            supplierForm.reset();
-                            document.getElementById('formBtn').innerText = "Add Supplier";
-                            document.getElementById("cancelBtn").remove();
+                const { hasError: { status, message }, data } = formDataValidator(formData)
+                if (status) {
+                    alertify.error(message);
+                } else {
+                    $.ajax({
+                        url: '/Suppliers/Edit',
+                        type: 'POST',
+                        data: Object.fromEntries(data),
+                        success(res) {
+                            if (res.Success) {
+                                alertify.success(`${res.Status}: ${res.Message}`);
+                                supplierDataTable.ajax.reload();
+                                const supplierForm = document.getElementById('SupplierForm');
+                                supplierForm.dataset.type = 'add';
+                                supplierForm.dataset.id = '';
+                                supplierForm.dataset.version = '';
+                                supplierForm.reset();
+                                document.getElementById('formBtn').innerText = "Add Supplier";
+                                document.getElementById("cancelBtn").remove();
 
-                        } else {
-                            alertify.error(`${res.Status}: ${res.Message}`);
+                            } else {
+                                alertify.error(`${res.Status}: ${res.Message}`);
+                            }
+                            console.log(res);
+                        },
+                        error(err) {
+                            console.log(err);
+                            alertify.error(`Something went wrong! ${err}`);
                         }
-                        console.log(res);
-                    },
-                    error(err) {
-                        console.log(err);
-                        alertify.error(`Something went wrong! ${err}`);
-                    }
-                })
+                    })
+                }
             }
         });
+
+        function formDataValidator(formData) {
+            const data = new FormData();
+            let hasError = { status: false, message: "" };
+            formData.forEach((value, key) => {
+                if (typeof value === "string") {
+                    value = value.replace(/['"\/']/g, '').trim();
+                    if (value === '') {
+                        hasError.status = true;
+                        hasError.message = "Avoid the use of ', \", \/, and white spaces"
+                    }
+                    data.append(key, value);
+                }
+            });
+
+            return { hasError, data };
+        }
 
         function editSupplier(id, row) {
             supplierObj = JSON.parse(decodeURIComponent(row));

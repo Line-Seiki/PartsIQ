@@ -236,11 +236,11 @@ class DynamicTabs {
                             </div>
                             <div class="mb-3">
                                 <label for="LotNumber-${id}" class="form-label">Lot Number</label>
-                                <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber != null ? `${rowData.LotNumber}` : `` }>
+                                <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber != null ? `${rowData.LotNumber}` : `` } required>
                             </div>
                             <div class="mb-3">
                                 <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
-                                <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="${rowData.LotQuantity}">
+                                <input type="number" class="form-control" id="LotQuantity-${id}" name="LotQuantity" value="${rowData.LotQuantity}" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form >`;
@@ -286,11 +286,11 @@ class DynamicTabs {
                                 </div>
                                 <div>
                                     <label for="UpperLimit-${id}" class="form-label">Upper Limit</label>
-                                    <input type="text" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit ? rowData.UpperLimit : ``}">
+                                    <input type="number" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit ? rowData.UpperLimit : ``}">
                                 </div>
                                 <div>
                                     <label for="LowerLimit-${id}" class="form-label">Lower Limit</label>
-                                    <input type="text" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit ? rowData.LowerLimit : ``}">
+                                    <input type="number" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit ? rowData.LowerLimit : ``}">
                                 </div>
                             </div>
 
@@ -298,11 +298,11 @@ class DynamicTabs {
                             <div class="mb-3">
                                 <p class="form-label">Measurement?</p>
                                 <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="1" checked/>
+                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="true" checked/>
                                     <label class="form-check-label" for="IsMeasurementT">True</label>
                                 </div>
                                 <div class="form-check custom-radio">
-                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="0"/>
+                                    <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="false"/>
                                     <label class="form-check-label" for="IsMeasurementF">False</label>
                                 </div>
                             </div>
@@ -347,22 +347,25 @@ class DynamicTabs {
         
         const form = document.getElementById(`checkpointForm-${id}`);
         const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        console.log(data);
+        const { hasError: { status, message }, data } = this.formDataValidatorClass(formData, this.contentType);
+        console.log(Object.fromEntries(data));
+        if (status) {
+            alertify.error(message);
+        } else {
+            $.ajax({
+                url: `/Checkpoints/UploadCheckpoint`,
+                type: 'POST',
+                data: Object.fromEntries(data),
+                success: (res) => {
+                    console.log(res);
+                    this.removeTab(tabId, contentId);
 
-        $.ajax({
-            url: `/Checkpoints/UploadCheckpoint`,
-            type: 'POST',
-            data,
-            success: (res) => {
-                console.log(res);
-                this.removeTab(tabId, contentId);
-
-            },
-            error: (err) => {
-                console.log(err);
-            }
-        });
+                },
+                error: (err) => {
+                    console.log(err);
+                }
+            });
+        }
     }
 
     // For Edit Functionality
@@ -379,25 +382,31 @@ class DynamicTabs {
             formData.append("DeliveryId", deliveryId);
             formData.append("DeliveryDetailVersion", version);
             formData.append("DeliveryVersion", deliveryVersion);
-            const data = Object.fromEntries(formData);
+            const { hasError: { status, message }, data: newData } = this.formDataValidatorClass(formData, this.contentType)
+            const data = Object.fromEntries(newData);
             data['LotQuantity'] = Math.abs(parseInt(data['LotQuantity']));
             data['TotalQuantity'] = Math.abs(parseInt(data['TotalQuantity']));
             console.log(data);
 
-            $.ajax({
-                url: '/Scheduling/EditDelivery',
-                type: 'POST',
-                data,
-                success: (res) => {
-                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                    else alertify.error(`${res.Status}: ${res.Message}`);
-                    this.reloadDataTables(this.dataTables);
-                    this.removeTab(tabId, contentId);
-                },
-                error: (err) => {
-                    alertify.error(`${err}`);
-                }
-            });
+            if (status) {
+                alertify.error(message);
+            } else {
+                $.ajax({
+                    url: '/Scheduling/EditDelivery',
+                    type: 'POST',
+                    data,
+                    success: (res) => {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        this.reloadDataTables(this.dataTables);
+                        this.removeTab(tabId, contentId);
+                    },
+                    error: (err) => {
+                        alertify.error(`${err}`);
+                    }
+                });
+            }
+            
         } else {
             console.log(totalQty, lotQty);
             alertify.error(`The Quantity in the lot exceeded the total quantity.`)
@@ -513,11 +522,11 @@ class DynamicTabs {
                                     </div>
                                     <div class="mb-2">
                                         <label for="lot-${lotNumber}" class="form-label">Lot Number</label>
-                                        <input type="text" id="lot-${lotNumber}" class="form-control lot-code-${id}" value="${lotNumber !== 1 ? `` : data.LotNumber != null ? `${data.LotNumber}` : ``}"/>
+                                        <input type="text" id="lot-${lotNumber}" class="form-control lot-code-${id}" value="${lotNumber !== 1 ? `` : data.LotNumber != null ? `${data.LotNumber}` : ``}" required/>
                                     </div>
                                     <div class="mb-2">
                                         <label for="lotQty-${lotNumber}" class="form-label">Lot Quantity</label>
-                                        <input type="number" id="lotQty-${lotNumber}" class="form-control lot-qty-${id}" value="${qty}" onchange="updateSetQty('${id}')" />
+                                        <input type="number" id="lotQty-${lotNumber}" class="form-control lot-qty-${id}" value="${qty}" onchange="updateSetQty('${id}')" required/>
                                     </div>
                                 </div>
                             </div>
@@ -530,12 +539,17 @@ class DynamicTabs {
     saveLotChanges(id, tabId, contentId) {
         const reqQty = document.getElementById(`reqQty-${id}`);
         const setQty = document.getElementById(`setQty-${id}`);
+        let hasNoLot = false;
         if (parseInt(reqQty.value) !== parseInt(setQty.value)) {
             alertify.error('Current set quantity is not equal to the required quantity!');
         } else {
             const savedLots = qtyInputs.find(input => input.id === id).savedLots;
             const lots = document.querySelectorAll(`#lot-container-${id} > div`);
             lots.forEach((lot, index) => {
+                let trimmedLot = lot.querySelector(`.lot-code-${id}`).value.trim();
+                if (trimmedLot === '') {
+                    hasNoLot = true;
+                }
                 if (index === 0) savedLots.push({
                     DeliveryID: lot.querySelector(`.deliveryId-${id}`).value,
                     DeliveryDetailID: lot.querySelector(`.deliveryDetailId-${id}`).value,
@@ -569,6 +583,9 @@ class DynamicTabs {
             if (otherLots.length <= 0) {
                 alertify.error("Add lot/s to duplcate item");
                 savedLots.splice(0, savedLots.length);
+            } else if (hasNoLot) {
+                alertify.error("Please assign a Lot Number to unfilled forms");
+                savedLots.splice(0, savedLots.length);
             } else {
                 $.ajax({
                     url: '/Scheduling/DuplicateDelivery',
@@ -591,5 +608,40 @@ class DynamicTabs {
                 savedLots.splice(0, savedLots.length);
             }
         }
+    }
+
+    // FORM VALIDATOR FOR FORM SUBMISSIONS
+    formDataValidatorClass(formData, contentType) {
+        const data = new FormData();
+        let hasError = { status: false, message: "" };
+        formData.forEach((value, key) => {
+            if (contentType === "checkpoint") {
+                if (key === "SpecificationRange") value = value === '' ? "none" : value;
+                if (key === "UpperLimit" || key === "LowerLimit") value = value === '' ? 0 : Number(value);
+                data.append(key, value)
+            }
+
+            if (typeof value === "string") {
+                value = value.trim();
+                if (value === '') {
+                    hasError.status = true;
+                    hasError.message = "Avoid the use of white spaces ";
+                }
+                data.append(key, value);
+            }
+        });
+
+        if (contentType === "checkpoint") {
+            const upperLimit = Number(formData.get('UpperLimit'));
+            const lowerLimit = Number(formData.get('LowerLimit'));
+
+            if (upperLimit < lowerLimit) {
+                hasError.status = true;
+                hasError.message += "Upper limit cannot be lower than the Lower limit ";
+            }
+        }
+
+
+        return { hasError, data };
     }
 }
