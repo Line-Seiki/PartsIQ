@@ -540,6 +540,7 @@ class DynamicTabs {
         const reqQty = document.getElementById(`reqQty-${id}`);
         const setQty = document.getElementById(`setQty-${id}`);
         let hasNoLot = false;
+        let hasNoQuantity = false;
         if (parseInt(reqQty.value) !== parseInt(setQty.value)) {
             alertify.error('Current set quantity is not equal to the required quantity!');
         } else {
@@ -547,9 +548,9 @@ class DynamicTabs {
             const lots = document.querySelectorAll(`#lot-container-${id} > div`);
             lots.forEach((lot, index) => {
                 let trimmedLot = lot.querySelector(`.lot-code-${id}`).value.trim();
-                if (trimmedLot === '') {
-                    hasNoLot = true;
-                }
+                let identifiedQuantity = Number(lot.querySelector(`.lot-qty-${id}`).value);
+                if (trimmedLot === '') hasNoLot = true;
+                if (identifiedQuantity === 0 || identifiedQuantity === NaN) hasNoQuantity = true;
                 if (index === 0) savedLots.push({
                     DeliveryID: lot.querySelector(`.deliveryId-${id}`).value,
                     DeliveryDetailID: lot.querySelector(`.deliveryDetailId-${id}`).value,
@@ -585,6 +586,9 @@ class DynamicTabs {
                 savedLots.splice(0, savedLots.length);
             } else if (hasNoLot) {
                 alertify.error("Please assign a Lot Number to unfilled forms");
+                savedLots.splice(0, savedLots.length);
+            } else if (hasNoQuantity) {
+                alertify.error("Unable to save lots with quantity of 0");
                 savedLots.splice(0, savedLots.length);
             } else {
                 $.ajax({
