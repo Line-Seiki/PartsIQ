@@ -236,7 +236,7 @@ class DynamicTabs {
                             </div>
                             <div class="mb-3">
                                 <label for="LotNumber-${id}" class="form-label">Lot Number</label>
-                                <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value=${rowData.LotNumber != null ? `${rowData.LotNumber}` : `` } required>
+                                <input type="text" class="form-control" id="LotNumber-${id}" name="LotNumber" value="${rowData.LotNumber != null ? `${rowData.LotNumber}` : `` }" required>
                             </div>
                             <div class="mb-3">
                                 <label for="LotQuantity-${id}" class="form-label">Lot Quantity</label>
