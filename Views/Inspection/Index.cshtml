@@ -422,6 +422,8 @@
                     editBtn.dataset.index = '';
                     memberBtn.dataset.index = '';
                     playpauseBtn.dataset.index = '';
+                } else if (classList.contains('child')) {
+                    
                 }
                 else {
                     availableTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));

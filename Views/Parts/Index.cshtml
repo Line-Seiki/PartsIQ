@@ -130,21 +130,25 @@
                 createPartForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const formData = new FormData(createPartForm);
-                    const data = Object.fromEntries(formData);
-                    $.ajax({
-                        url: `/Parts/CreatePart`,
-                        method: 'POST',
-                        data,
-                        success: (res) => {
-                            console.log(res);
-                            createModalInstance.hide();
-                            createPartForm.reset();
-                            pisTable.ajax.reload();
-                        },
-                        error: (err) => {
-                            console.log(err);
-                        }
-                    });
+                    const { hasError: { status, message }, data } = formDataValidator(formData);
+                    if (status) {
+                        alertify.error(message);
+                    } else {
+                        $.ajax({
+                            url: `/Parts/CreatePart`,
+                            method: 'POST',
+                            data: Object.fromEntries(data),
+                            success: (res) => {
+                                console.log(res);
+                                createModalInstance.hide();
+                                createPartForm.reset();
+                                pisTable.ajax.reload();
+                            },
+                            error: (err) => {
+                                console.log(err);
+                            }
+                        });
+                    }
                 });
             }
 
@@ -214,6 +218,23 @@
 
 
         });
+
+        function formDataValidator(formData) {
+            const data = new FormData();
+            let hasError = { status: false, message: "" };
+            formData.forEach((value, key) => {
+                if (typeof value === "string") {
+                    value = value.trim();
+                    if (value === '') {
+                        hasError.status = true;
+                        hasError.message = "Avoid the use of white spaces";
+                    }
+                    data.append(key, value);
+                }
+            });
+
+            return { hasError, data };
+        }
 
         function monitorPart(id) {
             $.ajax({
