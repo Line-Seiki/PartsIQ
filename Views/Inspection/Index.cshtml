@@ -540,7 +540,7 @@
                             refreshTables();
                             if (res.RouteInspectionID) {
                                 const url = `/Inspection/Details/${res.RouteInspectionID}`;
-                                window.open(url, '_blank');
+                                window.location.href =  url;
                             }
                         },
                         error(err) {

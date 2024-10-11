@@ -128,9 +128,15 @@
 @section scripts {
     <script src="~/Utility/JS/helpers.js"></script>
     <script>
-        let evaluationTable;
+        var evaluationTable;
+        var partMonitoringTable;
 
         document.addEventListener('DOMContentLoaded', function () {
+
+            partMonitoringTable = $('#monitoring-table').DataTable({
+
+            });
+
             evaluationTable = $('#evaluation-table').DataTable({
                 ajax: {
                     url: '/Evaluation/GetEvaluationData',

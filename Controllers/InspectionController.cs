@@ -42,6 +42,13 @@ namespace PartsIq.Controllers
 
             if (inspection == null)
                 return HttpNotFound();
+            //if (inspection.DeliveryDetails.FirstOrDefault(i => i.StatusID.HasValue && i.StatusID != 1) != null)
+            //{
+            //    return HttpNotFound();
+            //}
+
+
+
 
             // Get the part related to the first DeliveryDetail
             var deliveryDetail = inspection.DeliveryDetails.FirstOrDefault();
