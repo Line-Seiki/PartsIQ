@@ -59,11 +59,11 @@
                                         <div class="mb-3">
                                             <p class="form-label">Measurement?</p>
                                             <div class="form-check custom-radio">
-                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="1" @(Model.IsMeasurement ? "checked": "") />
+                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="true" @(Model.IsMeasurement ? "checked": "") />
                                                 <label class="form-check-label" for="IsMeasurementT">True</label>
                                             </div>
                                             <div class="form-check custom-radio">
-                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="0" @(!Model.IsMeasurement ? "checked": "")/>
+                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="false" @(!Model.IsMeasurement ? "checked": "")/>
                                                 <label class="form-check-label" for="IsMeasurementF">False</label>
                                             </div>
                                         </div>
@@ -112,28 +112,63 @@
             checkpointForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const formData = new FormData(checkpointForm);
-                const data = Object.fromEntries(formData);
-                $.ajax({
-                    url: '/Checkpoints/EditCheckpoint',
-                    method: 'POST',
-                    data,
-                    success: (res) => {
-                        if (res.success) {
-                            alertify.success(res.message);
+                const { hasError: { status, message }, data } = formDataValidator(formData);
+                if (status) {
+                    alertify.error(message);
+                    console.log(Object.fromEntries(data));
+                } else {
+                    $.ajax({
+                        url: '/Checkpoints/EditCheckpoint',
+                        method: 'POST',
+                        data: Object.fromEntries(data),
+                        success: (res) => {
+                            if (res.success) {
+                                alertify.success(res.message);
+                            }
+                            window.scroll({
+                                top: 0,
+                                left: 0,
+                                behavior: 'smooth'
+                            });
+                            console.log(res);
+                        },
+                        error: (err) => {
+                            console.log(err);
                         }
-                        window.scroll({
-                            top: 0,
-                            left: 0,
-                            behavior: 'smooth'
-                        });
-                        console.log(res);
-                    },
-                    error: (err) => {
-                        console.log(err);
-                    }
-                })
+                    })
+                }
             })
-        })
+        });
+
+        function formDataValidator(formData) {
+            const data = new FormData();
+            let hasError = { status: false, message: "" };
+            formData.forEach((value, key) => {
+                if (key === "SpecificationRange") value = value === '' ? "none" : value;
+                if (key === "UpperLimit" || key === "LowerLimit") value = value === '' ? 0 : Number(value);
+                data.append(key, value)   
+
+                if (typeof value === "string") {
+                    value = value.trim();
+                    if (value === '') {
+                        hasError.status = true;
+                        hasError.message = "Avoid the use of white spaces ";
+                    }
+                    data.append(key, value);
+                }
+            });
+
+            const upperLimit = Number(formData.get('UpperLimit'));
+            const lowerLimit = Number(formData.get('LowerLimit'));
+
+            if (upperLimit < lowerLimit) {
+                hasError.status = true;
+                hasError.message += "Upper limit cannot be lower than the Lower limit ";
+            }
+
+
+            return { hasError, data };
+        }
         
     </script>
 }
