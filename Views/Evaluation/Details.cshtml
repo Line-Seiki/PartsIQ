@@ -89,21 +89,37 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                <div class="d-flex justify-content-between">
-                                    <div class="d-flex">
-                                        <h5>Checkpoints</h5>
-                                        <div class="d-flex gap-3">
-                                            <p><b>Checkpoint Number</b>:</p>
-                                            <p>
-                                                <select id="CheckpointInfo" class="form-control">
-                                                    @foreach (var checkpoint in ViewBag.Checkpoints)
-                                                    {
-                                                        <option value="@checkpoint.CheckpointId" data-measurement="@checkpoint.IsMeasurement" data-upperlimit="@checkpoint.LimitUpper" data-lowerlimit="@checkpoint.LimitLower">
-                                                            @checkpoint.Code
-                                                        </option>
-                                                    }
-                                                </select>
-                                            </p>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <!-- Left section for Checkpoints -->
+                                    <div class="d-flex align-items-center">
+                                        <h5 class="me-3">Checkpoints</h5>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <p class="mb-0"><b>Checkpoint Number:</b></p>
+                                            <select id="CheckpointInfo" class="form-control ms-2">
+                                                @foreach (var checkpoint in ViewBag.Checkpoints)
+                                                {
+                                                    <option value="@checkpoint.CheckpointId"
+                                                            data-measurement="@checkpoint.IsMeasurement"
+                                                            data-upperlimit="@checkpoint.LimitUpper"
+                                                            data-lowerlimit="@checkpoint.LimitLower">
+                                                        @checkpoint.Code
+                                                    </option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right section for Upper and Lower Limits -->
+                                    <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center gap-3 me-4">
+                                            <p class="mb-0"><b>Upper Limit:</b></p>
+                                            <input id="UpperLimit" type="text" class="form-control"
+                                                   value="@ViewBag.Checkpoints[0].LimitUpper" readonly />
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <p class="mb-0"><b>Lower Limit:</b></p>
+                                            <input id="LowerLimit" type="text" class="form-control"
+                                                   value="@ViewBag.Checkpoints[0].LimitLower" readonly />
                                         </div>
                                     </div>
                                 </div>
@@ -121,7 +137,7 @@
                                             </tr>
                                         </thead>
                                     </table>
-                                    <button class="btn btn-secondary mt-2" disabled><i class="mdi mdi-pencil"></i> Edit Items</button>
+                                    <button id="edit-items-btn" class="btn btn-secondary mt-2"><i class="mdi mdi-pencil"></i> Edit Items</button>
                                     <div class="d-flex flex-column">
                                         <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
                                             <span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span>
@@ -172,9 +188,31 @@
     <script>
         $(document).ready(function () {
 
+            function toggleEditItems(status) {
+                let btn = $('#edit-items-btn');
+
+                if (status) {
+                    btn.text("Save Items");
+                    btn.removeClass().addClass("btn btn-primary");
+                } else {
+                    btn.text("Edit Items");
+                    btn.removeClass().addClass("btn btn-secondary");
+                }
+            }
+
+
             $(document).on('change', '#CheckpointInfo', function () {
                 inspectionTable.ajax.reload();
+
+                // Corrected syntax for accessing selected option's data
+                let upperlimit = $(this).find('option:selected').data("upperlimit");
+                let lowerlimit = $(this).find('option:selected').data("lowerlimit");
+                console.log(`${upperlimit} ${lowerlimit}`)
+                // Update the Upper and Lower Limit inputs
+                $('#UpperLimit').val(upperlimit).text(upperlimit);
+                $('#LowerLimit').val(lowerlimit).text(lowerlimit);
             });
+
 
             function calculate(obj) {
                 // If there is NG., the overall judgement is No Good
@@ -239,12 +277,14 @@
                     { data: "OrigMeasurement" },
                     {
                         data: "Judgement",
+                        sortable: false,
                         render: function (data, type, row) {
                             let decision = data == "1" ? "GOOD" : "NOT GOOD";
-                            return `<span>${decision}</span>`;
+                            return `<span data-judgement="${data}"> ${decision} </span> `;
                         }
                     },
                 ],
+                rowId: "InspectionItemID",
                 order: [[0, 'asc']],
                 rowCallback: function (row, data, index) {
                     // Check the judgment value and apply the class to the entire row
@@ -382,6 +422,106 @@
                     }
                 });
             });
+
+
+             $(document).on('click', '#edit-items-btn', function () {
+                 let isMeasurement = $('#CheckpointInfo option:selected').data('measurement') === "True"; // Simplify isMeasurement check
+               
+                if ($(this).hasClass("btn-secondary")) {
+                    // Switch to edit mode
+                    inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                        var $row = $(this.node());
+                        var $measurementCell = $row.find('td').eq(2);
+                        var $judgementCell = $row.find('td').eq(4);
+                        var isGood = $judgementCell.find('span').data('judgement');
+
+                        // Allow judgment change manually if it's not a measurement
+                        if (!isMeasurement) {
+                            var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
+                            $judgementCell.html(`
+                                <select class="form-control judgement-select">
+                                    <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
+                                    <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
+                                </select>
+                            `);
+                        }
+
+                        // Add input for Measurement cell if not present
+                        if ($measurementCell.find('input').length === 0) {
+                            var currentValue = $measurementCell.text().trim();
+                            $measurementCell.attr('data-originalValue', currentValue);
+                            $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
+                        }
+                    });
+
+                    toggleEditItems(true);
+        } else {
+            let ajaxReload = false;
+            // Switch to save mode
+            // Switch to save mode
+            inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                var $row = $(this.node());
+                var rowData = inspectionTable.row($row).data();
+                var $measurementCell = $row.find('td').eq(2);
+                var $judgementCell = $row.find('td').eq(4);
+
+                // Ensure rowData exists
+                if (!rowData) {
+                    console.error('Row data is undefined.');
+                    return;
+                }
+
+                // Get new measurement value
+                var newValue = $measurementCell.find('input').val().trim();
+                var originalValue = $measurementCell.attr('data-originalValue');
+
+                // Get new judgment value for non-measurements
+                var selectedJudgment = isMeasurement ? rowData.Judgement : $judgementCell.find('select').val();
+
+                // Check if the value has changed
+                if (newValue !== originalValue || selectedJudgment != rowData.Judgement) {
+                    // Update the cell display without input
+                    $measurementCell.html(newValue);
+
+                    // Determine judgement value
+                    let upperLimit = $('#UpperLimit').val();
+                    let lowerLimit = $('#LowerLimit').val();
+                    let judgement = isMeasurement ? (parseFloat(newValue) <= upperLimit && parseFloat(newValue) >= lowerLimit ? 1 : 0) : selectedJudgment;
+
+                    // Prepare form data
+                    var formData = new FormData();
+                    formData.append("isMeasurement", isMeasurement ? 1 : 0);
+                    formData.append("measurementString", newValue);
+                    formData.append("attribute", newValue);
+                    formData.append("inspectionItemID", rowData.InspectionItemID);
+                    formData.append("judgement", judgement);
+
+                    // Send an AJAX request to update the server
+                    $.ajax({
+                        url: '@Url.Action("UpdateInspectionItem", "InspectionItems")',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            if (response.success) {
+                                alertify.success('Measurement and judgment updated successfully.');
+                                inspectionTable.ajax.reload(null, false);
+                            } else {
+                                alertify.error('Error updating item.');
+                            }
+                        },
+                        error: function () {
+                            alertify.error('Error connecting to the server.');
+                        }
+                    });
+                }
+            });
+
+                    toggleEditItems(false);  // Switch back to view mode
+                    inspectionTable.ajax.reload(null, true);
+                }
+        });
 
 
 

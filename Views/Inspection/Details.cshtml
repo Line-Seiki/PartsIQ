@@ -103,6 +103,17 @@
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
 
+            function toggleEditItems(status) {
+                let btn = $('#edit-items-btn');
+
+                if (status) {
+                    btn.text("Save Items");
+                    btn.removeClass().addClass("btn btn-primary");
+                } else {
+                    btn.text("Edit Items");
+                    btn.removeClass().addClass("btn btn-secondary");
+                }
+            }
 
             function calculate(obj) {
 
@@ -331,6 +342,7 @@
                 let cavityID = $(this).attr('data-cavityid'); // This ensures you're getting the most recent value
 
                 let measurement = $(document).find('#Measurement').val();
+                let origMeasurement;
                 let cavityNumber = $(document).find('#CavityNumber').val();
                 let sampleNumber = $(document).find('#SampleNumber').val();
 
@@ -339,13 +351,16 @@
                 let lowerLimit = $('#LowerLimit').val();
                 if (isMeasurement == "True") {
                     measurement = Number(measurement);
+                    origMeasurement = measurement;
                     if (measurement <= upperLimit && measurement >= lowerLimit) {
                         Judgement = 1;
                     }
                 } else {
                     Judgement = $(this).data("judgement");
                     attribute = measurement;
+                    origMeasurement = null;
                 }
+              
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
@@ -353,7 +368,7 @@
                     SampleNumber: sampleNumber,
                     CavityName: cavityNumber,
                     Measurement: measurement,
-                    OrigMeasurement: measurement,
+                    OrigMeasurement: origMeasurement,
                     Judgement: Judgement
                 };
 
@@ -440,13 +455,14 @@
                     sortable: false,
                     render: function (data, type, row) {
                         let decision = data == "1" ? "GOOD" : "NOT GOOD";
-                        return `<span> ${decision} </span> `;
+                        return `<span data-judgement="${data}"> ${decision} </span> `;
                     }
                 },
             ],
             order: [[0, 'asc']],
             rowId: "InspectionItemID",
             rowCallback: function (row, data, index) {
+
                 // Check the judgment value and apply the class to the entire row
                 if (data.Judgement == "0") {
                     $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
@@ -455,6 +471,7 @@
                 }
             },
             drawCallback: function (settings) {
+
                 var api = this.api();
 
                 // Get the SampleItems from the current page rows
@@ -496,89 +513,108 @@
         });
 
         // For Enabling edit
-            $(document).on('click', '#edit-items-btn', function () {
-                // Iterate over all rows in the DataTable
-                inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
-                    var rowData = this.data();
-                    var $row = $(this.node());
+     $(document).on('click', '#edit-items-btn', function () {
+        let isMeasurement = $('.submit-inspection-item').data('measurement') === "True"; // Simplify isMeasurement check
 
-                    // Find the "Measurement" cell in this row (assuming it's the third column)
-                    var $measurementCell = $row.find('td').eq(2);
+        if ($(this).hasClass("btn-secondary")) {
+            // Switch to edit mode
+            inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                var $row = $(this.node());
+                var $measurementCell = $row.find('td').eq(2);
+                var $judgementCell = $row.find('td').eq(4);
+                var isGood = $judgementCell.find('span').data('judgement');
 
-                    // Only replace the content with input if there is no input already
-                    if ($measurementCell.find('input').length === 0) {
-                        var currentValue = $measurementCell.text().trim();
-                        $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
-                    }
-                });
+                // Allow judgment change manually if it's not a measurement
+                if (!isMeasurement) {
+                    var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
+                    $judgementCell.html(`
+                        <select class="form-control judgement-select">
+                            <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
+                            <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
+                        </select>
+                    `);
+                }
 
-                // Now all "Measurement" cells are editable
-            });
-
-            // Save Data
-
-            $('#inspection-item-table tbody').on('blur keydown', 'input.measurement-input', function (e) {
-                
-                if (e.type === 'blur' || (e.type === 'keydown' && e.key === 'Enter')) {
-                    let inspection = $('.submit-inspection-item');
-                    let isMeasurement = (inspection.data('measurement')) == "True" ? 1 : 0;
-                    var measurementString = "";
-                    var attribute = "";
-                    var judgement;
-                   
-                    var $input = $(this);
-                    var newValue = $input.val().trim();
-
-                    // Get the row and cell associated with the input
-                    var $cell = $input.closest('td');
-                    var $row = $input.closest('tr');
-
-                    // Get the row data from DataTable
-                    var row = inspectionTable.row($row);
-                    var rowData = row.data();
-
-                    // Replace the input with the new value
-                    $cell.html(newValue);
-
-                    let upperLimit = $('#UpperLimit').val();
-                    let lowerLimit = $('#LowerLimit').val();
-
-                    if (isMeasurement == 1) {
-                        measurementString = Number(measurementString);
-                        if (measurementString <= upperLimit && measurementString >= lowerLimit) {
-                            judgement = 1;
-                        }
-                    } else {
-                        judgement = rowData.Judgement;
-                        
-                    }
-
-
-                    var formData = new FormData();
-
-                    formData.append("isMeasurement", isMeasurement);
-                    formData.append("measurementString", newValue);
-                    formData.append("attribute", newValue);
-                    formData.append("inspectionItemID", rowData.InspectionItemID);
-                    formData.append("judgement", judgement)
-
-                    // Optionally send an AJAX request to update the server
-                    $.ajax({
-                        url: '@Url.Action("UpdateInspectionItem", "InspectionItems")',
-                        type: 'POST',
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        success: function (response) {
-                            if (response.success) {
-                                alertify.success('Measurement updated successfully.');
-                            } else {
-                                alertify.error('Error updating measurement.');
-                            }
-                        }
-                    });
+                // Add input for Measurement cell if not present
+                if ($measurementCell.find('input').length === 0) {
+                    var currentValue = $measurementCell.text().trim();
+                    $measurementCell.attr('data-originalValue', currentValue);
+                    $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
                 }
             });
+
+            toggleEditItems(true);
+    } else {
+        let ajaxReload = false;
+        // Switch to save mode
+        // Switch to save mode
+        inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            var $row = $(this.node());
+            var rowData = inspectionTable.row($row).data();
+            var $measurementCell = $row.find('td').eq(2);
+            var $judgementCell = $row.find('td').eq(4);
+
+            // Ensure rowData exists
+            if (!rowData) {
+                console.error('Row data is undefined.');
+                return;
+            }
+
+            // Get new measurement value
+            var newValue = $measurementCell.find('input').val().trim();
+            var originalValue = $measurementCell.attr('data-originalValue');
+
+            // Get new judgment value for non-measurements
+            var selectedJudgment = isMeasurement ? rowData.Judgement : $judgementCell.find('select').val();
+
+            // Check if the value has changed
+            if (newValue !== originalValue || selectedJudgment != rowData.Judgement) {
+                // Update the cell display without input
+                $measurementCell.html(newValue);
+
+                // Determine judgement value
+                let upperLimit = $('#UpperLimit').val();
+                let lowerLimit = $('#LowerLimit').val();
+                let judgement = isMeasurement ? (parseFloat(newValue) <= upperLimit && parseFloat(newValue) >= lowerLimit ? 1 : 0) : selectedJudgment;
+
+                // Prepare form data
+                var formData = new FormData();
+                formData.append("isMeasurement", isMeasurement ? 1 : 0);
+                formData.append("measurementString", newValue);
+                formData.append("attribute", newValue);
+                formData.append("inspectionItemID", rowData.InspectionItemID);
+                formData.append("judgement", judgement);
+
+                // Send an AJAX request to update the server
+                $.ajax({
+                    url: '@Url.Action("UpdateInspectionItem", "InspectionItems")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.success) {
+                            alertify.success('Measurement and judgment updated successfully.');
+                            inspectionTable.ajax.reload(null, false);
+                        } else {
+                            alertify.error('Error updating item.');
+                        }
+                    },
+                    error: function () {
+                        alertify.error('Error connecting to the server.');
+                    }
+                });
+            }
+        });
+
+                toggleEditItems(false);  // Switch back to view mode
+                inspectionTable.ajax.reload(null, true);
+            }
+        });
+
+
+
+            // Save Data
 
             $(document).on('click', '#end-inspection-btn', function () {
                 let inspectionID = $(this).data('id');

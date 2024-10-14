@@ -204,6 +204,7 @@ namespace PartsIq.Controllers
             if (deliveryDetail != null)
             {
                 deliveryDetail.StatusID = 5;
+                deliveryDetail.DecisionID = 1;
             }
 
             // End the inspection by setting the end date

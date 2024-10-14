@@ -134,6 +134,24 @@
         document.addEventListener('DOMContentLoaded', function () {
 
             partMonitoringTable = $('#monitoring-table').DataTable({
+                ajax: {
+                    url: '@Url.Action("GetPartMonitoring", "Parts")',
+                    dataSrc: 'data'
+                },
+                lengthChange: false,
+                responsive: false,
+                rowId: "PartID",
+                columns: [
+                    { data: "Code" },
+                    { data: "Name" },
+                    {
+                        data: "DateMonitored",
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    }
+                ],
+                rowId: "PartID",
 
             });
 
@@ -177,7 +195,7 @@
                             return `${convertIntToTimeFormat(data)}`
                         }
                     },
-                    { data: 'Comments' },
+                    { data: 'InspectorComments' },
                     { data: 'NCRNumber' },
                     { data: 'Purpose' },
                 ],
