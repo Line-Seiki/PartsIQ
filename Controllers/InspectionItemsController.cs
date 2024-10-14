@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.Ajax.Utilities;
 using PartsIq.Models;
 
 namespace PartsIq.Controllers
@@ -147,7 +148,7 @@ namespace PartsIq.Controllers
                 string attribute = null; // For non-measurement types
 
                 // Handle measurement if applicable
-                if (isMeasurement != "0")
+                if (isMeasurement == "True")
                 {
                     if (!float.TryParse(form.Get("Measurement"), out var tempMeasurement))
                     {
@@ -155,10 +156,15 @@ namespace PartsIq.Controllers
                     }
                     measurement = tempMeasurement;
                 }
-                else
+                else if (isMeasurement == "False") 
                 {
                     // If not measurement, use Attribute instead
                     attribute = form.Get("Attribute");
+                    if (String.IsNullOrEmpty(attribute) && String.IsNullOrWhiteSpace(attribute))
+                    {
+                        return Json(new { success = false, message = "Invalid input / empty." }, JsonRequestBehavior.AllowGet);
+                    }
+
                 }
 
                 // OrigMeasurement is the same as measurement unless it's not a measurement case
@@ -200,6 +206,7 @@ namespace PartsIq.Controllers
                 db.InspectionItems.Add(inspectionItem);
                 db.SaveChanges();
 
+                int InspectionItemID = inspectionItem.InspectionItemID;
                 // Update SampleNumber in backend
                 var inspection = db.Inspections.Find(inspectionID);
                 if (inspection != null)
@@ -208,7 +215,7 @@ namespace PartsIq.Controllers
                     sampleNumber = (sampleNumber < sampleSize) ? sampleNumber + 1 : 0;
                 }
 
-                return Json(new { success = true, SampleNumber = sampleNumber }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = true, SampleNumber = sampleNumber, InspectionItemID = InspectionItemID }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -244,6 +251,73 @@ namespace PartsIq.Controllers
             // Returning the result as JSON
             return Json(new { data = inspectionItems }, JsonRequestBehavior.AllowGet);
         }
+
+        [HttpPost]
+        public ActionResult UpdateInspectionItem()
+        {
+            try
+            {
+                var form = Request.Form;
+                if (form == null)
+                {
+                    return Json(new { success = false, message = "Invalid form data." }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Parsing form data
+                int inspectionItemID;
+                if (!int.TryParse(form.Get("inspectionItemID"), out inspectionItemID))
+                {
+                    return Json(new { success = false, message = "Invalid inspection item ID." }, JsonRequestBehavior.AllowGet);
+                }
+
+                string isMeasurement = form.Get("isMeasurement");
+                var measurementString = form.Get("measurementString");
+                string attribute = form.Get("attribute");
+                var judgement = form.Get("judgement") == "1" ? true : false;
+                // Retrieve the inspection item from the database
+                var inspectionItem = db.InspectionItems.Find(inspectionItemID);
+                if (inspectionItem == null)
+                {
+                    return Json(new { success = false, message = "Inspection item not found." }, JsonRequestBehavior.AllowGet);
+                }
+
+                // Check if it's a measurement update
+                if (isMeasurement == "1")
+                {
+                    // Validate the measurement
+                    double measurement;
+                    if (double.TryParse(measurementString, out measurement))
+                    {
+                        inspectionItem.Measurement = measurement;
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Invalid measurement. It must be a valid number." }, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                else
+                {
+                    // Validate and update the attribute
+                    if (!String.IsNullOrEmpty(attribute))
+                    {
+                        inspectionItem.Attribute = attribute;
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Invalid attribute. It cannot be empty." }, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                inspectionItem.IsGood = judgement;
+                // Save changes to the database
+                db.SaveChanges();
+                return Json(new { success = true, message = "Measurement / Attribute updated successfully." }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(new { success = false, message = $"An error occurred: {e.Message}" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
 
 
         protected override void Dispose(bool disposing)

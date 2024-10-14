@@ -103,6 +103,17 @@
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
 
+            function toggleEditItems(status) {
+                let btn = $('#edit-items-btn');
+
+                if (status) {
+                    btn.text("Save Items");
+                    btn.removeClass().addClass("btn btn-primary");
+                } else {
+                    btn.text("Edit Items");
+                    btn.removeClass().addClass("btn btn-secondary");
+                }
+            }
 
             function calculate(obj) {
 
@@ -187,6 +198,11 @@
                 let cavityID = selectedOption.data('cavityid');
                 let lowerLimit = selectedOption.data('lowerlimit');
                 let upperLimit = selectedOption.data('upperlimit');
+                let inspectionPart = selectedOption.data('inspectionpart');
+                let specs = selectedOption.data('specs');
+                let notes = selectedOption.data('note');
+                let tool = selectedOption.data('tool');
+                let sampMethod = selectedOption.data('sampling');
 
                 // Set the limits to corresponding inputs or elements
                 if ($('#UpperLimit').length) {
@@ -195,9 +211,24 @@
                 if ($('#LowerLimit').length) {
                     $('#LowerLimit').val(lowerLimit).text(lowerLimit);
                 }
+                if ($('#InspectionPart').length) {
+                    $('#InspectionPart').val(inspectionPart).text(inspectionPart);
+                }
+                if ($('#Specification').length) {
+                    $('#Specification').val(specs).text(specs);
+                }
+                if ($('#Notes').length) {
+                    $('#Notes').val(notes).text(notes);
+                }
+                if ($('#Tools').length) {
+                    $('#Tools').val(tool).text(tool);
+                }
+                if ($('#SamplingMethod').length) {
+                    $('#SamplingMethod').val(sampMethod).text(sampMethod);
+                }
+
                 if ($('.submit-inspection-item').length) {
                     $('.submit-inspection-item').attr('data-checkpointid', checkpointID);
-
                 }
                 // Update the data and reload the table
                 inspectionTable.ajax.reload();
@@ -311,6 +342,7 @@
                 let cavityID = $(this).attr('data-cavityid'); // This ensures you're getting the most recent value
 
                 let measurement = $(document).find('#Measurement').val();
+                let origMeasurement;
                 let cavityNumber = $(document).find('#CavityNumber').val();
                 let sampleNumber = $(document).find('#SampleNumber').val();
 
@@ -319,13 +351,16 @@
                 let lowerLimit = $('#LowerLimit').val();
                 if (isMeasurement == "True") {
                     measurement = Number(measurement);
+                    origMeasurement = measurement;
                     if (measurement <= upperLimit && measurement >= lowerLimit) {
                         Judgement = 1;
                     }
                 } else {
                     Judgement = $(this).data("judgement");
                     attribute = measurement;
+                    origMeasurement = null;
                 }
+              
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
@@ -333,7 +368,7 @@
                     SampleNumber: sampleNumber,
                     CavityName: cavityNumber,
                     Measurement: measurement,
-                    OrigMeasurement: measurement,
+                    OrigMeasurement: origMeasurement,
                     Judgement: Judgement
                 };
 
@@ -358,6 +393,7 @@
                     contentType: false,
                     success: function (response) {
                         if (response.success) {
+                            data.InspectionItemID = response.InspectionItemID;
                             inspectionTable.row.add(data).draw();
                             if (response.SampleNumber == "0") {
                                 alertify.success("End inspection");
@@ -388,6 +424,7 @@
             searching: false,
             scrollX: true,
             paging: false,
+            rowId: "InspectionItemID",
             columns: [
                 {
                     data: "SampleNumber",
@@ -418,12 +455,14 @@
                     sortable: false,
                     render: function (data, type, row) {
                         let decision = data == "1" ? "GOOD" : "NOT GOOD";
-                        return `<span> ${decision} </span> `;
+                        return `<span data-judgement="${data}"> ${decision} </span> `;
                     }
                 },
             ],
             order: [[0, 'asc']],
+            rowId: "InspectionItemID",
             rowCallback: function (row, data, index) {
+
                 // Check the judgment value and apply the class to the entire row
                 if (data.Judgement == "0") {
                     $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
@@ -432,6 +471,7 @@
                 }
             },
             drawCallback: function (settings) {
+
                 var api = this.api();
 
                 // Get the SampleItems from the current page rows
@@ -458,7 +498,6 @@
                     }
                     // Log the next sample number
 
-
                 } else {
                     $('#SampleNumber').val(1);
                     enableDisableToggle(false);
@@ -470,10 +509,112 @@
                 $("#standardDev").text(flags.stdv);
                 $('#overallJudgement').text(flags.judgement).attr('class', `fs-1 text-${flags.color}`);
                 checkSampleNumber($('#SampleNumber').val(), cavities[0].CavityID);
-
-
             }
         });
+
+        // For Enabling edit
+     $(document).on('click', '#edit-items-btn', function () {
+        let isMeasurement = $('.submit-inspection-item').data('measurement') === "True"; // Simplify isMeasurement check
+
+        if ($(this).hasClass("btn-secondary")) {
+            // Switch to edit mode
+            inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                var $row = $(this.node());
+                var $measurementCell = $row.find('td').eq(2);
+                var $judgementCell = $row.find('td').eq(4);
+                var isGood = $judgementCell.find('span').data('judgement');
+
+                // Allow judgment change manually if it's not a measurement
+                if (!isMeasurement) {
+                    var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
+                    $judgementCell.html(`
+                        <select class="form-control judgement-select">
+                            <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
+                            <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
+                        </select>
+                    `);
+                }
+
+                // Add input for Measurement cell if not present
+                if ($measurementCell.find('input').length === 0) {
+                    var currentValue = $measurementCell.text().trim();
+                    $measurementCell.attr('data-originalValue', currentValue);
+                    $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
+                }
+            });
+
+            toggleEditItems(true);
+    } else {
+        let ajaxReload = false;
+        // Switch to save mode
+        // Switch to save mode
+        inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            var $row = $(this.node());
+            var rowData = inspectionTable.row($row).data();
+            var $measurementCell = $row.find('td').eq(2);
+            var $judgementCell = $row.find('td').eq(4);
+
+            // Ensure rowData exists
+            if (!rowData) {
+                console.error('Row data is undefined.');
+                return;
+            }
+
+            // Get new measurement value
+            var newValue = $measurementCell.find('input').val().trim();
+            var originalValue = $measurementCell.attr('data-originalValue');
+
+            // Get new judgment value for non-measurements
+            var selectedJudgment = isMeasurement ? rowData.Judgement : $judgementCell.find('select').val();
+
+            // Check if the value has changed
+            if (newValue !== originalValue || selectedJudgment != rowData.Judgement) {
+                // Update the cell display without input
+                $measurementCell.html(newValue);
+
+                // Determine judgement value
+                let upperLimit = $('#UpperLimit').val();
+                let lowerLimit = $('#LowerLimit').val();
+                let judgement = isMeasurement ? (parseFloat(newValue) <= upperLimit && parseFloat(newValue) >= lowerLimit ? 1 : 0) : selectedJudgment;
+
+                // Prepare form data
+                var formData = new FormData();
+                formData.append("isMeasurement", isMeasurement ? 1 : 0);
+                formData.append("measurementString", newValue);
+                formData.append("attribute", newValue);
+                formData.append("inspectionItemID", rowData.InspectionItemID);
+                formData.append("judgement", judgement);
+
+                // Send an AJAX request to update the server
+                $.ajax({
+                    url: '@Url.Action("UpdateInspectionItem", "InspectionItems")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.success) {
+                            alertify.success('Measurement and judgment updated successfully.');
+                            inspectionTable.ajax.reload(null, false);
+                        } else {
+                            alertify.error('Error updating item.');
+                        }
+                    },
+                    error: function () {
+                        alertify.error('Error connecting to the server.');
+                    }
+                });
+            }
+        });
+
+                toggleEditItems(false);  // Switch back to view mode
+                inspectionTable.ajax.reload(null, true);
+            }
+        });
+
+
+
+            // Save Data
 
             $(document).on('click', '#end-inspection-btn', function () {
                 let inspectionID = $(this).data('id');

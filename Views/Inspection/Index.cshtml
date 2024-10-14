@@ -546,7 +546,7 @@
                                 refreshTables();
                                 if (res.RouteInspectionID) {
                                     const url = `/Inspection/Details/${res.RouteInspectionID}`;
-                                    window.open(url, '_blank');
+                                    window.location.href = url;
                                 }
                             },
                             error(err) {
@@ -648,7 +648,7 @@
                                 if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
                                 else alertify.error(`${res.Status}: ${res.Message}`);
                                 const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                                window.open(url, '_blank');
+                                window.location.href = url;
                                 refreshTables();
                             },
                             error(err) {
@@ -696,7 +696,7 @@
                         lotModal.show();
                     } else if (selectedData.InspectionID !== null) {
                         const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                        window.open(url, '_blank');
+                        window.location.href = url;
                     } else {
                         console.log(selectedData, selectedDataIndex);
                         inspectionForm.dataset.user = selectedData.UserID;

@@ -8,6 +8,8 @@ using System.Web;
 using System.Web.Mvc;
 using PartsIq.Models;
 using System.Runtime.InteropServices;
+//Commenting 10/14/2024
+//using System.Web.UI.WebControls.WebParts;
 
 namespace PartsIq.Controllers
 {
@@ -251,6 +253,44 @@ namespace PartsIq.Controllers
                 return Json(new { success = false, message = $"{ex.Message}" }, JsonRequestBehavior.AllowGet);
             }
         }
+
+
+        //Get Monitoring Part
+        public ActionResult GetPartMonitoring()
+        {
+            try
+            {
+                // Fetch parts where IsMonitored is true
+                var part = db.Parts.Where(s => s.IsMonitored).ToList();
+
+                // Transform the result if any parts are found
+                if (part.Any())
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        data = part.Select(s => new
+                        {
+                            s.PartID,
+                            s.Code,
+                            s.Name,
+                            s.DateMonitored, // Ensure this field exists in your model
+                        }).ToList()
+                    }, JsonRequestBehavior.AllowGet); // Correct placement of JsonRequestBehavior
+                }
+
+                return Json(new { success = true, data = new List<object>() }, JsonRequestBehavior.AllowGet); // Return an empty list if no parts found
+            }
+            catch (Exception ex)
+            {
+                // Log the error message for debugging purposes
+                System.Diagnostics.Debug.WriteLine($"Error: {ex.Message} \n StackTrace: {ex.StackTrace}");
+
+                return Json(new { success = false, message = $"Error: {ex.Message}" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
 
 
         public ActionResult AddCheckpoint (int id)

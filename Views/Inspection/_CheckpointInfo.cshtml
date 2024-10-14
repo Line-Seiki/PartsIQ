@@ -8,7 +8,9 @@
                 <select id="CheckpointInfo" class="form-control">
                     @foreach (var checkpoint in Model.CheckpointInfo.Checkpoints)
                     {
-                        <option value="@checkpoint.CheckpointId" data-measurement="@checkpoint.IsMeasurement" data-upperlimit="@checkpoint.LimitUpper" data-lowerlimit="@checkpoint.LimitLower">
+                        <option value="@checkpoint.CheckpointId" data-measurement="@checkpoint.IsMeasurement" data-upperlimit="@checkpoint.LimitUpper" data-lowerlimit="@checkpoint.LimitLower"
+                                data-tool="@checkpoint.Tools" data-inspectionpart="@checkpoint.InspectionPart" data-specs="@checkpoint.Specification"
+                                data-note="@checkpoint.Note" data-sampling="@checkpoint.SamplingMethod">
                             @checkpoint.Code
                         </option>
                     }
@@ -20,25 +22,25 @@
 
         <div class="d-flex gap-3">
             <p><b>Inspection Part</b>:</p>
-            <p>@Model.CheckpointInfo.InspectionPart</p>
+            <p id="InspectionPart">@Model.CheckpointInfo.InspectionPart</p>
         </div>
         <div class="d-flex gap-3">
             <p><b>Specification</b>:</p>
-            <p>@Model.CheckpointInfo.Specification</p>
+            <p id="Specification">@Model.CheckpointInfo.Specification</p>
         </div>
         <div class="d-flex gap-3">
             <p><b>Notes</b>:</p>
-            <p>@Model.CheckpointInfo.Notes</p>
+            <p id="Notes">@Model.CheckpointInfo.Notes</p>
         </div>
     </div>
     <div class="col-lg-6 col-md-12">
         <div class="d-flex gap-3">
             <p><b>Tools</b>:</p>
-            <p>@Model.CheckpointInfo.Tools</p>
+            <p id="Tools">@Model.CheckpointInfo.Tools</p>
         </div>
         <div class="d-flex gap-3">
             <p><b>Sampling Method</b>:</p>
-            <p>@Model.CheckpointInfo.SamplingMethod</p>
+            <p id="SamplingMethod">@Model.CheckpointInfo.SamplingMethod</p>
         </div>
         <div class="d-flex gap-3">
             <p><b>Upper Limit</b>:</p>
@@ -132,7 +134,7 @@
                     </tr>
                 </thead>
             </table>
-            <button class="btn btn-secondary" disabled><i class="mdi mdi-pencil"></i> Edit Items</button>
+            <button class="btn btn-secondary" id="edit-items-btn"><i class="mdi mdi-pencil"></i> Edit Items</button>
             <div class="d-flex flex-column">
                 <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
                     <span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span>
