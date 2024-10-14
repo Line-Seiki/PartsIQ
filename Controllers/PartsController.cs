@@ -237,6 +237,25 @@ namespace PartsIq.Controllers
                 var part = db.Parts.Find(id);
                 if (part != null)
                 {
+                    var currentlyScheduled = db.DeliveryDetails.Where(d => d.Delivery.PartID == part.PartID).Any(d => !d.IsArchived && d.StatusID != 5);
+                    if (currentlyScheduled)
+                    {
+                        return Json(new { success = false, message = "part is currently scheduled" });
+                    }
+                    if (part.IsActive)
+                    {
+                        part.IsSearchable = false;
+                        part.IsMonitored = false;
+                        db.Entry(part).Property(p => p.IsSearchable).IsModified = true;
+                        db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
+                    }
+                    else
+                    {
+                        part.IsSearchable = true;
+                        part.IsMonitored = true;
+                        db.Entry(part).Property(p => p.IsSearchable).IsModified = true;
+                        db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
+                    }
                     part.IsActive = !part.IsActive;
                     db.Entry(part).Property(p => p.IsActive).IsModified = true;
                     db.SaveChanges();
@@ -305,6 +324,35 @@ namespace PartsIq.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        public JsonResult ArchivePart (int partID)
+        {
+            try
+            {
+                var part = db.Parts.Find(partID);
+                if(part == null)
+                {
+                    return Json(new { success = false, message = "Failed to find Part" });
+                }
+
+                // Archive -- REMOVE COMMENT TO IMPLEMENT ON DATABASE
+                //part.IsActive = false;
+                //part.IsSearchable = false;
+                //part.IsMonitored = false;
+                //db.Entry(part).Property(p => p.IsActive).IsModified = true;
+                //db.Entry(part).Property(p => p.IsSearchable).IsModified = true;
+                //db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
+                //db.SaveChanges();
+                //return Json(new { success = "true", message = "Successfully Archived Part" });
+                return Json(new { success = "true", message = "DEV: Action SUCCESS, transaction not modified in DB" });
+
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new { success = false, message = $"{ex.Message}" });
+            }
         }
     }
 }

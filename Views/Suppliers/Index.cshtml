@@ -217,6 +217,11 @@
                 const stopEditBtnEl = `<button id="cancelBtn" class="btn btn-danger" onclick="cancelEdit()">Cancel Edit</button>`
                 document.getElementById('supplierBtns').insertAdjacentHTML('beforeend', stopEditBtnEl);
             }
+            window.scroll({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
             
         }
 
