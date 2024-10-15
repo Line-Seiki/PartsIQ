@@ -220,6 +220,7 @@ namespace PartsIq.Models
     #region PIS
     public class PartFormData
     {
+        public int PartID { get; set; }
         public string Code { get; set; }
         public string DocNumber { get; set; }
         public string Model { get; set; }

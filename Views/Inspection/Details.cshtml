@@ -35,11 +35,12 @@
                 </div>
             </div>
             <div class="page-content-wrapper mt--45">
-                <div class="container-fluid">
+                <div class="container-fluid" id="general-info-container">
                     <div class="row">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between">
                                 <h4>General Information</h4>
+                                <button id="hide-info" class="btn btn-secondary"><i class="mdi mdi-minus-circle-outline"></i> Hide Info</button>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -76,14 +77,13 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Inspection Item -->
-            <div class="page-content-wrapper">
+                <!-- Inspection Item -->
                 <div class="container-fluid">
                     <div class="row">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between">
                                 <h4>Checkpoint Information</h4>
+                                <button class="btn btn-secondary d-none" id="show-info"><i class="mdi mdi-plus-circle-outline"></i> Show Info</button>
                             </div>
                             <div class="card-body">
                                 @Html.Partial("_CheckpointInfo")
@@ -99,7 +99,15 @@
 
 @section scripts{
     <script>
+        const infoContainer = document.getElementById('general-info-container');
+        const showInfo = document.getElementById('show-info');
+        const hideInfo = document.getElementById('hide-info');
         $(document).ready(function () {
+
+            //GENERAL INFORMATION CARD FUNCTIONALITY
+            hideInfo.addEventListener('click', hideGeneralInfo);
+            showInfo.addEventListener('click', showGeneralInfo);
+
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
 
@@ -665,5 +673,16 @@
 
 
         });
+
+        // Fn for General Information
+        function hideGeneralInfo() {
+            infoContainer.classList.add('d-none');
+            showInfo.classList.remove('d-none');
+        }
+
+        function showGeneralInfo() {
+            showInfo.classList.add('d-none');
+            infoContainer.classList.remove('d-none');
+        }
     </script>
 }
