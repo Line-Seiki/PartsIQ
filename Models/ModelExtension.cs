@@ -256,7 +256,7 @@ namespace PartsIq.Models
             {
                 if (Time.HasValue)
                 {
-                    TimeSpan timeSpan = TimeSpan.FromMilliseconds(Time.Value);
+                    TimeSpan timeSpan = TimeSpan.FromSeconds(Time.Value);
                     return $"{timeSpan.Hours:D2}h {timeSpan.Minutes:D2}m {timeSpan.Seconds}s";
                 }
                 else
