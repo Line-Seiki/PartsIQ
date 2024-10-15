@@ -8,6 +8,10 @@
             height: 2px;
             margin: 0.5rem 0;
         }
+
+        .flex-sm-column {
+            flex-direction: column;
+        }
     </style>
 }
 
@@ -38,10 +42,11 @@
             <div class="page-content-wrapper mt--45">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="card">
-                            <div class="card-header">
+                        <div class="card" id="general-info-container">
+                            <div class="card-header d-flex justify-content-between">
                                 <h4>General Information</h4>
-                            </div>
+                                <button id="hide-info" class="btn btn-secondary"><i class="mdi mdi-minus-circle-outline"></i> Hide Info</button>
+                            </div>   
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
@@ -89,11 +94,15 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <!-- Left section for Checkpoints -->
-                                    <div class="d-flex align-items-center">
+                                <!-- Left section for Checkpoints -->
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="d-flex justify-content-between">
                                         <h5 class="me-3">Checkpoints</h5>
-                                        <div class="d-flex align-items-center gap-3">
+                                        <button class="btn btn-secondary d-none" id="show-info"><i class="mdi mdi-plus-circle-outline"></i> Show Info</button>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-lg-row flex-md-column flex-sm-column justify-content-between gap-3">
+                                        <div class="d-flex gap-3">
                                             <p class="mb-0"><b>Checkpoint Number:</b></p>
                                             <select id="CheckpointInfo" class="form-control ms-2">
                                                 @foreach (var checkpoint in ViewBag.Checkpoints)
@@ -107,19 +116,18 @@
                                                 }
                                             </select>
                                         </div>
-                                    </div>
-
-                                    <!-- Right section for Upper and Lower Limits -->
-                                    <div class="d-flex align-items-center">
-                                        <div class="d-flex align-items-center gap-3 me-4">
-                                            <p class="mb-0"><b>Upper Limit:</b></p>
-                                            <input id="UpperLimit" type="text" class="form-control"
-                                                   value="@ViewBag.Checkpoints[0].LimitUpper" readonly />
-                                        </div>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <p class="mb-0"><b>Lower Limit:</b></p>
-                                            <input id="LowerLimit" type="text" class="form-control"
-                                                   value="@ViewBag.Checkpoints[0].LimitLower" readonly />
+                                        <!-- Right section for Upper and Lower Limits -->
+                                        <div class="d-flex">
+                                            <div class="d-flex gap-3 me-4">
+                                                <p class="mb-0"><b>Upper Limit:</b></p>
+                                                <input id="UpperLimit" type="text" class="form-control"
+                                                       value="@ViewBag.Checkpoints[0].LimitUpper" readonly />
+                                            </div>
+                                            <div class="d-flex gap-3">
+                                                <p class="mb-0"><b>Lower Limit:</b></p>
+                                                <input id="LowerLimit" type="text" class="form-control"
+                                                       value="@ViewBag.Checkpoints[0].LimitLower" readonly />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -138,14 +146,10 @@
                                         </thead>
                                     </table>
                                     <button id="edit-items-btn" class="btn btn-secondary mt-2"><i class="mdi mdi-pencil"></i> Edit Items</button>
-                                    <div class="d-flex flex-column">
-                                        <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
-                                            <span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span>
-                                            <span class="badge badge-soft-secondary badge-pill"><b>Min Value: </b> #</span><span id="maxvalue"></span>
-                                        </div>
-                                        <div class="d-flex flex-lg-row flex-md-column justify-content-lg-between mt-4">
-                                            <span class="badge badge-soft-primary badge-pill"><b>Standard Deviation: </b> #</span> <span id="standardDev"></span>
-                                        </div>
+                                    <div class="d-flex flex-lg-row flex-md-column flex-sm-column gap-4 mt-4">
+                                            <div><span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span></div>
+                                            <div><span class="badge badge-soft-secondary badge-pill"><b>Min Value: </b> #</span> <span id="maxvalue"></span></div>
+                                            <div><span class="badge badge-soft-primary badge-pill"><b>Standard Deviation: </b> #</span> <span id="standardDev"></span></div>
                                     </div>
                                 </div>
                                 <div class="my-3">
@@ -186,7 +190,15 @@
 
 @section scripts{
     <script>
+        const infoContainer = document.getElementById('general-info-container');
+        const showInfo = document.getElementById('show-info');
+        const hideInfo = document.getElementById('hide-info');
+
         $(document).ready(function () {
+
+            //GENERAL INFORMATION CARD FUNCTIONALITY
+            hideInfo.addEventListener('click', hideGeneralInfo);
+            showInfo.addEventListener('click', showGeneralInfo);
 
             function toggleEditItems(status) {
                 let btn = $('#edit-items-btn');
@@ -528,7 +540,16 @@
 });
 
 
+        // Fn for General Information
+        function hideGeneralInfo() {
+            infoContainer.classList.add('d-none');
+            showInfo.classList.remove('d-none');
+        }
 
+        function showGeneralInfo() {
+            showInfo.classList.add('d-none');
+            infoContainer.classList.remove('d-none');
+        }
 
 
 

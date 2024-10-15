@@ -77,11 +77,6 @@
                                     <i class="bx bx-home fs-xs"></i>
                                 </a>
                             </li>
-                            <li class="breadcrumb-item">
-                                <a href="~/">
-                                    PartsIQ
-                                </a>
-                            </li>
                             <li class="breadcrumb-item active">Inspection</li>
                         </ol>
                     </div>
@@ -97,7 +92,7 @@
                             <div class="card">
                                 <div class="card-header">
                                     <div class="mb-4 d-flex justify-content-between align-items-center">
-                                        <div class="d-flex">
+                                        <div class="d-flex flex-column">
                                             <h5>Available</h5>
                                         </div>
                                         <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
@@ -105,7 +100,7 @@
                                             <button id="playpauseBtn" class="btn btn-info" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Pause/Unpause"><i class="mdi mdi-play-pause"></i></button>
                                             <button id="memberBtn" class="btn btn-primary" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Unassign Member"><i class="mdi mdi-account-arrow-right"></i></button>
                                             <button id="refreshBtn" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh Tables"><i class="mdi mdi-reload"></i></button>
-                                            <button id="devAssign" class="btn btn-warning text-black"><i class="mdi mdi-account"></i> DEV Assign</button>
+                                            <button id="devAssign" class="btn btn-warning text-black"><i class="mdi mdi-account"></i> DEV: Assign</button>
                                         </div>
                                     </div>
                                 </div>
@@ -141,7 +136,7 @@
                                             <h5>Finished</h5>
                                         </div>
                                         <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-pencil"></i></button>
+                                            <button id="Btn" class="btn btn-secondary" disabled><i class="mdi mdi-pencil"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -174,7 +169,7 @@
                                             <h5>Pending</h5>
                                         </div>
                                         <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button id="Btn" class="btn btn-secondary"><i class="mdi mdi-file-pdf-outline"></i></button>
+                                            <button id="Btn" class="btn btn-secondary" disabled><i class="mdi mdi-file-pdf-outline"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -196,8 +191,8 @@
                                             </thead>
                                         </table>
                                     </div>
-                                    <button id="inspection-btn" class="btn btn-primary"><i class="mdi mdi-magnify"></i> Start Inspection</button>
-                                    <button id="dev-inspection" class="btn btn-warning"><i class="mdi mdi-magnify"></i> DEV Start Inspection</button>
+                                    <button id="inspection-btn" class="btn btn-primary" disabled><i class="mdi mdi-magnify"></i> Start Inspection</button>
+                                    <button id="dev-inspection" class="btn btn-warning"><i class="mdi mdi-magnify"></i> DEV: Start Inspection</button>
                                 </div>
                             </div>
                         </div>
@@ -449,7 +444,7 @@
             // EVENT: Edit Currently Selected Row
             editBtn.addEventListener('click', function (e) {
                 if (!e.target.closest('#editBtn').dataset.index) {
-                    console.log('no index');
+                    alertNoRowClicked();
                 } else {
                     const rowIndex = e.target.closest('#editBtn').dataset.index;
                     editDelivery(rowIndex);
@@ -459,7 +454,7 @@
             // EVENT: Pause/Unpause Selected Row
             playpauseBtn.addEventListener('click', function (e) {
                 if (!e.target.closest('#playpauseBtn').dataset.index) {
-                    console.log('no index');
+                    alertNoRowClicked();
                 } else {
                     const rowIndex = e.target.closest('#playpauseBtn').dataset.index;
                     pauseUnpauseInspection(rowIndex);
@@ -469,7 +464,7 @@
             // EVENT: Remove/Transfer Assigned Inspector
             memberBtn.addEventListener('click', function(e) {
                 if (!e.target.closest('#memberBtn').dataset.index) {
-                    console.log('no index');
+                    alertNoRowClicked();
                 } else {
                     const rowIndex = e.target.closest('#memberBtn').dataset.index;
                     removeAssignedInspector(rowIndex);
@@ -479,7 +474,7 @@
             // EVENT: Edit Delivery and add lot
             addLotBtn.addEventListener('click', function (e) {
                 if (!e.target.closest('#addLotBtn').dataset.index) {
-                    console.log('no index');
+                    alertNoRowClicked();
                 } else {
                     console.log(e.target.closest('#addLotBtn').dataset.index);
                     const rowIndex = e.target.closest('#addLotBtn').dataset.index;
@@ -768,6 +763,10 @@
             });
 
             return { hasError, data };
+        }
+
+        function alertNoRowClicked() {
+            alertify.message('Please click on an item before clicking the button');
         }
     </script>
 }

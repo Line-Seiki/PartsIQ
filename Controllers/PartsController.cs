@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using PartsIq.Models;
 using System.Runtime.InteropServices;
+using Microsoft.SqlServer.Server;
 //Commenting 10/14/2024
 //using System.Web.UI.WebControls.WebParts;
 
@@ -79,7 +80,7 @@ namespace PartsIq.Controllers
                     var model = form.Get("partModel");
                     var partDoc = form.Get("partDoc");
                     var partType = form.Get("partType");
-                    var partPriority = form.Get("partPriority");
+                    var partPriority = Convert.ToInt32(form.Get("partPriority"));
                     var partID = form.Get("partID");
 
                     var part = db.Parts.Find(Convert.ToInt32(partID));
@@ -109,6 +110,7 @@ namespace PartsIq.Controllers
                     part.Type = partType;
                     part.Model = model;
                     part.DocNumber = partDoc;
+                    part.Priority = partPriority;
 
                     db.SaveChanges();
 
@@ -189,6 +191,63 @@ namespace PartsIq.Controllers
                 return Json( new { message = "failed to save new part", error = $"Error: {ex.Message}"});
             }
             
+        }
+
+        public JsonResult EditPart(PartFormData data)
+        {
+            try
+            {
+                var part = db.Parts.Find(data.PartID);
+
+                if (part == null) return Json(new { success = false, message = "part cannot be found" });
+
+                if (part.Name != data.Name)
+                {
+                    part.Name = data.Name;
+                    db.Entry(part).Property(p => p.Name).IsModified = true;
+                }
+                if (part.Code != data.Code)
+                {
+                    part.Code = data.Code;
+                    db.Entry(part).Property(p => p.Code).IsModified = true;
+                }
+                if (part.Model != data.Model)
+                {
+                    part.Model = data.Model;
+                    db.Entry(part).Property(p => p.Model).IsModified = true;
+                }
+                if (part.DocNumber != data.DocNumber)
+                {
+                    part.DocNumber = data.DocNumber;
+                    db.Entry(part).Property(p => p.DocNumber).IsModified = true;
+                }
+                if (part.Priority != data.Priority)
+                {
+                    part.Priority = data.Priority;
+                    db.Entry(part).Property(p => p.Priority).IsModified = true;
+                }
+                if (part.Type != data.Type)
+                {
+                    part.Type = data.Type;
+                    db.Entry(part).Property(p => p.Type).IsModified = true;
+                }
+                db.SaveChanges();
+
+                return Json( new
+                {
+                    success = true,
+                    message = "Part Successfully Edited"
+                });
+            }
+            catch (Exception ex)
+            {
+
+                return Json(new
+                {
+                    success = false,
+                    message = $"{ex.Message}"
+                });
+            }
         }
 
         // /Parts/MonitorPart/:id

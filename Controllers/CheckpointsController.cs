@@ -54,6 +54,7 @@ namespace PartsIq.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             ViewBag.PartId = id;
+            ViewBag.PartName = part.Name;
             return View();
         }
 
@@ -148,11 +149,11 @@ namespace PartsIq.Controllers
             // Fetch the checkpoints for the specified Part_ID
             var query = db.Checkpoints.Where(c => c.Part_ID == id);
 
-            // Check if there are no results
-            if (!query.Any())
-            {
-                return HttpNotFound();
-            }
+            //// Check if there are no results
+            //if (!query.Any())
+            //{
+            //    return Json(new { success = false, data  });
+            //}
 
             var checkpoints = query.Select(c => new
             {

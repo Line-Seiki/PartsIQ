@@ -1,6 +1,4 @@
-﻿@model PartsIq.Models.Checkpoint
-
-@{
+﻿@{
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
@@ -18,11 +16,11 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="ui-buttons.html">
-                            Components
+                        <a href="~/Parts/Details/@ViewBag.PartId">
+                            @ViewBag.PartName
                         </a>
                     </li>
-                    <li class="breadcrumb-item active">Accordian</li>
+                    <li class="breadcrumb-item active">Create</li>
                 </ol>
             </div>
         </div>
