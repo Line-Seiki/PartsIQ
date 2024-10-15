@@ -787,7 +787,7 @@ namespace PartsIq.Models
                 LotNumber = detail.LotNumber,
                 LotQuantity = detail.LotQuantity,
                 DRNumber = detail.Delivery.DRNumber,
-                Time = detail.Inspection.InspectionDuration.HasValue ? detail.Inspection.InspectionDuration.Value : detail.Inspection.InspectionDuration,
+                Time = detail.Inspection.InspectionDuration ?? detail.Inspection.InspectionDuration,
                 Comments = detail.Inspection.Comments,
                 SampleSize = detail.Inspection.SampleSize.ToString(),
                 Supplier = detail.Delivery.Supplier.Name,

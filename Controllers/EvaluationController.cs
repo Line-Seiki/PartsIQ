@@ -71,6 +71,7 @@ namespace PartsIq.Controllers
             var delivery = db.DeliveryDetails.Include(drs => drs.Delivery)
             .Include(dr => dr.Inspection)
             .Include(u => u.User)// Eagerly load related Inspection
+            .Where(s => s.DecisionID == 1)
             .Select(s => new EvaluationData
             {
                 
@@ -94,10 +95,10 @@ namespace PartsIq.Controllers
                 PartName = s.Delivery.Part.Name,
                 LotNumber = s.LotNumber,
                 LotQuantity = s.LotQuantity,
-                Time = s.Inspection.InspectionDuration.HasValue ? s.Inspection.InspectionDuration.Value : 0,
+                Time = s.Inspection.InspectionDuration ?? 0,
                 Purpose = "" // Placeholder for dynamic value
-            }).Where(s => s.DecisionID == 1).ToList();
-            return Json(new { message = "success", data = delivery.ToList() }, JsonRequestBehavior.AllowGet);
+            }).ToList();
+            return Json(new { message = "success", data = delivery }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
