@@ -6,9 +6,11 @@ using System.Runtime.Remoting.Messaging;
 using System.Web;
 using System.Web.Mvc;
 using PartsIq.Utility;
+using PartsIq.Filters;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class SchedulingController : Controller
     {
         private IDataEntityContext  _db;
