@@ -200,6 +200,19 @@
             hideInfo.addEventListener('click', hideGeneralInfo);
             showInfo.addEventListener('click', showGeneralInfo);
 
+
+            // Fn for General Information
+            function hideGeneralInfo() {
+                infoContainer.classList.add('d-none');
+                showInfo.classList.remove('d-none');
+            }
+
+            function showGeneralInfo() {
+                showInfo.classList.add('d-none');
+                infoContainer.classList.remove('d-none');
+            }
+
+
             function toggleEditItems(status) {
                 let btn = $('#edit-items-btn');
 
@@ -212,10 +225,30 @@
                 }
             }
 
+            function withNg(withNg) {
+                let $selectedOption = $('#CheckpointInfo').find('option:selected');
+                let currentText = $selectedOption.text();
+
+                if (withNg == true) {
+                    // Check if "w/NG" is not already present to avoid duplication
+                    if (!currentText.includes("w/NG")) {
+                        $selectedOption.text(currentText + " w/NG");
+                    }
+                } else {
+                    // Remove "w/NG" if it exists
+                    if (currentText.includes("w/NG")) {
+                        let updatedText = currentText.replace(" w/NG", "");
+                        $selectedOption.text(updatedText);
+                    }
+                }
+            }
+
+
+
 
             $(document).on('change', '#CheckpointInfo', function () {
+                toggleEditItems(false);
                 inspectionTable.ajax.reload();
-
                 // Corrected syntax for accessing selected option's data
                 let upperlimit = $(this).find('option:selected').data("upperlimit");
                 let lowerlimit = $(this).find('option:selected').data("lowerlimit");
@@ -250,6 +283,9 @@
                 const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
                 const variance = squaredDifferences.reduce((acc, val) => acc + val, 0) / (data.length - 1);
                 const standardDeviation = Math.sqrt(variance);
+
+                let withNG = obj.some(s => s.Judgement == "0");
+                withNg(withNG);
 
                 // Assign calculated values to annotation object
                 annotation["stdv"] = standardDeviation;
@@ -301,7 +337,7 @@
                 rowCallback: function (row, data, index) {
                     // Check the judgment value and apply the class to the entire row
                     if (data.Judgement == "0") {
-                        $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
+                        $('td', row).addClass('text-danger'); // Apply class to all <td> in the row                     
                     } else if (data.Judgement == "1") {
                         $('td', row).addClass(''); // Apply class to all <td> in the row
                     }
@@ -439,34 +475,40 @@
              $(document).on('click', '#edit-items-btn', function () {
                  let isMeasurement = $('#CheckpointInfo option:selected').data('measurement') === "True"; // Simplify isMeasurement check
                
-                if ($(this).hasClass("btn-secondary")) {
-                    // Switch to edit mode
-                    inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
-                        var $row = $(this.node());
-                        var $measurementCell = $row.find('td').eq(2);
-                        var $judgementCell = $row.find('td').eq(4);
-                        var isGood = $judgementCell.find('span').data('judgement');
+                 if ($(this).hasClass("btn-secondary")) {
 
-                        // Allow judgment change manually if it's not a measurement
-                        if (!isMeasurement) {
-                            var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
-                            $judgementCell.html(`
-                                <select class="form-control judgement-select">
-                                    <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
-                                    <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
-                                </select>
-                            `);
-                        }
+                     if (!inspectionTable.rows().count()) {
+                         alertify.error("No editable inspection items.");
+                     } else {
+                         // Switch to edit mode
+                         inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                             var $row = $(this.node());
+                             var $measurementCell = $row.find('td').eq(2);
+                             var $judgementCell = $row.find('td').eq(4);
+                             var isGood = $judgementCell.find('span').data('judgement');
 
-                        // Add input for Measurement cell if not present
-                        if ($measurementCell.find('input').length === 0) {
-                            var currentValue = $measurementCell.text().trim();
-                            $measurementCell.attr('data-originalValue', currentValue);
-                            $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
-                        }
-                    });
+                             // Allow judgment change manually if it's not a measurement
+                             if (!isMeasurement) {
+                                 var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
+                                    $judgementCell.html(`
+                                        <select class="form-control judgement-select">
+                                        <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
+                                        <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
+                                        </select>
+                                    `);
+                             }
+                             // Add input for Measurement cell if not present
+                             if ($measurementCell.find('input').length === 0) {
+                                 var currentValue = $measurementCell.text().trim();
+                                 $measurementCell.attr('data-originalValue', currentValue);
+                                 $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
+                             }
+                         });
 
-                    toggleEditItems(true);
+                         toggleEditItems(true);
+                     }
+
+                   
         } else {
             let ajaxReload = false;
             // Switch to save mode
@@ -539,17 +581,6 @@
 
 });
 
-
-        // Fn for General Information
-        function hideGeneralInfo() {
-            infoContainer.classList.add('d-none');
-            showInfo.classList.remove('d-none');
-        }
-
-        function showGeneralInfo() {
-            showInfo.classList.add('d-none');
-            infoContainer.classList.remove('d-none');
-        }
 
 
 

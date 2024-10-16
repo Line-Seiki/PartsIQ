@@ -8,9 +8,11 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using PartsIq.Models;
+using PartsIq.Filters;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class UserGroupPermissionsController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();

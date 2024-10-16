@@ -11,6 +11,7 @@ using PartsIq.Models;
 using System.Diagnostics;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using System.Web.Management;
+using PartsIq.Utility;
 
 namespace PartsIq.Controllers
 {
@@ -97,15 +98,18 @@ namespace PartsIq.Controllers
                     if (existingUser != null) {
                         return Json(new { message = "A user with this username or email is already exists", success = false }, JsonRequestBehavior.AllowGet);
                     }
+                    string salt = UserHelper.GenerateSalt();
+                    string hashedPassword = UserHelper.HashPassword(password, salt);
                     var user = new User()
                     {
                         Username = username,
                         FirstName = firstname,
                         LastName = lastname,
                         Email = email,
-                        Password = password,
+                        Password = hashedPassword,
                         UserGroup_ID = Convert.ToInt32(usergroup),
                         IsActive = true,
+                        Salt = salt
                     };
                     db.Users.Add(user);
                     db.SaveChanges();
