@@ -117,6 +117,17 @@ namespace PartsIq.Models
     {
         public string Username { get; set; }
         public string Password { get; set; }
+
+        public string Salt  { get; set; }
+    }
+
+    public class UserSession : User
+    {
+        public string Fullname 
+        { 
+            get {  return FirstName + " " + LastName; }  
+        }
+       
     }
     #endregion
     

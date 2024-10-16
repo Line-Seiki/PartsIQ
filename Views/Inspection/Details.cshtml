@@ -197,6 +197,8 @@
 
             $(document).on('change', '#CheckpointInfo', function () {
                 // Get selected option values
+                toggleEditItems(false);
+
                 let checkpointID = $(this).val();
                 let inspectionID = $('.submit-inspection-item').attr('data-inspectionid');
 
@@ -521,37 +523,45 @@
         });
 
         // For Enabling edit
-     $(document).on('click', '#edit-items-btn', function () {
+    $(document).on('click', '#edit-items-btn', function () {
+
         let isMeasurement = $('.submit-inspection-item').data('measurement') === "True"; // Simplify isMeasurement check
 
         if ($(this).hasClass("btn-secondary")) {
             // Switch to edit mode
-            inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
-                var $row = $(this.node());
-                var $measurementCell = $row.find('td').eq(2);
-                var $judgementCell = $row.find('td').eq(4);
-                var isGood = $judgementCell.find('span').data('judgement');
+            if (!inspectionTable.rows().count()) {
+                alertify.error("No editable inspection items.");
+            }
+            else {
+                enableDisableToggle(true);
+                inspectionTable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+                    var $row = $(this.node());
+                    var $measurementCell = $row.find('td').eq(2);
+                    var $judgementCell = $row.find('td').eq(4);
+                    var isGood = $judgementCell.find('span').data('judgement');
 
-                // Allow judgment change manually if it's not a measurement
-                if (!isMeasurement) {
-                    var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
-                    $judgementCell.html(`
-                        <select class="form-control judgement-select">
-                            <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
-                            <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
-                        </select>
-                    `);
-                }
+                    // Allow judgment change manually if it's not a measurement
+                    if (!isMeasurement) {
+                        var selectedValue = isGood == 1 ? 'Good' : 'Not Good';
+                        $judgementCell.html(`
+             <select class="form-control judgement-select">
+                 <option value="1" ${isGood == 1 ? 'selected' : ''}>Good</option>
+                 <option value="0" ${isGood == 0 ? 'selected' : ''}>Not Good</option>
+             </select>
+         `);
+                    }
 
-                // Add input for Measurement cell if not present
-                if ($measurementCell.find('input').length === 0) {
-                    var currentValue = $measurementCell.text().trim();
-                    $measurementCell.attr('data-originalValue', currentValue);
-                    $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
-                }
-            });
+                    // Add input for Measurement cell if not present
+                    if ($measurementCell.find('input').length === 0) {
+                        var currentValue = $measurementCell.text().trim();
+                        $measurementCell.attr('data-originalValue', currentValue);
+                        $measurementCell.html(`<input type="text" class="form-control measurement-input" value="${currentValue}" />`);
+                    }
+                });
 
-            toggleEditItems(true);
+                toggleEditItems(true);
+            }
+           
     } else {
         let ajaxReload = false;
         // Switch to save mode
