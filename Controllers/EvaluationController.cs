@@ -1,4 +1,5 @@
-﻿using PartsIq.Models;
+﻿using PartsIq.Filters;
+using PartsIq.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -8,6 +9,7 @@ using System.Web.Mvc;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class EvaluationController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();

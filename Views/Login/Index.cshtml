@@ -1,4 +1,4 @@
-﻿
+﻿@model PartsIq.Models.UserLogin
 @{
     ViewBag.Title = "Login";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
@@ -53,11 +53,11 @@
                                 <p class="text-muted mb-4">Enter your username and password to access admin panel.</p>
                                 <form id="loginForm" name="loginForm">
                                     <div class="form-group floating-label">
-                                        <input type="text" class="form-control form-control-lg" name="username" id="username">
+                                        <input type="text" class="form-control form-control-lg" name="Username" id="username">
                                         <label for="username">Username</label>
                                     </div>
                                     <div class="form-group floating-label">
-                                        <input type="password" class="form-control form-control-lg" name="validation-password" id="password">
+                                        <input type="password" class="form-control form-control-lg" name="Password" id="password">
                                         <label for="password">Password</label>
                                         <div class="validation-error d-none fs-13">
                                             <p>This field is required</p>
@@ -83,3 +83,37 @@
     </div>
     <!-- end container -->
 </div>
+
+@section scripts 
+{
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        document.addEventListener('DOMContentLoaded', function () {
+
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(loginForm);
+                const data = Object.fromEntries(formData)
+
+                $.ajax({
+                    url: '/Login/LoginUser',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (res) {
+                        if (res.success) {
+                            window.location.href = res.redirectUrl
+                        } else {
+                            alertify.error(res.errorMessage);
+                        }
+                        
+                    },
+                    error: function (xhr, status, errorThrown) {
+                        console.error('Error:', status, errorThrown);
+                        alertify.error('An error occurred. Please try again.');
+                    }
+                })
+            })
+        })
+    </script>
+}

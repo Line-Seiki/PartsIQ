@@ -9,11 +9,13 @@ using System.Web.Mvc;
 using PartsIq.Models;
 using System.Runtime.InteropServices;
 using Microsoft.SqlServer.Server;
+using PartsIq.Filters;
 //Commenting 10/14/2024
 //using System.Web.UI.WebControls.WebParts;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class PartsController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();

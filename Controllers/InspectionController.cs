@@ -1,4 +1,5 @@
-﻿using PartsIq.Models;
+﻿using PartsIq.Filters;
+using PartsIq.Models;
 using PartsIq.Utility;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using WebGrease.Css.Extensions;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class InspectionController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();
