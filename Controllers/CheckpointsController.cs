@@ -17,9 +17,11 @@ using System.ComponentModel.Design;
 using System.IO;
 using Microsoft.SqlServer.Server;
 using System.Runtime.CompilerServices;
+using PartsIq.Filters;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class CheckpointsController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();

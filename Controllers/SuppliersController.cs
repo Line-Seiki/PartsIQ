@@ -8,10 +8,12 @@ using System.Web;
 using System.Web.Helpers;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using PartsIq.Filters;
 using PartsIq.Models;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class SuppliersController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();

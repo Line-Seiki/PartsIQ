@@ -1,4 +1,5 @@
 ﻿using Microsoft.Ajax.Utilities;
+using PartsIq.Filters;
 using PartsIq.Models;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Web.Mvc;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class ReportsController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();

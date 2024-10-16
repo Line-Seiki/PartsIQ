@@ -1,37 +1,72 @@
-﻿using PartsIq.Models;
+﻿using Newtonsoft.Json;
+using PartsIq.Models;
 using PartsIq.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace PartsIq.Controllers
 {
     public class LoginController : Controller
     {
-        private PartsIQEntities db = new PartsIQEntities();
+        private PartsIQEntities _db = new PartsIQEntities();
+        private IDataEntityContext _dbContext;
+
+        public LoginController()
+        {
+            _dbContext = new DataEntityContext();
+        }
+
         // GET: Login
+        [HttpGet]
         public ActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public ActionResult Login (string username, string password)
+        public ActionResult LoginUser()
         {
-            var user = db.Users.FirstOrDefault(u => u.Username == username);
-            if (user == null) 
+            try
             {
-                return Json(new { success = false, message = $"Username or password is not valid." }, JsonRequestBehavior.AllowGet);
+                // Read the input stream and deserialize the JSON data
+                using (var reader = new System.IO.StreamReader(Request.InputStream))
+                {
+                    var json = reader.ReadToEnd();
+                    var model = JsonConvert.DeserializeObject<UserLogin>(json);
+
+                    if (IsValidUser(model.Username, model.Password))
+                    {
+                        FormsAuthentication.SetAuthCookie(model.Username, false);
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, errorMessage = "Invalid username or password" });
+                    }
+                }
             }
-            bool isPasswordValid = UserHelper.VerifyPassword(password, user.Password, user.Salt);
-            if (isPasswordValid)
+            catch (Exception ex)
             {
-
+                // Log the exception details here
+                Console.WriteLine($"Error in Login: {ex.Message}");
+                return Json(new { success = false, errorMessage = "An error occurred. Please try again." });
             }
-            return Json(new { success = true, message = "Test" }, JsonRequestBehavior.AllowGet);
+        }
 
+        private bool IsValidUser(string username, string password)
+        {
+            // TODO: Add decrypt when passwords are already hashed
+            return _db.Users.Any(u => u.Username == username && u.Password == password);
+        }
+
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("Index", "Login");
         }
     }
 }

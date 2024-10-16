@@ -7,10 +7,12 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.Ajax.Utilities;
+using PartsIq.Filters;
 using PartsIq.Models;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class InspectionItemsController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();
