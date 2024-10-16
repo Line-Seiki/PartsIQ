@@ -11,10 +11,12 @@ using PartsIq.Models;
 using System.Diagnostics;
 using OfficeOpenXml.ConditionalFormatting.Contracts;
 using System.Web.Management;
+using PartsIq.Filters;
 using PartsIq.Utility;
 
 namespace PartsIq.Controllers
 {
+    [CustomAuthorize]
     public class UsersController : Controller
     {
         private PartsIQEntities db = new PartsIQEntities();
@@ -202,6 +204,17 @@ namespace PartsIq.Controllers
             {
                 return HttpNotFound();
             }
+        }
+
+        public JsonResult ValidateUsername(string username)
+        {
+            var userAvailable = db.Users.Any(u => u.Username == username);
+            if (userAvailable)
+            {
+                return Json(new { success = false, message = "username already taken" });
+            }
+            return Json(new { success = true, message = "username available" });
+            
         }
 
         #endregion

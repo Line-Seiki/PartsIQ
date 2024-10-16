@@ -13,6 +13,7 @@ namespace PartsIq.Utility
     public class GetSelectLists
     {
         private readonly IDataEntityContext _db;
+        private PartsIQEntities _dbData = new PartsIQEntities();
 
         public GetSelectLists()
         {
@@ -42,6 +43,15 @@ namespace PartsIq.Utility
             {
                 Value = p.PartID.ToString(),
                 Text = p.Code,
+            }).ToList();
+        }
+
+        public List<SelectListItem> UserGroupList()
+        {
+            return _dbData.UserGroupPermissions.Select(u => new SelectListItem
+            {
+                Value = u.UserGroupId.ToString(),
+                Text = u.Name,
             }).ToList();
         }
 

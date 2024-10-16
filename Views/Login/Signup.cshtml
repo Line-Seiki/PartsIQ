@@ -1,0 +1,259 @@
+﻿@{
+    ViewBag.Title = "Singup";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+@section styles{
+    <style>
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        .image-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3;
+        }
+
+        .login-image {
+            position: absolute;
+            object-fit: cover;
+            object-position: top;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        .custom-validator {
+            display: block;
+            color: #72BF78;
+            width: 100%;
+        }
+
+        .taken {
+            color: #ff5c75;
+        }
+    </style>
+}
+
+<div class="backhome">
+    <a href="/Login" class="avatar avatar-sm bg-primary text-white"><i class="bx bx-home-alt fs-sm"></i></a>
+</div>
+
+<div class="auth-pages">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-11 col-xl-10">
+                <div class="row justify-content-center">
+                    <div class="col-md-6 pe-md-0">
+                        <div class="image-container">
+                            <div class="image-overlay"></div>
+                            <img src="~/assets/images/auth/auth-bg.jpg" class="login-image" alt="login-img" />
+                        </div>
+                    </div>
+                    <div class="col-md-6 ps-md-0">
+                        <div class="card mb-0 p-2 p-md-3 border-bl-radius-0 border-tl-radius-0">
+                            <div class="card-body p-4">
+                                <div class="clearfix">
+                                    <img src="~/assets/images/logo.png" height="24" alt="Lettstart Admin">
+                                </div>
+                                <h5 class="mt-4 fw-semibold">Welcome!</h5>
+                                <p class="text-muted mb-4">Enter your username and password to access admin panel.</p>
+                                <form action="#" novalidate="novalidate" id="register-form">
+                                    @Html.AntiForgeryToken()
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <input class="form-control" id="username" name="validation-username" type="text">
+                                                <label for="username">Username<span class="text-danger">*</span></label>
+                                                <div class="validation-error d-none fs-13">
+                                                    Username can not be blank.
+                                                </div>
+                                                <div id="user-validator" class="custom-validator d-none fs-13"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <input class="form-control" id="email" name="validation-email" type="text" placeholder="example@example.com">
+                                                <label for="email">Email Address<span class="text-danger">*</span></label>
+                                                <div class="validation-error d-none fs-13">
+                                                    Please enter valid Email
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <input class="form-control" id="firstname" name="validation-firstname" type="text" placeholder="John">
+                                                <label for="firstname">First Name<span class="text-danger">*</span></label>
+                                                <div class="validation-error d-none fs-13">
+                                                    First name can not be blank.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <input class="form-control" id="lastname" name="validation-lastname" type="text" placeholder="Doe">
+                                                <label for="lastname">Last Name</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <input class="form-control" id="password" type="password">
+                                                <label for="password">Password<span class="text-danger">*</span></label>
+                                                <div class="validation-error d-none fs-13">
+                                                    Please enter valid number
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <input class="form-control" id="cpassword" type="password">
+                                                <label for="cpassword">Confirm Password<span class="text-danger">*</span></label>
+                                                <div class="validation-error d-none fs-13">
+                                                    Please enter valid number
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group floating-label enable-floating-label show-label">
+                                                <label for="UserGroup_ID">User Group<span class="text-danger">*</span></label>
+                                                <div class="validation-error d-none fs-13">
+                                                    This field is required
+                                                </div>
+                                                @Html.DropDownList("UserGroup_ID", (SelectList)ViewBag.UserGroupList, "Select User Group", new { @class = "form-control" })
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix">
+                                        <button class="btn btn-primary ms-1 waves-effect waves-light" data-effect="wave" type="submit" id="save-user-btn">Create User</button>
+                                        <button class="btn btn-secondary waves-effect waves-light" data-effect="wave" type="reset" id="reset-profile-form">Reset</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end row -->
+    </div>
+    <!-- end container -->
+</div>
+
+@section scripts
+{
+    <script>
+        const userInputEl = document.getElementById('username');
+        const userDivValidator = document.getElementById('user-validator');
+        let validUsername = false
+        const registerform = document.getElementById('register-form');
+
+        $(document).ready(function (e) {
+
+            userInputEl.addEventListener('blur', function () {
+                $.ajax({
+                    url: '/Login/ValidateUsername',
+                    method: 'POST',
+                    data: {
+                        username: userInputEl.value
+                    },
+                    success: (res) => {
+                        if (res.success) {
+                            userDivValidator.classList.remove('taken');
+                            userDivValidator.classList.remove('d-none')
+                            userDivValidator.textContent = '';
+                            userDivValidator.textContent = res.message;
+                            validUsername = true;
+                            console.log(res.message);
+                        } else {
+                            userDivValidator.classList.add('taken');
+                            userDivValidator.classList.remove('d-none')
+                            userDivValidator.textContent = '';
+                            userDivValidator.textContent = res.message;
+                            validUsername = false;
+                            console.log(res.message);
+                        }
+                    },
+                    error: (err) => {
+                        console.log(err);
+                    }
+                });
+            });
+
+            $(document).on('click', '#save-user-btn', function (e) {
+        e.preventDefault();
+        let hasEmptyField = false;
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        const username = $('#username').val().trim();
+        const email = $('#email').val().trim();
+        const firstname = $('#firstname').val().trim();
+        const lastname = $('#lastname').val().trim();
+        const password = $('#password').val();
+        const cpassword = $('#cpassword').val();
+        const usergroup = $('#UserGroup_ID').val();
+
+        // Check if passwords match
+        if (password !== cpassword) {
+            alertify.error("Passwords are not equal");
+            return; // Stop the process if passwords do not match
+        }
+
+        let formData = new FormData();
+        formData.append("__RequestVerificationToken", token);
+        formData.append("username", username);
+        formData.append("email", email);
+        formData.append("firstname", firstname);
+        formData.append("lastname", lastname);
+        formData.append("password", password);
+        formData.append("usergroup", usergroup);
+
+        formData.forEach((value, key) => {
+            if (value === '') {
+                hasEmptyField = true;
+                return;
+            }
+        });
+
+        if (hasEmptyField) {
+            alertify.error("Field/s left empty");
+            return
+        }
+
+        if (!validUsername) {
+            alertify.error("Username already taken!")
+            return
+        }
+
+        $.ajax({
+            url: '@Url.Action("Register", "Login")',
+            processData: false,
+            contentType: false,
+            method: "POST",
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    alertify.success(response.message);
+                    userDivValidator.classList.add('d-none')
+                    registerform.reset();
+                } else {
+                    alertify.error(response.message);
+                }
+            }, error: function (err) {
+                alertify.error(`Error ${err} occured.`)
+            }
+
+        });
+
+    });
+
+});
+    </script>
+}
