@@ -95,28 +95,64 @@ namespace PartsIq.Controllers
             FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Login");
         }
-        public ActionResult Register(string username, string password)
+
+        public ActionResult Signup()
         {
-            // Generate a salt
-            string salt = UserHelper.GenerateSalt();
-
-            // Hash the password with the salt
-            string passwordHash = UserHelper.HashPassword(password, salt);
-
-            // Save user to database (with hashed password and salt)
-          
-                var user = new User
+            ViewBag.UserGroupList = new SelectList(_db.UserGroupPermissions, "UserGroupId", "Name");
+            return View();
+        }
+        public ActionResult Register()
+        {
+            try
+            {
+                var form = Request.Form;
+                if (form != null)
                 {
-                    FirstName = "Dandan",
-                    LastName = "Ragos",
-                    Username = username,
-                    Password = passwordHash,
-                    Salt = salt
-                };
+                    var username = form.Get("username");
+                    var firstname = form.Get("firstname");
+                    var lastname = form.Get("lastname");
+                    var email = form.Get("email");
+                    var password = form.Get("password");
+                    var usergroup = form.Get("usergroup");
 
-                _db.Users.Add(user);
-                _db.SaveChanges();
-            return Json("test", JsonRequestBehavior.AllowGet);
+                    string salt = UserHelper.GenerateSalt();
+                    string hashedPassword = UserHelper.HashPassword(password, salt);
+                    var user = new User()
+                    {
+                        Username = username,
+                        FirstName = firstname,
+                        LastName = lastname,
+                        Email = email,
+                        Password = hashedPassword,
+                        UserGroup_ID = Convert.ToInt32(usergroup),
+                        IsActive = true,
+                        Salt = salt
+                    };
+                    _db.Users.Add(user);
+                    _db.SaveChanges();
+
+                    return Json(new { success = true, message = "User created successfully" }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { succes = false, message = "Form data is missing." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error {ex} occured" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult ValidateUsername(string username)
+        {
+            var userAvailable = _db.Users.Any(u => u.Username == username);
+            if (userAvailable)
+            {
+                return Json(new { success = false, message = "username already taken" });
+            }
+            return Json(new { success = true, message = "username available" });
+
         }
 
     }

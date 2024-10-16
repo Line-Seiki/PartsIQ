@@ -32,6 +32,10 @@
     </style>
 }
 
+<div class="backhome">
+    <a href="/Login/Signup" class="avatar avatar-sm bg-primary text-white"><i class="bx bx-home-alt fs-sm"></i></a>
+</div>
+
 <div class="auth-pages">
     <div class="container">
         <div class="row justify-content-center">
@@ -106,14 +110,14 @@
                         } else {
                             alertify.error(res.errorMessage);
                         }
-                        
+
                     },
                     error: function (xhr, status, errorThrown) {
                         console.error('Error:', status, errorThrown);
                         alertify.error('An error occurred. Please try again.');
                     }
                 })
-            })
+            });
         })
     </script>
 }

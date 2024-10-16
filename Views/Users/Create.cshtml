@@ -5,6 +5,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@section styles {
+    <style>
+        .custom-validator {
+            display: block;
+            color: #72BF78;
+            width: 100%;
+        }
+        .taken {
+            color: #ff5c75;
+        }
+    </style>
+}
+
 <div class="page-content">
     <!-- page header -->
     <div class="page-title-box">
@@ -44,11 +57,12 @@
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <div class="form-group floating-label enable-floating-label show-label">
-                                                    <input class="form-control" id="username" name="validation-firstname" type="text">
+                                                    <input class="form-control" id="username" name="validation-username" type="text">
                                                     <label for="username">Username<span class="text-danger">*</span></label>
                                                     <div class="validation-error d-none fs-13">
-                                                        First name can not be blank.
+                                                        Username can not be blank.
                                                     </div>
+                                                    <div id="user-validator" class="custom-validator d-none fs-13"></div>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
@@ -138,17 +152,51 @@
  @section scripts 
 {
     <script>
+        const userInputEl = document.getElementById('username');
+        const userDivValidator = document.getElementById('user-validator');
+        let validUsername = false
+
         $(document).ready(function (e) {
 
+            userInputEl.addEventListener('blur', function () {
+                $.ajax({
+                    url: '/Users/ValidateUsername',
+                    method: 'POST',
+                    data: {
+                        username: userInputEl.value
+                    },
+                    success: (res) => {
+                        if (res.success) {
+                            userDivValidator.classList.remove('taken');
+                            userDivValidator.classList.remove('d-none')
+                            userDivValidator.textContent = '';
+                            userDivValidator.textContent = res.message;
+                            validUsername = true;
+                        } else {
+                            userDivValidator.classList.add('taken');
+                            userDivValidator.classList.remove('d-none')
+                            userDivValidator.textContent = '';
+                            userDivValidator.textContent = res.message;
+                            validUsername = false;
+                        }
+                    },
+                    error: (err) => {
+                        console.log(err);
+                    }
+                })
+            })
+
             $(document).on('click', '#save-user-btn', function (e) {
-                var token = $('input[name="__RequestVerificationToken"]').val();
-                let username = $('#username').val();
-                let email = $('#email').val();
-                let firstname = $('#firstname').val();
-                let lastname = $('#lastname').val();
-                let password = $('#password').val();
-                let cpassword = $('#cpassword').val();
-                let usergroup = $('#UserGroup_ID').val();
+                e.preventDefault();
+                let hasEmptyField = false;
+                const token = $('input[name="__RequestVerificationToken"]').val();
+                const username = $('#username').val().trim();
+                const email = $('#email').val().trim();
+                const firstname = $('#firstname').val().trim();
+                const lastname = $('#lastname').val().trim();
+                const password = $('#password').val();
+                const cpassword = $('#cpassword').val();
+                const usergroup = $('#UserGroup_ID').val();
 
                 // Check if passwords match
                 if (password !== cpassword) {
@@ -164,6 +212,25 @@
                 formData.append("lastname", lastname);
                 formData.append("password", password);
                 formData.append("usergroup", usergroup);
+
+                formData.forEach((value, key) => {
+                    if (value === '') {
+                        hasEmptyField = true;
+                        return;
+                    }
+                });
+
+                if (hasEmptyField) {
+                    alertify.error("Field/s left empty");
+                    return
+                }
+
+                if (!validUsername) {
+                    alertify.error("Username already taken!")
+                    return
+                }
+
+                console.log(Object.fromEntries(formData));
 
                 $.ajax({
                     url: '@Url.Action("CreateUser", "Users")',
