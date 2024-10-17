@@ -360,6 +360,10 @@
                 let upperLimit = $('#UpperLimit').val();
                 let lowerLimit = $('#LowerLimit').val();
                 if (isMeasurement == "True") {
+                    if (measurement.trim().length === 0) {
+                        alertify.error("Measurement is null");
+                        return;
+                    }
                     measurement = Number(measurement);
                     origMeasurement = measurement;
                     if (measurement <= upperLimit && measurement >= lowerLimit) {
