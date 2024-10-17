@@ -191,8 +191,8 @@ class DynamicTabs {
 
     getHtmlContent(contentType, id, rowData, tabId, contentId) {
         const content = contentType.toLowerCase();
-        const deliveryDetailId = `${rowData.DeliveryDetailId}`;
-        const deliveryId = `${rowData.DeliveryId}`;
+        const deliveryDetailId = `${rowData.DeliveryDetailID}`;
+        const deliveryId = `${rowData.DeliveryID}`;
         const version = rowData.Version;
         const deliveryVersion = rowData.DeliveryVersion;
 
