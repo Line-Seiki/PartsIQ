@@ -225,7 +225,7 @@
                         You are about to start inspection on <strong id="inspection-dr"></strong>. Add a Lot Number and Quantity.
                     </p>
                     <button type="button" class="btn btn-danger my-2" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="addLotBtn" data-index="" class="btn btn-info my-2" data-bs-dismiss="modal">Continue</button>
+                    <button type="button" id="addLotBtn" data-index="" data-table="" class="btn btn-info my-2" data-bs-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div><!-- /.modal-content -->
@@ -478,7 +478,8 @@
                 } else {
                     console.log(e.target.closest('#addLotBtn').dataset.index);
                     const rowIndex = e.target.closest('#addLotBtn').dataset.index;
-                    editDelivery(rowIndex);
+                    const rowTable = e.target.closest('#addLotBtn').dataset.table;
+                    editDelivery(rowIndex, rowTable);
                     window.scroll({
                         top: 0,
                         left: 0,
@@ -567,7 +568,8 @@
 
         // FUNCTIONALITY: Start Inspection
         function startInspection() {
-            const hasPendingData = availableTable.data().toArray().length > 0;
+            console.log('start inspection');
+            const hasPendingData = pendingTable.data().toArray().length > 0;
             if (hasPendingData) {
                 const dataPending = pendingTable.data().toArray();
                 const selectedData = dataPending.find(item => item.StatusID !== 4)
@@ -575,6 +577,7 @@
                 if (!selectedData) {
                     const dataAvailable = availableTable.data().toArray();
                     const selectedData = dataAvailable.find(item => item.StatusID === 1)
+                    const selectedDataIndex = dataAvailable.findIndex(item => item.StatusID !== 4);
                     if (selectedData.InspectionID !== null) {
                         console.log('get scheduled item and execute');
                         $.ajax({
@@ -595,6 +598,13 @@
                                 alertify.error(`${err}`);
                             }
                         });
+                    } else if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") { 
+                        console.log('modal here');
+                        console.log(selectedDataIndex);
+                        addLotBtn.dataset.index = selectedDataIndex;
+                        addLotBtn.dataset.table = "av";
+                        drNumber.innerText = selectedData.DRNumber;
+                        lotModal.show();
                     } else {
                         console.log('open inspection modal');
                         console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
@@ -631,7 +641,9 @@
                 } else {
                     if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
                         console.log('modal here');
+                        console.log(selectedDataIndex);
                         addLotBtn.dataset.index = selectedDataIndex;
+                        addLotBtn.dataset.table = "pd";
                         drNumber.innerText = selectedData.DRNumber;
                         lotModal.show();
                     } else if (selectedData.InspectionID !== null) {
@@ -817,8 +829,14 @@
         }
 
         // FUNCTIONALITY for Editing Deliveries
-        function editDelivery(rowIndex) {
-            const rowData = availableTable.row(rowIndex).data();
+        function editDelivery(rowIndex, rowTable) {
+            let rowData;
+            if (rowTable == 'av') {
+                rowData = availableTable.row(rowIndex).data();
+            } else {
+                rowData = pendingTable.row(rowIndex).data();
+            }
+            
             console.log(rowData);
 
             document.getElementById('left-column').classList.remove('col-lg-12');
