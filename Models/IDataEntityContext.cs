@@ -40,6 +40,7 @@ namespace PartsIq.Models
         ResponseData PauseUnpause(int StatusID, int DeliveryDetailID, int DeliveryDetailVersion);
         //DEV FUNCTIONALITY
         ResponseData DevAssignInspector(int id, int version);
+        ResponseData AssignInspector(int id, int version, int userID);
         #endregion
 
         #region Evaluation

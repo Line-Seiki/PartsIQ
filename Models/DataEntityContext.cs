@@ -684,6 +684,45 @@ namespace PartsIq.Models
             }
         }
 
+        public ResponseData AssignInspector(int id, int version, int userID)
+        {
+            try
+            {
+                var delDetail = db.DeliveryDetails.Find(id);
+                if (delDetail.VERSION != version) return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = "Editing Conflict! Current item already edited try again"
+                };
+                if (delDetail.UserID == null)
+                {
+                    delDetail.UserID = userID;
+                    db.Entry(delDetail).Property(d => d.UserID).IsModified = true;
+                }
+                delDetail.StatusID = delDetail.InspectionID.HasValue ? 3 : 2;
+                db.Entry(delDetail).Property(d => d.StatusID).IsModified = true;
+                delDetail.VERSION++;
+                db.SaveChanges();
+
+                return new ResponseData
+                {
+                    Success = true,
+                    Status = "Success",
+                    Message = "Item Successfully Assigned"
+                };
+
+            }
+            catch (Exception ex)
+            {
+
+                return new ResponseData
+                {
+                    Status = "Failed",
+                    Message = $"Something went wrong: {ex.Message}"
+                };
+            }
+        }
+
         public ResponseData DevAssignInspector(int id, int version)
         {
             try

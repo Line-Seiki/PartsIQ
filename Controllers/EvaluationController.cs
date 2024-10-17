@@ -1,5 +1,6 @@
 ﻿using PartsIq.Filters;
 using PartsIq.Models;
+using PartsIq.Utility;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -47,8 +48,9 @@ namespace PartsIq.Controllers
            
             var decisions = DecisionListItem();
             decisions.RemoveAt(0);
-            var defaultUserID = 5; // Change this to Session ID
-            var defaultUser = dbContext.GetUserDataByID(defaultUserID);
+            var userData = this.GetUserData();
+            //var defaultUserID = 5; // Change this to Session ID
+            var defaultUser = dbContext.GetUserDataByID(userData.UserID);
             if (detail.EvaluatorID.HasValue == false)
             {
                 detail.EvaluatorName = defaultUser.Name;
@@ -118,7 +120,6 @@ namespace PartsIq.Controllers
                 var detailID = form.Get("DeliveryDetailID");
                 var decision = form.Get("Decision");
                 var evaluator = form.Get("Evaluator");
-                var inspector = 1;
                 var comment = form.Get("Comments");
 
                 var deliveryDetail = db.DeliveryDetails.Find(Convert.ToInt32(detailID));

@@ -1,4 +1,5 @@
 ﻿using PartsIq.Filters;
+using PartsIq.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace PartsIq.Controllers
     {
         public ActionResult Index()
         {
+            var userData = this.GetUserData();
+            ViewBag.UserData = userData;
             return View();
         }
 

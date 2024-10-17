@@ -48,11 +48,8 @@ namespace PartsIq.Controllers
                     // Validate user credentials
                     if (IsValidUser(model.Password, user.Password, user.Salt))
                     {
-                        // Set authentication cookie
-                        FormsAuthentication.SetAuthCookie(model.Username, false);
-
-                        // Start session and store the UserSession object
-                        UserSession session = new UserSession
+                        // Stored session object
+                        UserSession userData = new UserSession
                         {
                             UserID = user.UserID,
                             Username = user.Username,
@@ -61,8 +58,16 @@ namespace PartsIq.Controllers
                             Email = user.Email
                         };
 
-                        Session["UserSession"] = session;
+                        string userDataJson = JsonConvert.SerializeObject(userData);
 
+                        FormsAuthenticationTicket authTicket = new FormsAuthenticationTicket(1, model.Username, DateTime.Now, DateTime.Now.AddDays(2), false, userDataJson);
+
+                        // Ticket Encryption
+                        string encTicket = FormsAuthentication.Encrypt(authTicket);
+
+                        // Create auth cookie
+                        HttpCookie authCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encTicket);
+                        Response.Cookies.Add(authCookie);
                         // Return successful login response with redirect URL
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") }, JsonRequestBehavior.AllowGet);
                     }
@@ -93,6 +98,9 @@ namespace PartsIq.Controllers
         public ActionResult Logout()
         {
             FormsAuthentication.SignOut();
+            Session.Clear();
+            Session.Abandon();
+
             return RedirectToAction("Index", "Login");
         }
 
