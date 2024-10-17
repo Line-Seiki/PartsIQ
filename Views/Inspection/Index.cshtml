@@ -402,7 +402,6 @@
                     },
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    console.log(data);
                     $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             })
@@ -418,7 +417,7 @@
                     memberBtn.dataset.index = '';
                     playpauseBtn.dataset.index = '';
                 } else if (classList.contains('child')) {
-                    
+
                 }
                 else {
                     availableTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));
@@ -435,18 +434,13 @@
             // Start Inspection
             inspectionBtn.addEventListener('click', startInspection);
 
-            // Start Dev Inspection
-            //devInspect.addEventListener('click', devInspection);
-
-            // Dev Assign (ASSIGN TO USER(FIXED))
-            //devAssign.addEventListener('click', devAssignDelivery);
-
             // EVENT: Edit Currently Selected Row
             editBtn.addEventListener('click', function (e) {
                 if (!e.target.closest('#editBtn').dataset.index) {
                     alertNoRowClicked();
                 } else {
                     const rowIndex = e.target.closest('#editBtn').dataset.index;
+                    console.log(rowIndex);
                     editDelivery(rowIndex);
                 }
             });
@@ -479,7 +473,7 @@
                     console.log(e.target.closest('#addLotBtn').dataset.index);
                     const rowIndex = e.target.closest('#addLotBtn').dataset.index;
                     const rowTable = e.target.closest('#addLotBtn').dataset.table;
-                    editDelivery(rowIndex, rowTable);
+                    promptEditDelivery(rowIndex, rowTable);
                     window.scroll({
                         top: 0,
                         left: 0,
@@ -568,167 +562,76 @@
 
         // FUNCTIONALITY: Start Inspection
         function startInspection() {
+            refreshTables();
             console.log("start inspection");
             let selectedData;
             let selectedDataIndex;
-            const hasPendingData = pendingTable.data().toArray().length > 0;
-            if (hasPendingData) {
+            const initialPendingData = pendingTable.data().toArray();
+            const initialPendingItem = initialPendingData.find(item => item.StatusID !== 4);
+            const hasPendingInspection = (initialPendingData.length > 0) && initialPendingItem != null;
+            const hasAvailableInspection = availableTable.data().toArray().length > 0;
+
+            if (!hasPendingInspection) {
+                if (hasAvailableInspection) {
+                    const dataAvailable = availableTable.data().toArray();
+                    selectedData = dataAvailable.find(item => item.StatusID === 1);
+                    if (selectedData) {
+                        assignDelivery(selectedData);
+                        // Inserted Delay for conditionals to run
+                        setTimeout(() => {
+                            const dataPending = pendingTable.data().toArray();
+                            selectedData = dataPending.find(item => item.StatusID !== 4);
+                            if (selectedData) {
+                                selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
+                                if (!selectedData.LotNumber || selectedData.LotNumber === "") {
+                                    console.log("addLot Modal");
+                                    addLotBtn.dataset.index = selectedDataIndex;
+                                    drNumber.innerText = selectedData.DRNumber;
+                                    lotModal.show();
+                                } else if (selectedData.InspectionID != null) {
+                                    const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                                    window.location.href = url;
+                                }
+                                else {
+                                    console.log("inspection form");
+                                    inspectionForm.dataset.user = selectedData.UserID;
+                                    inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
+                                    inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
+                                    inspectionModal.show();
+
+                                }
+                            }
+                        }, 100)   
+                    }
+                } else {
+                    alertify.error('no available items to inspect')
+                }
+                // IF THERE ARE PENDING RESERVED ITEMS
+            } else {
                 const dataPending = pendingTable.data().toArray();
-                selectedData = dataPending.find((item) => item.StatusID !== 4);
-                selectedDataIndex = dataPending.findIndex((item) => item.StatusID !== 4);
+                selectedData = dataPending.find(item => item.StatusID !== 4);
+                // IF THERE IS AN ITEM NOT PAUSED IN THE PENDING TABLE
                 if (selectedData) {
+                    selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
                     if (!selectedData.LotNumber || selectedData.LotNumber === "") {
-                        console.log("add lot modal");
-                        console.log(selectedDataIndex);
+                        console.log("addLot Modal");
                         addLotBtn.dataset.index = selectedDataIndex;
-                        addLotBtn.dataset.table = "pd";
                         drNumber.innerText = selectedData.DRNumber;
                         lotModal.show();
                     } else if (selectedData.InspectionID != null) {
                         const url = `/Inspection/Details/${selectedData.InspectionID}`;
                         window.location.href = url;
-                    } else {
+                    }
+                    else {
                         console.log("inspection form");
                         inspectionForm.dataset.user = selectedData.UserID;
                         inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
                         inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
                         inspectionModal.show();
+
                     }
                 } else {
-                    const dataAvailable = availableTable.data().toArray();
-                    selectedData = dataAvailable.find((item) => item.StatusID === 1);
-                    selectedDataIndex = dataAvailable.findIndex((item) => item.StatusID !== 4);
-                    if (selectedData.InspectionID !== null) {
-                        console.log("get scheduled item and execute");
-                        $.ajax({
-                            url: "/Inspection/AssignInspector",
-                            type: "POST",
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                                window.location.href = url;
-                                refreshTables();
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            },
-                        });
-                    } else if (
-                        !selectedData.LotNumber ||
-                        selectedData.LotNumber === " " ||
-                        selectedData.LotNumber === ""
-                    ) {
-                        console.log("add lot modal");
-                        console.log(selectedDataIndex);
-                        addLotBtn.dataset.index = selectedDataIndex;
-                        addLotBtn.dataset.table = "av";
-                        drNumber.innerText = selectedData.DRNumber;
-                        lotModal.show();
-                    } else {
-                        console.log("open inspection modal");
-                        console.log("deldetVer 1: ", selectedData.DeliveryDetailVersion);
-                        $.ajax({
-                            url: "/Inspection/AssignInspector",
-                            type: "POST",
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                refreshTables();
-                                // TODO: Make retrieving data async
-                                setTimeout(() => {
-                                    const dataPending = pendingTable.data().toArray();
-                                    const newData = dataPending.find((item) => item.StatusID !== 4);
-                                    console.log("new: ", dataPending);
-                                    console.log("deldetVer 2: ", newData.DeliveryDetailVersion);
-                                    inspectionForm.dataset.user =
-                                        newData.UserID == 0 ? 4 : newData.UserID;
-                                    inspectionForm.dataset.detail = newData.DeliveryDetailID;
-                                    inspectionForm.dataset.detailversion =
-                                        newData.DeliveryDetailVersion;
-                                    inspectionModal.show();
-                                }, 100);
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            },
-                        });
-                    }
-                }
-            } else {
-                const dataAvailable = availableTable.data().toArray();
-                selectedData = dataAvailable.find((item) => item.StatusID === 1);
-                selectedDataIndex = dataAvailable.findIndex((item) => item.StatusID !== 4);
-                if (selectedData.InspectionID !== null) {
-                    console.log("get scheduled item and execute");
-                    $.ajax({
-                        url: "/Inspection/AssignInspector",
-                        type: "POST",
-                        data: {
-                            delDetailID: selectedData.DeliveryDetailID,
-                            delDetailVersion: selectedData.DeliveryDetailVersion,
-                        },
-                        success(res) {
-                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                            else alertify.error(`${res.Status}: ${res.Message}`);
-                            const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                            window.location.href = url;
-                            refreshTables();
-                        },
-                        error(err) {
-                            alertify.error(`${err}`);
-                        },
-                    });
-                } else if (
-                    !selectedData.LotNumber ||
-                    selectedData.LotNumber === " " ||
-                    selectedData.LotNumber === ""
-                ) {
-                    console.log("add lot modal");
-                    console.log(selectedDataIndex);
-                    addLotBtn.dataset.index = selectedDataIndex;
-                    addLotBtn.dataset.table = "av";
-                    drNumber.innerText = selectedData.DRNumber;
-                    lotModal.show();
-                } else {
-                    console.log("open inspection modal");
-                    console.log("deldetVer 1: ", selectedData.DeliveryDetailVersion);
-                    $.ajax({
-                        url: "/Inspection/AssignInspector",
-                        type: "POST",
-                        data: {
-                            delDetailID: selectedData.DeliveryDetailID,
-                            delDetailVersion: selectedData.DeliveryDetailVersion,
-                        },
-                        success(res) {
-                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                            else alertify.error(`${res.Status}: ${res.Message}`);
-                            refreshTables();
-                            // TODO: Make retrieving data async
-                            setTimeout(() => {
-                                const dataPending = pendingTable.data().toArray();
-                                const newData = dataPending.find((item) => item.StatusID !== 4);
-                                console.log("new: ", dataPending);
-                                console.log("deldetVer 2: ", newData.DeliveryDetailVersion);
-                                inspectionForm.dataset.user =
-                                    newData.UserID == 0 ? 4 : newData.UserID;
-                                inspectionForm.dataset.detail = newData.DeliveryDetailID;
-                                inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
-                                inspectionModal.show();
-                            }, 100);
-                        },
-                        error(err) {
-                            alertify.error(`${err}`);
-                        },
-                    });
+                    alertify.error('error locating inspection')
                 }
             }
         }
@@ -780,132 +683,13 @@
                         alertify.error(`${err}`);
                     }
                 });
-            } 
-        }
-
-        // DEV-FUNCTIONALITY: Start Inspection
-        function devInspection() {
-            const hasPendingData = availableTable.data().toArray().length > 0;
-            if (hasPendingData) {
-                const dataPending = pendingTable.data().toArray();
-                const selectedData = dataPending.find(item => item.StatusID !== 4)
-                const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
-                if (!selectedData) {
-                    const dataAvailable = availableTable.data().toArray();
-                    const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                    if (selectedData.InspectionID !== null) {
-                        console.log('get scheduled item and execute');
-                        $.ajax({
-                            url: '/Inspection/DevAssignInspector',
-                            type: 'POST',
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                                window.location.href = url;
-                                refreshTables();
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            }
-                        });
-                    } else {
-                        console.log('open inspection modal');
-                        console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
-                        $.ajax({
-                            url: '/Inspection/DevAssignInspector',
-                            type: 'POST',
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                refreshTables();
-                                // TODO: Make retrieving data async
-                                setTimeout(() => {
-                                    const dataPending = pendingTable.data().toArray();
-                                    const newData = dataPending.find(item => item.StatusID !== 4);
-                                    console.log('new: ', dataPending);
-                                    console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
-                                    inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
-                                    inspectionForm.dataset.detail = newData.DeliveryDetailID;
-                                    inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
-                                    inspectionModal.show();
-                                }, 100);
-
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            }
-                        });
-                    }
-                    console.log(selectedData);
-                } else {
-                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
-                        console.log('modal here');
-                        addLotBtn.dataset.index = selectedDataIndex;
-                        drNumber.innerText = selectedData.DRNumber;
-                        lotModal.show();
-                    } else if (selectedData.InspectionID !== null) {
-                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                        window.location.href = url;
-                    } else {
-                        console.log(selectedData, selectedDataIndex);
-                        inspectionForm.dataset.user = selectedData.UserID;
-                        inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
-                        inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
-                        inspectionModal.show();
-                    }
-                }
-            } else {
-                const dataAvailable = availableTable.data().toArray();
-                const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                console.log(selectedData);
-            }
-        }
-
-        // DEV-FUNCTIONALITY: Assign to Delivery
-        function devAssignDelivery() {
-            console.log('assigned');
-            const dataAvailable = availableTable.data().toArray();
-            const selectedData = dataAvailable.find(item => !item.UserName);
-            if (!selectedData) {
-                alertify.error('DEV Error - No Deliveries Without Inspector');
-            } else {
-                $.ajax({
-                    url: '/Inspection/DevAssignInspector',
-                    type: 'POST',
-                    data: {
-                        delDetailID: selectedData.DeliveryDetailID,
-                        delDetailVersion: selectedData.DeliveryDetailVersion,
-                    },
-                    success(res) {
-                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                        else alertify.error(`${res.Status}: ${res.Message}`);
-                        refreshTables();
-                    },
-                    error(err) {
-                        alertify.error(`${err}`);
-                    }
-                });
             }
         }
 
         // FUNCTIONALITY for Editing Deliveries
-        function editDelivery(rowIndex, rowTable) {
-            let rowData;
-            if (rowTable == 'av') {
-                rowData = availableTable.row(rowIndex).data();
-            } else {
-                rowData = pendingTable.row(rowIndex).data();
-            }
-            
+        function editDelivery(rowIndex) {
+            let rowData = availableTable.row(rowIndex).data();
+
             console.log(rowData);
 
             document.getElementById('left-column').classList.remove('col-lg-12');
@@ -915,8 +699,38 @@
             const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
         }
 
+        function promptEditDelivery(rowIndex) {
+            let rowData = pendingTable.row(rowIndex).data();
 
-        // HELPER 
+            document.getElementById('left-column').classList.remove('col-lg-12');
+            document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
+        }
+
+        // FUNCTIONALITY: Assigning inspector
+        function assignDelivery(selectedData) {
+            $.ajax({
+                url: "/Inspection/AssignInspector",
+                type: "POST",
+                data: {
+                    delDetailID: selectedData.DeliveryDetailID,
+                    delDetailVersion: selectedData.DeliveryDetailVersion,
+                },
+                success(res) {
+                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                    else alertify.error(`${res.Status}: ${res.Message}`);
+                    refreshTables();
+                },
+                error(err) {
+                    alertify.error(`${err}`);
+                },
+            });
+        }
+
+
+        // HELPER
         function formDataValidator(formData) {
             const data = new FormData();
             let hasError = { status: false, message: "" };
@@ -937,6 +751,130 @@
         function alertNoRowClicked() {
             alertify.message('Please click on an item before clicking the button');
         }
+
+        @*
+            // DEV FUNCTIONS
+            // Start Dev Inspection
+//devInspect.addEventListener('click', devInspection);
+
+// Dev Assign (ASSIGN TO USER(FIXED))
+//devAssign.addEventListener('click', devAssignDelivery);
+
+            // DEV-FUNCTIONALITY: Assign to Delivery
+function devAssignDelivery() {
+    console.log('assigned');
+    const dataAvailable = availableTable.data().toArray();
+    const selectedData = dataAvailable.find(item => !item.UserName);
+    if (!selectedData) {
+        alertify.error('DEV Error - No Deliveries Without Inspector');
+    } else {
+        $.ajax({
+            url: '/Inspection/DevAssignInspector',
+            type: 'POST',
+            data: {
+                delDetailID: selectedData.DeliveryDetailID,
+                delDetailVersion: selectedData.DeliveryDetailVersion,
+            },
+            success(res) {
+                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                else alertify.error(`${res.Status}: ${res.Message}`);
+                refreshTables();
+            },
+            error(err) {
+                alertify.error(`${err}`);
+            }
+        });
+    }
+}
+
+            // DEV-FUNCTIONALITY: Start Inspection
+function devInspection() {
+    const hasPendingData = availableTable.data().toArray().length > 0;
+    if (hasPendingData) {
+        const dataPending = pendingTable.data().toArray();
+        const selectedData = dataPending.find(item => item.StatusID !== 4)
+        const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
+        if (!selectedData) {
+            const dataAvailable = availableTable.data().toArray();
+            const selectedData = dataAvailable.find(item => item.StatusID === 1)
+            if (selectedData.InspectionID !== null) {
+                console.log('get scheduled item and execute');
+                $.ajax({
+                    url: '/Inspection/DevAssignInspector',
+                    type: 'POST',
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                        window.location.href = url;
+                        refreshTables();
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            } else {
+                console.log('open inspection modal');
+                console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
+                $.ajax({
+                    url: '/Inspection/DevAssignInspector',
+                    type: 'POST',
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        refreshTables();
+                        // TODO: Make retrieving data async
+                        setTimeout(() => {
+                            const dataPending = pendingTable.data().toArray();
+                            const newData = dataPending.find(item => item.StatusID !== 4);
+                            console.log('new: ', dataPending);
+                            console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
+                            inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
+                            inspectionForm.dataset.detail = newData.DeliveryDetailID;
+                            inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
+                            inspectionModal.show();
+                        }, 100);
+
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            }
+            console.log(selectedData);
+        } else {
+            if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
+                console.log('modal here');
+                addLotBtn.dataset.index = selectedDataIndex;
+                drNumber.innerText = selectedData.DRNumber;
+                lotModal.show();
+            } else if (selectedData.InspectionID !== null) {
+                const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                window.location.href = url;
+            } else {
+                console.log(selectedData, selectedDataIndex);
+                inspectionForm.dataset.user = selectedData.UserID;
+                inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
+                inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
+                inspectionModal.show();
+            }
+        }
+    } else {
+        const dataAvailable = availableTable.data().toArray();
+        const selectedData = dataAvailable.find(item => item.StatusID === 1)
+        console.log(selectedData);
+    }
+}
+
+        *@
     </script>
 }
 
