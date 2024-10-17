@@ -568,21 +568,41 @@
 
         // FUNCTIONALITY: Start Inspection
         function startInspection() {
-            console.log('start inspection');
+            console.log("start inspection");
+            let selectedData;
+            let selectedDataIndex;
             const hasPendingData = pendingTable.data().toArray().length > 0;
             if (hasPendingData) {
                 const dataPending = pendingTable.data().toArray();
-                const selectedData = dataPending.find(item => item.StatusID !== 4)
-                const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
-                if (!selectedData) {
+                selectedData = dataPending.find((item) => item.StatusID !== 4);
+                selectedDataIndex = dataPending.findIndex((item) => item.StatusID !== 4);
+                if (selectedData) {
+                    if (!selectedData.LotNumber || selectedData.LotNumber === "") {
+                        console.log("add lot modal");
+                        console.log(selectedDataIndex);
+                        addLotBtn.dataset.index = selectedDataIndex;
+                        addLotBtn.dataset.table = "pd";
+                        drNumber.innerText = selectedData.DRNumber;
+                        lotModal.show();
+                    } else if (selectedData.InspectionID != null) {
+                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                        window.location.href = url;
+                    } else {
+                        console.log("inspection form");
+                        inspectionForm.dataset.user = selectedData.UserID;
+                        inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
+                        inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
+                        inspectionModal.show();
+                    }
+                } else {
                     const dataAvailable = availableTable.data().toArray();
-                    const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                    const selectedDataIndex = dataAvailable.findIndex(item => item.StatusID !== 4);
+                    selectedData = dataAvailable.find((item) => item.StatusID === 1);
+                    selectedDataIndex = dataAvailable.findIndex((item) => item.StatusID !== 4);
                     if (selectedData.InspectionID !== null) {
-                        console.log('get scheduled item and execute');
+                        console.log("get scheduled item and execute");
                         $.ajax({
-                            url: '/Inspection/AssignInspector',
-                            type: 'POST',
+                            url: "/Inspection/AssignInspector",
+                            type: "POST",
                             data: {
                                 delDetailID: selectedData.DeliveryDetailID,
                                 delDetailVersion: selectedData.DeliveryDetailVersion,
@@ -596,21 +616,25 @@
                             },
                             error(err) {
                                 alertify.error(`${err}`);
-                            }
+                            },
                         });
-                    } else if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") { 
-                        console.log('modal here');
+                    } else if (
+                        !selectedData.LotNumber ||
+                        selectedData.LotNumber === " " ||
+                        selectedData.LotNumber === ""
+                    ) {
+                        console.log("add lot modal");
                         console.log(selectedDataIndex);
                         addLotBtn.dataset.index = selectedDataIndex;
                         addLotBtn.dataset.table = "av";
                         drNumber.innerText = selectedData.DRNumber;
                         lotModal.show();
                     } else {
-                        console.log('open inspection modal');
-                        console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
+                        console.log("open inspection modal");
+                        console.log("deldetVer 1: ", selectedData.DeliveryDetailVersion);
                         $.ajax({
-                            url: '/Inspection/AssignInspector',
-                            type: 'POST',
+                            url: "/Inspection/AssignInspector",
+                            type: "POST",
                             data: {
                                 delDetailID: selectedData.DeliveryDetailID,
                                 delDetailVersion: selectedData.DeliveryDetailVersion,
@@ -622,45 +646,90 @@
                                 // TODO: Make retrieving data async
                                 setTimeout(() => {
                                     const dataPending = pendingTable.data().toArray();
-                                    const newData = dataPending.find(item => item.StatusID !== 4);
-                                    console.log('new: ', dataPending);
-                                    console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
-                                    inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
+                                    const newData = dataPending.find((item) => item.StatusID !== 4);
+                                    console.log("new: ", dataPending);
+                                    console.log("deldetVer 2: ", newData.DeliveryDetailVersion);
+                                    inspectionForm.dataset.user =
+                                        newData.UserID == 0 ? 4 : newData.UserID;
                                     inspectionForm.dataset.detail = newData.DeliveryDetailID;
-                                    inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
+                                    inspectionForm.dataset.detailversion =
+                                        newData.DeliveryDetailVersion;
                                     inspectionModal.show();
                                 }, 100);
-
                             },
                             error(err) {
                                 alertify.error(`${err}`);
-                            }
+                            },
                         });
-                    }
-                    console.log(selectedData);
-                } else {
-                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
-                        console.log('modal here');
-                        console.log(selectedDataIndex);
-                        addLotBtn.dataset.index = selectedDataIndex;
-                        addLotBtn.dataset.table = "pd";
-                        drNumber.innerText = selectedData.DRNumber;
-                        lotModal.show();
-                    } else if (selectedData.InspectionID !== null) {
-                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                        window.location.href = url;
-                    } else {
-                        console.log(selectedData, selectedDataIndex);
-                        inspectionForm.dataset.user = selectedData.UserID;
-                        inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
-                        inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
-                        inspectionModal.show();
                     }
                 }
             } else {
                 const dataAvailable = availableTable.data().toArray();
-                const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                console.log(selectedData);
+                selectedData = dataAvailable.find((item) => item.StatusID === 1);
+                selectedDataIndex = dataAvailable.findIndex((item) => item.StatusID !== 4);
+                if (selectedData.InspectionID !== null) {
+                    console.log("get scheduled item and execute");
+                    $.ajax({
+                        url: "/Inspection/AssignInspector",
+                        type: "POST",
+                        data: {
+                            delDetailID: selectedData.DeliveryDetailID,
+                            delDetailVersion: selectedData.DeliveryDetailVersion,
+                        },
+                        success(res) {
+                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                            else alertify.error(`${res.Status}: ${res.Message}`);
+                            const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                            window.location.href = url;
+                            refreshTables();
+                        },
+                        error(err) {
+                            alertify.error(`${err}`);
+                        },
+                    });
+                } else if (
+                    !selectedData.LotNumber ||
+                    selectedData.LotNumber === " " ||
+                    selectedData.LotNumber === ""
+                ) {
+                    console.log("add lot modal");
+                    console.log(selectedDataIndex);
+                    addLotBtn.dataset.index = selectedDataIndex;
+                    addLotBtn.dataset.table = "av";
+                    drNumber.innerText = selectedData.DRNumber;
+                    lotModal.show();
+                } else {
+                    console.log("open inspection modal");
+                    console.log("deldetVer 1: ", selectedData.DeliveryDetailVersion);
+                    $.ajax({
+                        url: "/Inspection/AssignInspector",
+                        type: "POST",
+                        data: {
+                            delDetailID: selectedData.DeliveryDetailID,
+                            delDetailVersion: selectedData.DeliveryDetailVersion,
+                        },
+                        success(res) {
+                            if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                            else alertify.error(`${res.Status}: ${res.Message}`);
+                            refreshTables();
+                            // TODO: Make retrieving data async
+                            setTimeout(() => {
+                                const dataPending = pendingTable.data().toArray();
+                                const newData = dataPending.find((item) => item.StatusID !== 4);
+                                console.log("new: ", dataPending);
+                                console.log("deldetVer 2: ", newData.DeliveryDetailVersion);
+                                inspectionForm.dataset.user =
+                                    newData.UserID == 0 ? 4 : newData.UserID;
+                                inspectionForm.dataset.detail = newData.DeliveryDetailID;
+                                inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
+                                inspectionModal.show();
+                            }, 100);
+                        },
+                        error(err) {
+                            alertify.error(`${err}`);
+                        },
+                    });
+                }
             }
         }
 
