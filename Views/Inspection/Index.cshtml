@@ -1,4 +1,8 @@
-﻿@section styles{
+﻿@{
+    ViewBag.Title = "Inspection";
+}
+
+@section styles{
     <style>
         .badge-block {
             display: block;
@@ -601,7 +605,7 @@
 
                                 }
                             }
-                        }, 100)   
+                        }, 100)
                     }
                 } else {
                     alertify.error('no available items to inspect')

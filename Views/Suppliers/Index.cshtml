@@ -1,6 +1,10 @@
-﻿@section styles{
+﻿@{
+    ViewBag.Title = "Suppliers";
+}
+
+@section styles{
     <style>
-        .order-sm-first{
+        .order-sm-first {
             order: -1 !important;
         }
     </style>
@@ -108,11 +112,11 @@
                         data: "SupplierID", orderable: false, render(data, type, row, meta) {
                             const rowData = JSON.stringify(row).replace(/['\/]/g, "");
                             return `
-                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                <button class="btn btn-secondary" onclick="editSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-pencil"></i></button>
-                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-supplier-modal" onclick="deleteSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-trash-can"></i></button>
-                            </div>
-                            `;
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <button class="btn btn-secondary" onclick="editSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-pencil"></i></button>
+                                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-supplier-modal" onclick="deleteSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-trash-can"></i></button>
+                                </div>
+                                `;
                         }
                     }
                 ],
@@ -148,7 +152,7 @@
                         }
                     });
                 }
-                
+
             } else {
                 formData.append("SupplierID", e.target.dataset.id);
                 formData.append("Version", e.target.dataset.version);
@@ -222,7 +226,7 @@
                 left: 0,
                 behavior: 'smooth'
             });
-            
+
         }
 
         function cancelEdit() {

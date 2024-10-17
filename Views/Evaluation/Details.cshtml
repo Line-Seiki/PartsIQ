@@ -1,5 +1,9 @@
 ﻿@model PartsIq.Models.EvaluationData
 
+@{
+    ViewBag.Title = $"Evaluation - {Model.LotNumber}";
+}
+
 @section styles{
     <style>
         .divider {
@@ -46,7 +50,7 @@
                             <div class="card-header d-flex justify-content-between">
                                 <h4>General Information</h4>
                                 <button id="hide-info" class="btn btn-secondary"><i class="mdi mdi-minus-circle-outline"></i> Hide Info</button>
-                            </div>   
+                            </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
@@ -100,7 +104,7 @@
                                         <h5 class="me-3">Checkpoints</h5>
                                         <button class="btn btn-secondary d-none" id="show-info"><i class="mdi mdi-plus-circle-outline"></i> Show Info</button>
                                     </div>
-                                    
+
                                     <div class="d-flex flex-lg-row flex-md-column flex-sm-column justify-content-between gap-3">
                                         <div class="d-flex gap-3">
                                             <p class="mb-0"><b>Checkpoint Number:</b></p>
@@ -147,9 +151,9 @@
                                     </table>
                                     <button id="edit-items-btn" class="btn btn-secondary mt-2"><i class="mdi mdi-pencil"></i> Edit Items</button>
                                     <div class="d-flex flex-lg-row flex-md-column flex-sm-column gap-4 mt-4">
-                                            <div><span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span></div>
-                                            <div><span class="badge badge-soft-secondary badge-pill"><b>Min Value: </b> #</span> <span id="maxvalue"></span></div>
-                                            <div><span class="badge badge-soft-primary badge-pill"><b>Standard Deviation: </b> #</span> <span id="standardDev"></span></div>
+                                        <div><span class="badge badge-soft-secondary badge-pill" id="maxValue"><b>Max Value: </b> #</span> <span id="minValue"></span></div>
+                                        <div><span class="badge badge-soft-secondary badge-pill"><b>Min Value: </b> #</span> <span id="maxvalue"></span></div>
+                                        <div><span class="badge badge-soft-primary badge-pill"><b>Standard Deviation: </b> #</span> <span id="standardDev"></span></div>
                                     </div>
                                 </div>
                                 <div class="my-3">
@@ -337,7 +341,7 @@
                 rowCallback: function (row, data, index) {
                     // Check the judgment value and apply the class to the entire row
                     if (data.Judgement == "0") {
-                        $('td', row).addClass('text-danger'); // Apply class to all <td> in the row                     
+                        $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
                     } else if (data.Judgement == "1") {
                         $('td', row).addClass(''); // Apply class to all <td> in the row
                     }
@@ -474,7 +478,7 @@
 
              $(document).on('click', '#edit-items-btn', function () {
                  let isMeasurement = $('#CheckpointInfo option:selected').data('measurement') === "True"; // Simplify isMeasurement check
-               
+
                  if ($(this).hasClass("btn-secondary")) {
 
                      if (!inspectionTable.rows().count()) {
@@ -508,7 +512,7 @@
                          toggleEditItems(true);
                      }
 
-                   
+
         } else {
             let ajaxReload = false;
             // Switch to save mode
