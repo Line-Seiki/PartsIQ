@@ -124,9 +124,18 @@ namespace PartsIq.Controllers
         // GET: /Inspection/GetPendingInspections
         public JsonResult GetPendingInspections()
         {
-            int userID = 4; //CHANGE TO SESSION USER ID
-            var data = dbContext.GetPendingInspections(userID);
-            return Json(new {data}, JsonRequestBehavior.AllowGet);
+            //int userID = 4; //CHANGE TO SESSION USER ID
+            var userSession = this.GetUserData();
+            var data = new List<InspectionData>();
+            if (userSession != null)
+            {
+                int userID = userSession.UserID;
+                data = dbContext.GetPendingInspections(userID);
+                return Json(new { data }, JsonRequestBehavior.AllowGet);
+            }
+            
+            return Json(new { data });
+            
         }
 
         public JsonResult GetFinishedInspections()
@@ -222,6 +231,14 @@ namespace PartsIq.Controllers
             db.SaveChanges();
 
             return Json(new { message = "Inspection ended.", success = true }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult AssignInspector(int delDetailID, int delDetailVersion)
+        {
+            var userSession = this.GetUserData();
+            var userID = userSession.UserID;
+            var response = dbContext.AssignInspector(delDetailID, delDetailVersion, userID);
+            return Json(response, JsonRequestBehavior.AllowGet);
         }
 
         #region DEV Controller Actions
