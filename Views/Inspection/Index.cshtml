@@ -182,7 +182,7 @@
                                                     <th>Priority</th>
                                                     <th>DR Number</th>
                                                     <th>Lot Number</th>
-                                                    <th>Pard Code</th>
+                                                    <th>Part Code</th>
                                                     <th>Part Name</th>
                                                     <th>Lot Quantity</th>
                                                     <th>Sample Size</th>
@@ -432,7 +432,7 @@
             refreshBtn.addEventListener('click', refreshTables);
 
             // Start Inspection
-            inspectionBtn.addEventListener('click', startInspection);
+            inspectionBtn.addEventListener('click', async () => { startInspection() });
 
             // EVENT: Edit Currently Selected Row
             editBtn.addEventListener('click', function (e) {
@@ -561,7 +561,7 @@
         }
 
         // FUNCTIONALITY: Start Inspection
-        function startInspection() {
+        async function startInspection() {
             refreshTables();
             console.log("start inspection");
             let selectedData;
@@ -576,9 +576,9 @@
                     const dataAvailable = availableTable.data().toArray();
                     selectedData = dataAvailable.find(item => item.StatusID === 1);
                     if (selectedData) {
-                        assignDelivery(selectedData);
+                        await assignDelivery(selectedData);
                         // Inserted Delay for conditionals to run
-                        setTimeout(() => {
+                        await setTimeout(() => {
                             const dataPending = pendingTable.data().toArray();
                             selectedData = dataPending.find(item => item.StatusID !== 4);
                             if (selectedData) {
@@ -710,23 +710,31 @@
         }
 
         // FUNCTIONALITY: Assigning inspector
-        function assignDelivery(selectedData) {
-            $.ajax({
-                url: "/Inspection/AssignInspector",
-                type: "POST",
-                data: {
-                    delDetailID: selectedData.DeliveryDetailID,
-                    delDetailVersion: selectedData.DeliveryDetailVersion,
-                },
-                success(res) {
-                    if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                    else alertify.error(`${res.Status}: ${res.Message}`);
-                    refreshTables();
-                },
-                error(err) {
-                    alertify.error(`${err}`);
-                },
-            });
+        async function assignDelivery(selectedData) {
+            try {
+                const response = await $.ajax({
+                    url: "/Inspection/AssignInspector",
+                    type: "POST",
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                });
+
+                // Handling the response after successful AJAX call
+                if (response.Success) {
+                    alertify.success(`${response.Status}: ${response.Message}`);
+                } else {
+                    alertify.error(`${response.Status}: ${response.Message}`);
+                }
+
+                // Refresh the tables
+                refreshTables();
+
+            } catch (error) {
+                // Handle any errors that occur during the AJAX request
+                alertify.error(`Error: ${error.statusText || error}`);
+            }
         }
 
 
