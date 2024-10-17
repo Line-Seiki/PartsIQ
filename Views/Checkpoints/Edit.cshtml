@@ -1,5 +1,9 @@
 ﻿@model PartsIq.Models.Checkpoint
 
+@{
+    ViewBag.Title = "Edit Checkpoints";
+}
+
 <div class="page-content">
     <div class="row" id="mainContent">
         <div class="page-content">
@@ -32,7 +36,7 @@
                                             <label for="Code" class="form-label">Code</label>
                                             <input type="text" class="form-control" id="Code" name="Code" value="@Model.Code">
                                             <input type="hidden" id="PartID" value="@Model.Part_ID" name="PartID">
-                                            <input type="hidden" id="CheckpointID" value="@Model.CheckpointId" name="CheckpointID"/>
+                                            <input type="hidden" id="CheckpointID" value="@Model.CheckpointId" name="CheckpointID" />
                                         </div>
 
                                         <div class="mb-3">
@@ -59,11 +63,11 @@
                                         <div class="mb-3">
                                             <p class="form-label">Measurement?</p>
                                             <div class="form-check custom-radio">
-                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="true" @(Model.IsMeasurement ? "checked": "") />
+                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="true" @(Model.IsMeasurement ? "checked" : "") />
                                                 <label class="form-check-label" for="IsMeasurementT">True</label>
                                             </div>
                                             <div class="form-check custom-radio">
-                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="false" @(!Model.IsMeasurement ? "checked": "")/>
+                                                <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="false" @(!Model.IsMeasurement ? "checked" : "") />
                                                 <label class="form-check-label" for="IsMeasurementF">False</label>
                                             </div>
                                         </div>
@@ -146,7 +150,7 @@
             formData.forEach((value, key) => {
                 if (key === "SpecificationRange") value = value === '' ? "none" : value;
                 if (key === "UpperLimit" || key === "LowerLimit") value = value === '' ? 0 : Number(value);
-                data.append(key, value)   
+                data.append(key, value)
 
                 if (typeof value === "string") {
                     value = value.trim();
@@ -169,6 +173,6 @@
 
             return { hasError, data };
         }
-        
+
     </script>
 }

@@ -1,4 +1,8 @@
-﻿@section styles{
+﻿@{
+    ViewBag.Title = "Scheduling";
+}
+
+@section styles{
     <style>
         .badge-block {
             display: block;
@@ -55,8 +59,6 @@
         #DateDelivered {
             background-color: transparent;
         }
-       
-
     </style>
 }
 
@@ -344,7 +346,7 @@
                         }
                     });
                 }
-                
+
             })
 
             // Reset Add Delivery Form When Closing Modal
