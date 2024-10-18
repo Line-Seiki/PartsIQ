@@ -157,11 +157,15 @@ namespace PartsIq.Controllers
                         return Json(new { success = false, message = "Invalid Measurement value" }, JsonRequestBehavior.AllowGet);
                     }
                     measurement = tempMeasurement;
+                    if (!measurement.HasValue) {
+                        return Json(new { success = false, message = "Invalid null value" }, JsonRequestBehavior.AllowGet);
+
+                    }
                 }
                 else if (isMeasurement == "False") 
                 {
                     // If not measurement, use Attribute instead
-                    attribute = form.Get("Attribute");
+                    attribute = form.Get("Attribute").Trim();
                     if (String.IsNullOrEmpty(attribute) && String.IsNullOrWhiteSpace(attribute))
                     {
                         return Json(new { success = false, message = "Invalid input / empty." }, JsonRequestBehavior.AllowGet);
@@ -244,10 +248,11 @@ namespace PartsIq.Controllers
                 s.InspectionItemID,
                 s.Attribute,
                 s.SampleNumber,
-                CavityName = s.Cavity.Name,  // Accessing the related Cavity's Name
-                s.Measurement,
-                s.OrigMeasurement,
-                Judgement = s.IsGood == true ? "1" :"0",  // Handling possible nulls in IsGood
+                CavityName = s.Cavity != null ? s.Cavity.Name : "N/A",  // Handle null Cavity
+                Measurement = s.Checkpoint != null && s.Checkpoint.IsMeasurement ?
+                   (s.Measurement.HasValue ? (double?)Math.Round(s.Measurement.Value, 3) : null) : s.Measurement,  // Null check before rounding
+                OrigMeasurement = s.Checkpoint.IsMeasurement ? (double)Math.Round(s.OrigMeasurement.Value , 3) : s.OrigMeasurement,
+                Judgement = s.IsGood.HasValue && s.IsGood.Value ? "1" : "0",  // Handle possible null in IsGood
             }).ToList();
 
             // Returning the result as JSON
