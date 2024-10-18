@@ -22,6 +22,12 @@
             background: white;
             z-index: 1;
         }
+
+        .selected-row {
+            background-color: #343131;
+            color: white;
+        }
+
     </style>
 }
 
@@ -118,7 +124,7 @@
                                             <div class="text-line-splitter"></div>
                                         </div>
                                         <div class="d-flex flex-column gap-2">
-                                            <button class="btn btn-primary" disabled>Inspection Result</button>
+                                            <button class="btn btn-primary" id="inspectionBtn">Inspection Result</button>
                                             <button class="btn btn-secondary" disabled>Nonconformity Report</button>
                                         </div>
                                         <div class="d-flex align-items-center my-4 gap-2 position-relative">
@@ -143,40 +149,99 @@
 @section scripts{
     <script src="~/Utility/JS/helpers.js"></script>
     <script>
-
         $(document).ready(function () {
-            var reportTable = $('#report-table').DataTable({
-                ajax: {
-                    url: '@Url.Action("GetReportData", "Reports")',
-                    dataSrc: 'data'
-                },
-                columns: [
-                    { data: "DecisionName" },
-                    { data: "EvaluatorName" },
-                    { data: "InspectorName" },
-                    { data: "ControlNumber" },
-                    {
-                        data: "DateFinished",
-                        type: "Date",
-                        render: function (data, type, row) {
-                            return `${convertDateStringToFormattedString(data)}`;
-                        }
-                    },
-                    { data: "PartCode" },
-                    { data: "PartName" },
-                    { data: "LotNumber" },
-                    { data: "LotQuantity" },
-                    { data: "DRNumber" },
-                    { data: "TimeString" },
-                    { data: "Comments" },
-                    { data: "InspectorComments" },
-                    { data: "NCRNumber"}
-                ],
-                rowID: "DeliveryDetailID",
-                lengthChange: false,
+    var reportTable = $('#report-table').DataTable({
+        ajax: {
+            url: '@Url.Action("GetReportData", "Reports")',
+            dataSrc: 'data'
+        },
+        columns: [
+            { data: "DecisionName" },
+            { data: "EvaluatorName" },
+            { data: "InspectorName" },
+            { data: "ControlNumber" },
+            {
+                data: "DateFinished",
+                type: "Date",
+                render: function (data, type, row) {
+                    return `${convertDateStringToFormattedString(data)}`;
+                }
+            },
+            { data: "PartCode" },
+            { data: "PartName" },
+            { data: "LotNumber" },
+            { data: "LotQuantity" },
+            { data: "DRNumber" },
+            { data: "TimeString" },
+            { data: "Comments" },
+            { data: "InspectorComments" },
+            { data: "NCRNumber" }
+        ],
+        rowID: "DeliveryDetailID",
+        lengthChange: false,
+    });
 
+    // Button click event handler
+    $('#inspectionBtn').on('click', function (e) {
+        // Check if the clicked element has the dataset.index
+        let id = $(this).attr('data-id');
+        $.ajax({
+            url: '@Url.Action("CreateInspectionResult", "Reports")',
+            method: "GET",
+            data: { DeliveryDetailID: id },
+            xhrFields: {
+                responseType: 'blob' // Set the response type to blob
+            },
+            success: function (response, status, xhr) {
+                if (status != 'success') {
+                    alertify.error("Error encountered");
+                    loadingBtn.replaceWith(btn);
+                }
+                else {
+                    alertify.success("File downloaded");
+                  
+                    // Create a Blob object
+                    const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    // Create a Blob URL
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    // Create a temporary link element
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    // Set the href and download attributes
+                    a.href = blobUrl;
+                    a.download = `${id}.xlsx`; // Set the filename here
+                    // Trigger a click event on the link to start the download
+                    a.click();
+                    // Clean up by revoking the Blob URL
+                    window.URL.revokeObjectURL(blobUrl);
+                }
 
-            });
+            }, error: function (e) {
+                alertify.error(`Error ${e} occured.`);
+            }
         });
+    });
+
+    // FUNCTIONALITY: Table row selection
+    reportTable.on('click', 'tbody tr', function (e) {
+        var data = reportTable.row(this).data();
+        let classList = e.currentTarget.classList;
+        const rowIndex = reportTable.row(this).index();
+
+        // Toggle selected row
+        if (classList.contains('selected-row')) {
+            classList.remove('selected-row');
+        } else if (!classList.contains('child')) {
+            reportTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));
+            classList.add('selected-row');
+        }
+
+        // Dynamically set data-index on the buttons based on the selected row
+        $('#inspectionBtn').attr('data-id', data.DeliveryDetailID);
+    });
+});
+
+
     </script>
 }
