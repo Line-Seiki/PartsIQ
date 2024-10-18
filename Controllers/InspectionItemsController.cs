@@ -252,7 +252,7 @@ namespace PartsIq.Controllers
                 Measurement = s.Checkpoint != null && s.Checkpoint.IsMeasurement ?
                    (s.Measurement.HasValue ? (double?)Math.Round(s.Measurement.Value, 3) : null) : s.Measurement,  // Null check before rounding
                 OrigMeasurement = s.Checkpoint.IsMeasurement ? (double)Math.Round(s.OrigMeasurement.Value , 3) : s.OrigMeasurement,
-                Judgement = s.IsGood.HasValue && s.IsGood.Value ? "1" : "0",  // Handle possible null in IsGood
+                Judgement = s.IsGood,  // Handle possible null in IsGood
             }).ToList();
 
             // Returning the result as JSON
