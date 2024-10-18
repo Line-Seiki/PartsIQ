@@ -775,7 +775,10 @@ namespace PartsIq.Models
                 DecisionID = d.DecisionID.HasValue ? d.DecisionID.Value : d.DecisionID,
                 DecisionName = d.DecisionID.HasValue ? d.Decision.Name : "",
                 EvaluatorID = d.Inspection.EvaluatorID.HasValue ? d.Inspection.EvaluatorID.Value : d.Inspection.EvaluatorID,
-                EvaluatorName = d.Inspection.EvaluatorID.HasValue ? d.Inspection.User1.FirstName +" "+ d.Inspection.User1.LastName : "", // User1 is for getting user data for Evaluator
+                EvaluatorName = d.Inspection.EvaluatorID.HasValue ? d.Inspection.User.FirstName +" "+ d.Inspection.User.LastName : "", // User1 is for getting user data for Evaluator
+                InspectorName = d.Inspection.UserID.HasValue
+                        ? d.Inspection.User.FirstName + " " + d.Inspection.User.LastName
+                        : "No Inspector",
                 InspectionID = d.InspectionID.HasValue ? d.InspectionID.Value : d.InspectionID,
                 UserID = d.UserID.HasValue ? d.UserID.Value : d.UserID,
                 UserName = d.UserID.HasValue ? d.User.FirstName + " " + d.User.LastName  : " ",
@@ -819,7 +822,9 @@ namespace PartsIq.Models
                 ControlNumber = detail.Inspection.ControlNumber,
                 InspectorComments = detail.Inspection.InspectionComments,
                 DateDelivered = detail.Delivery.DateDelivered,
+                DateStarted = detail.Inspection.DateStart,
                 DateFinished = detail.Inspection.DateEnd,
+                PartModel = detail.Delivery.Part.Model,
                 PartID = detail.Delivery.Part.PartID,
                 PartCode = detail.Delivery.Part.Code,
                 PartName = detail.Delivery.Part.Name,
@@ -837,6 +842,8 @@ namespace PartsIq.Models
                 DeliveryVersion = detail.Delivery.VERSION,
                 DeliveryDetailVersion = detail.VERSION,
                 InspectionVersion = detail.Inspection.VERSION,
+                Temperature = detail.Inspection.Temperature,
+                Humidity = detail.Inspection.Humidity,  
             };
         }
 
