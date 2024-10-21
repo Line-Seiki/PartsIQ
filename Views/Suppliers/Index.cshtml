@@ -110,11 +110,10 @@
                     { data: "Name" },
                     {
                         data: "SupplierID", orderable: false, render(data, type, row, meta) {
-                            const rowData = JSON.stringify(row).replace(/['\/]/g, "");
                             return `
                                 <div class="d-flex flex-wrap align-items-center gap-2">
-                                    <button class="btn btn-secondary" onclick="editSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-pencil"></i></button>
-                                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-supplier-modal" onclick="deleteSupplier(${data}, '${encodeURIComponent(rowData)}')"><i class="mdi mdi-trash-can"></i></button>
+                                    <button class="btn btn-secondary" onclick="editSupplier(${data}, '${meta.row}')"><i class="mdi mdi-pencil"></i></button>
+                                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-supplier-modal" onclick="deleteSupplier(${data}, '${meta.row}')"><i class="mdi mdi-trash-can"></i></button>
                                 </div>
                                 `;
                         }
@@ -195,10 +194,10 @@
             let hasError = { status: false, message: "" };
             formData.forEach((value, key) => {
                 if (typeof value === "string") {
-                    value = value.replace(/['"\/']/g, '').trim();
+                    value = value.trim();
                     if (value === '') {
                         hasError.status = true;
-                        hasError.message = "Avoid the use of ', \", \/, and white spaces"
+                        hasError.message = "Avoid the use of white spaces"
                     }
                     data.append(key, value);
                 }
@@ -207,13 +206,13 @@
             return { hasError, data };
         }
 
-        function editSupplier(id, row) {
-            supplierObj = JSON.parse(decodeURIComponent(row));
+        function editSupplier(id, rowIndex) {
+            let supplierObj = supplierDataTable.row(rowIndex).data();
             console.log(id, supplierObj);
             const supplierForm = document.getElementById('SupplierForm');
             document.getElementById('formBtn').innerText = "Edit Supplier"
-            document.getElementById('Name').value = supplierObj.Name.replace(/['"\/']/g, '');
-            document.getElementById('InCharge').value = supplierObj.InCharge.replace(/['"\/']/g, '');
+            document.getElementById('Name').value = supplierObj.Name;
+            document.getElementById('InCharge').value = supplierObj.InCharge;
             supplierForm.dataset.type = "edit";
             supplierForm.dataset.id = id;
             supplierForm.dataset.version = supplierObj.Version;
@@ -239,8 +238,8 @@
             document.getElementById("cancelBtn").remove();
         }
 
-        function deleteSupplier(id, row) {
-            supplierObj = JSON.parse(decodeURIComponent(row));
+        function deleteSupplier(id, rowIndex) {
+            let supplierObj = supplierDataTable.row(rowIndex).data();
             document.getElementById('supplier-modal-name').innerText = supplierObj.Name;
             document.getElementById('confirmDeleteBtn').dataset.id = id
             console.log(id)
