@@ -229,13 +229,16 @@
         // Toggle selected row
         if (classList.contains('selected-row')) {
             classList.remove('selected-row');
+            $('#inspectionBtn').removeAttr('data-id');
+
         } else if (!classList.contains('child')) {
             reportTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));
             classList.add('selected-row');
+            $('#inspectionBtn').attr('data-id', data.DeliveryDetailID);
         }
 
         // Dynamically set data-index on the buttons based on the selected row
-        $('#inspectionBtn').attr('data-id', data.DeliveryDetailID);
+        
     });
 });
 

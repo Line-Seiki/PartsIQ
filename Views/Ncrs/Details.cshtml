@@ -1,0 +1,133 @@
+﻿@model PartsIq.Models.NcrDetails
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="page-content">
+    <div class="row" id="mainContent">
+        <div class="page-content">
+            <!-- Title -->
+            <div class="page-title-box">
+                <div class="container-fluid">
+                    <div class="page-title dflex-between-center">
+                        <h3 class="mb-1 fw-bold">Evaluation</h3>
+                        <ol class="breadcrumb mb-0 mt-1">
+                            <li class="breadcrumb-item">
+                                <a href="~/">
+                                    <i class="bx bx-home fs-xs"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="~/Evaluation">
+                                    Evaluation
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@Model.LotQuantity</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="page-content-wrapper mt--45">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="card" id="general-info-container">
+                            <div class="card-header d-flex justify-content-between">
+                                <h4>General Information</h4>
+                                <button id="hide-info" class="btn btn-secondary"><i class="mdi mdi-minus-circle-outline"></i> Hide Info</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Supplier</b>:</p>
+                                            <p>@Model.Supplier</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Person In-Charge</b>:</p>
+                                            <p>@Model.PersonInCharge</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Number</b>:</p>
+                                            <p>@Model.LotNumber</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Lot Quantity</b>:</p>
+                                            <p>@Model.LotQuantity</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-md-12">
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Code</b>:</p>
+                                            <p>@Model.PartCode</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>Part Name</b>:</p>
+                                            <p>@Model.PartName</p>
+                                        </div>
+                                        <div class="d-flex gap-3">
+                                            <p><b>DR Number</b>:</p>
+                                            <p>@Model.DrNumber</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <h6>Quality of NG Samples: 5</h6>
+                                    <h6>Total Number of Samples: 10</h6>
+                                    <h6>% Reject: 50%</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <table class="table" id="nonConformity">
+                                    <thead>
+                                        <tr>
+                                            <th> Test Item</th>
+                                            <th> Specification </th>
+                                            <th> Actual Dimension </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                @*<div class="text-center">
+                                        <h6>Quality of NG Samples: 5</h6>
+                                        <h6>Total Number of Samples: 10</h6>
+                                        <h6>% Reject: 50%</h6>
+                                    </div>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        $(document).ready(function () {
+
+          var ncrTable = $('#nonConformity').DataTable({
+        ajax: {
+            url: '@Url.Action("GetNonConformity", "Ncrs")',
+            data: { inspectionID: 1041 }, // Adjust the inspectionID dynamically if needed
+                  dataSrc: 'data.Inspections' // Get data from Inspections part of the response
+        },
+        columns: [
+            { data: 'TestItem' },  // Example columns from InspectionItem
+            { data: 'Specification'},  // Example columns from InspectionItem
+            { data: 'Measurement'},     // Example from InspectionItem
+            // Add more columns based on your InspectionItem and Checkpoint model properties
+              ],
+        rowId: "InspectionItemID"
+    });
+
+        });
+    </script>
+    
+    }

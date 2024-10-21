@@ -292,6 +292,20 @@ namespace PartsIq.Models
 
     #endregion
 
-    
+    #region NCR
+    public class NcrDetails : Ncr
+    {
+        public string LotNumber { get; set; }
+        public int LotQuantity { get; set; }
+        public string Supplier { get; set; }
+        public string PersonInCharge { get; set; }
+        public string PartCode  { get; set; }
+        public string PartName { get; set; }    
+        public string DrNumber  { get; set; }
+
+    }
+    #endregion
+
+
 
 }
