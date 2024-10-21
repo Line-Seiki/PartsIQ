@@ -33,7 +33,7 @@
 }
 
 <div class="backhome">
-    <a href="/Login/Signup" class="avatar avatar-sm bg-primary text-white"><i class="bx bx-home-alt fs-sm"></i></a>
+    <a href="/Login/Signup" class="avatar avatar-sm bg-primary text-white"><i class="mdi mdi-account-plus fs-sm"></i></a>
 </div>
 
 <div class="auth-pages">
@@ -105,6 +105,7 @@
                     contentType: 'application/json',
                     data: JSON.stringify(data),
                     success: function (res) {
+                        console.log(res);
                         if (res.success) {
                             window.location.href = res.redirectUrl
                         } else {
