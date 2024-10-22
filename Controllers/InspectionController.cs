@@ -103,8 +103,8 @@ namespace PartsIq.Controllers
                     InspectionPart = checkpoints.Select(c => c.InspectionPart).FirstOrDefault(),
                     Tools = checkpoints.Select(c => c.Tools).FirstOrDefault(),
                     SamplingMethod = checkpoints.Select(c => c.SamplingMethod).FirstOrDefault(),
-                    Notes = "Test", // Placeholder for notes, modify as needed
-                    Specification = "12", // Placeholder for specification, modify as needed
+                    Notes = checkpoints.Select(c => c.Note).FirstOrDefault() ?? " ", // Placeholder for notes, modify as needed
+                    Specification = checkpoints.Select(c => c.Specification).FirstOrDefault() ?? " ", // Placeholder for specification, modify as needed
                     UpperLimit = checkpoints.Select(c => c.LimitUpper).FirstOrDefault() ?? 0,
                     LowerLimit = checkpoints.Select(c => c.LimitLower).FirstOrDefault() ?? 0,
                     IsMeasurement = checkpoints.Select(c => c.IsMeasurement).FirstOrDefault()
