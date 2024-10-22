@@ -1,4 +1,8 @@
-﻿@section styles{
+﻿@{
+    ViewBag.Title = "Inspection";
+}
+
+@section styles{
     <style>
         .badge-block {
             display: block;
@@ -94,6 +98,16 @@
                                     <div class="mb-4 d-flex justify-content-between align-items-center">
                                         <div class="d-flex flex-column">
                                             <h5>Available</h5>
+                                            <div class="float-left d-flex flex-wrap justify-content-start gap-3">
+                                                <div><b>Legend: </b></div>
+                                                <div class="d-flex justify-content-start gap-1"><span class="badge-block low-priority"></span><p>Low Priority</p></div>
+                                                <div class="d-flex justify-content-start gap-1"><span class="badge-block normal-priority"></span><p>Normal Priority</p></div>
+                                                <div class="d-flex justify-content-start gap-1"><span class="badge-block high-priority"></span><p>High Priority</p></div>
+                                                <div class="d-flex justify-content-start gap-1"><span class="badge-block priority-started"></span><p>Started</p></div>
+                                                <div class="d-flex justify-content-start gap-1"><span class="badge-block priority-paused"></span><p>Paused</p></div>
+                                                <div class="d-flex justify-content-start gap-1"><span class="badge-block priority-reserved"></span><p>Reserved</p></div>
+
+                                            </div>
                                         </div>
                                         <div class="d-flex flex-wrap justify-content-end align-items-center gap-2">
                                             <button id="editBtn" class="btn btn-secondary" data-index="" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-pencil"></i></button>
@@ -182,7 +196,7 @@
                                                     <th>Priority</th>
                                                     <th>DR Number</th>
                                                     <th>Lot Number</th>
-                                                    <th>Pard Code</th>
+                                                    <th>Part Code</th>
                                                     <th>Part Name</th>
                                                     <th>Lot Quantity</th>
                                                     <th>Sample Size</th>
@@ -225,7 +239,7 @@
                         You are about to start inspection on <strong id="inspection-dr"></strong>. Add a Lot Number and Quantity.
                     </p>
                     <button type="button" class="btn btn-danger my-2" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="addLotBtn" data-index="" class="btn btn-info my-2" data-bs-dismiss="modal">Continue</button>
+                    <button type="button" id="addLotBtn" data-index="" data-table="" class="btn btn-info my-2" data-bs-dismiss="modal">Continue</button>
                 </div>
             </div>
         </div><!-- /.modal-content -->
@@ -402,7 +416,6 @@
                     },
                 ],
                 createdRow: function (row, data, dataIndex) {
-                    console.log(data);
                     $(row).addClass(getColorAccordingToPriorityLevel(data.PriorityLevel, data.IsUrgent, data.StatusID));
                 }
             })
@@ -418,7 +431,7 @@
                     memberBtn.dataset.index = '';
                     playpauseBtn.dataset.index = '';
                 } else if (classList.contains('child')) {
-                    
+
                 }
                 else {
                     availableTable.rows('.selected-row').nodes().each((row) => row.classList.remove('selected-row'));
@@ -433,13 +446,7 @@
             refreshBtn.addEventListener('click', refreshTables);
 
             // Start Inspection
-            inspectionBtn.addEventListener('click', startInspection);
-
-            // Start Dev Inspection
-            //devInspect.addEventListener('click', devInspection);
-
-            // Dev Assign (ASSIGN TO USER(FIXED))
-            //devAssign.addEventListener('click', devAssignDelivery);
+            inspectionBtn.addEventListener('click', async () => { startInspection() });
 
             // EVENT: Edit Currently Selected Row
             editBtn.addEventListener('click', function (e) {
@@ -447,6 +454,7 @@
                     alertNoRowClicked();
                 } else {
                     const rowIndex = e.target.closest('#editBtn').dataset.index;
+                    console.log(rowIndex);
                     editDelivery(rowIndex);
                 }
             });
@@ -478,7 +486,8 @@
                 } else {
                     console.log(e.target.closest('#addLotBtn').dataset.index);
                     const rowIndex = e.target.closest('#addLotBtn').dataset.index;
-                    editDelivery(rowIndex);
+                    const rowTable = e.target.closest('#addLotBtn').dataset.table;
+                    promptEditDelivery(rowIndex, rowTable);
                     window.scroll({
                         top: 0,
                         left: 0,
@@ -566,89 +575,78 @@
         }
 
         // FUNCTIONALITY: Start Inspection
-        function startInspection() {
-            const hasPendingData = availableTable.data().toArray().length > 0;
-            if (hasPendingData) {
-                const dataPending = pendingTable.data().toArray();
-                const selectedData = dataPending.find(item => item.StatusID !== 4)
-                const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
-                if (!selectedData) {
-                    const dataAvailable = availableTable.data().toArray();
-                    const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                    if (selectedData.InspectionID !== null) {
-                        console.log('get scheduled item and execute');
-                        $.ajax({
-                            url: '/Inspection/AssignInspector',
-                            type: 'POST',
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                                window.location.href = url;
-                                refreshTables();
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            }
-                        });
-                    } else {
-                        console.log('open inspection modal');
-                        console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
-                        $.ajax({
-                            url: '/Inspection/AssignInspector',
-                            type: 'POST',
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                refreshTables();
-                                // TODO: Make retrieving data async
-                                setTimeout(() => {
-                                    const dataPending = pendingTable.data().toArray();
-                                    const newData = dataPending.find(item => item.StatusID !== 4);
-                                    console.log('new: ', dataPending);
-                                    console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
-                                    inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
-                                    inspectionForm.dataset.detail = newData.DeliveryDetailID;
-                                    inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
-                                    inspectionModal.show();
-                                }, 100);
+        async function startInspection() {
+            refreshTables();
+            console.log("start inspection");
+            let selectedData;
+            let selectedDataIndex;
+            const initialPendingData = pendingTable.data().toArray();
+            const initialPendingItem = initialPendingData.find(item => item.StatusID !== 4);
+            const hasPendingInspection = (initialPendingData.length > 0) && initialPendingItem != null;
+            const hasAvailableInspection = availableTable.data().toArray().length > 0;
 
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
+            if (!hasPendingInspection) {
+                if (hasAvailableInspection) {
+                    const dataAvailable = availableTable.data().toArray();
+                    selectedData = dataAvailable.find(item => item.StatusID === 1);
+                    if (selectedData) {
+                        await assignDelivery(selectedData);
+                        // Inserted Delay for conditionals to run
+                        await setTimeout(() => {
+                            const dataPending = pendingTable.data().toArray();
+                            selectedData = dataPending.find(item => item.StatusID !== 4);
+                            if (selectedData) {
+                                selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
+                                if (!selectedData.LotNumber || selectedData.LotNumber === "") {
+                                    console.log("addLot Modal");
+                                    addLotBtn.dataset.index = selectedDataIndex;
+                                    drNumber.innerText = selectedData.DRNumber;
+                                    lotModal.show();
+                                } else if (selectedData.InspectionID != null) {
+                                    const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                                    window.location.href = url;
+                                }
+                                else {
+                                    console.log("inspection form");
+                                    inspectionForm.dataset.user = selectedData.UserID;
+                                    inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
+                                    inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
+                                    inspectionModal.show();
+
+                                }
                             }
-                        });
+                        }, 100)
                     }
-                    console.log(selectedData);
                 } else {
-                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
-                        console.log('modal here');
+                    alertify.error('no available items to inspect')
+                }
+                // IF THERE ARE PENDING RESERVED ITEMS
+            } else {
+                const dataPending = pendingTable.data().toArray();
+                selectedData = dataPending.find(item => item.StatusID !== 4);
+                // IF THERE IS AN ITEM NOT PAUSED IN THE PENDING TABLE
+                if (selectedData) {
+                    selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
+                    if (!selectedData.LotNumber || selectedData.LotNumber === "") {
+                        console.log("addLot Modal");
                         addLotBtn.dataset.index = selectedDataIndex;
                         drNumber.innerText = selectedData.DRNumber;
                         lotModal.show();
-                    } else if (selectedData.InspectionID !== null) {
+                    } else if (selectedData.InspectionID != null) {
                         const url = `/Inspection/Details/${selectedData.InspectionID}`;
                         window.location.href = url;
-                    } else {
-                        console.log(selectedData, selectedDataIndex);
+                    }
+                    else {
+                        console.log("inspection form");
                         inspectionForm.dataset.user = selectedData.UserID;
                         inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
                         inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
                         inspectionModal.show();
+
                     }
+                } else {
+                    alertify.error('error locating inspection')
                 }
-            } else {
-                const dataAvailable = availableTable.data().toArray();
-                const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                console.log(selectedData);
             }
         }
 
@@ -699,126 +697,13 @@
                         alertify.error(`${err}`);
                     }
                 });
-            } 
-        }
-
-        // DEV-FUNCTIONALITY: Start Inspection
-        function devInspection() {
-            const hasPendingData = availableTable.data().toArray().length > 0;
-            if (hasPendingData) {
-                const dataPending = pendingTable.data().toArray();
-                const selectedData = dataPending.find(item => item.StatusID !== 4)
-                const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
-                if (!selectedData) {
-                    const dataAvailable = availableTable.data().toArray();
-                    const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                    if (selectedData.InspectionID !== null) {
-                        console.log('get scheduled item and execute');
-                        $.ajax({
-                            url: '/Inspection/DevAssignInspector',
-                            type: 'POST',
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                                window.location.href = url;
-                                refreshTables();
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            }
-                        });
-                    } else {
-                        console.log('open inspection modal');
-                        console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
-                        $.ajax({
-                            url: '/Inspection/DevAssignInspector',
-                            type: 'POST',
-                            data: {
-                                delDetailID: selectedData.DeliveryDetailID,
-                                delDetailVersion: selectedData.DeliveryDetailVersion,
-                            },
-                            success(res) {
-                                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                                else alertify.error(`${res.Status}: ${res.Message}`);
-                                refreshTables();
-                                // TODO: Make retrieving data async
-                                setTimeout(() => {
-                                    const dataPending = pendingTable.data().toArray();
-                                    const newData = dataPending.find(item => item.StatusID !== 4);
-                                    console.log('new: ', dataPending);
-                                    console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
-                                    inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
-                                    inspectionForm.dataset.detail = newData.DeliveryDetailID;
-                                    inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
-                                    inspectionModal.show();
-                                }, 100);
-
-                            },
-                            error(err) {
-                                alertify.error(`${err}`);
-                            }
-                        });
-                    }
-                    console.log(selectedData);
-                } else {
-                    if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
-                        console.log('modal here');
-                        addLotBtn.dataset.index = selectedDataIndex;
-                        drNumber.innerText = selectedData.DRNumber;
-                        lotModal.show();
-                    } else if (selectedData.InspectionID !== null) {
-                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
-                        window.location.href = url;
-                    } else {
-                        console.log(selectedData, selectedDataIndex);
-                        inspectionForm.dataset.user = selectedData.UserID;
-                        inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
-                        inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
-                        inspectionModal.show();
-                    }
-                }
-            } else {
-                const dataAvailable = availableTable.data().toArray();
-                const selectedData = dataAvailable.find(item => item.StatusID === 1)
-                console.log(selectedData);
-            }
-        }
-
-        // DEV-FUNCTIONALITY: Assign to Delivery
-        function devAssignDelivery() {
-            console.log('assigned');
-            const dataAvailable = availableTable.data().toArray();
-            const selectedData = dataAvailable.find(item => !item.UserName);
-            if (!selectedData) {
-                alertify.error('DEV Error - No Deliveries Without Inspector');
-            } else {
-                $.ajax({
-                    url: '/Inspection/DevAssignInspector',
-                    type: 'POST',
-                    data: {
-                        delDetailID: selectedData.DeliveryDetailID,
-                        delDetailVersion: selectedData.DeliveryDetailVersion,
-                    },
-                    success(res) {
-                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
-                        else alertify.error(`${res.Status}: ${res.Message}`);
-                        refreshTables();
-                    },
-                    error(err) {
-                        alertify.error(`${err}`);
-                    }
-                });
             }
         }
 
         // FUNCTIONALITY for Editing Deliveries
         function editDelivery(rowIndex) {
-            const rowData = availableTable.row(rowIndex).data();
+            let rowData = availableTable.row(rowIndex).data();
+
             console.log(rowData);
 
             document.getElementById('left-column').classList.remove('col-lg-12');
@@ -828,8 +713,46 @@
             const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
         }
 
+        function promptEditDelivery(rowIndex) {
+            let rowData = pendingTable.row(rowIndex).data();
 
-        // HELPER 
+            document.getElementById('left-column').classList.remove('col-lg-12');
+            document.getElementById('left-column').classList.add('col-md-12', 'col-lg-6');
+            document.getElementById('right-column').classList.remove('d-none');
+
+            const editDeliveryTab = new DynamicTabs('tab-list', 'tab-content', 'edit', rowData, availableTable, pendingTable);
+        }
+
+        // FUNCTIONALITY: Assigning inspector
+        async function assignDelivery(selectedData) {
+            try {
+                const response = await $.ajax({
+                    url: "/Inspection/AssignInspector",
+                    type: "POST",
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                });
+
+                // Handling the response after successful AJAX call
+                if (response.Success) {
+                    alertify.success(`${response.Status}: ${response.Message}`);
+                } else {
+                    alertify.error(`${response.Status}: ${response.Message}`);
+                }
+
+                // Refresh the tables
+                refreshTables();
+
+            } catch (error) {
+                // Handle any errors that occur during the AJAX request
+                alertify.error(`Error: ${error.statusText || error}`);
+            }
+        }
+
+
+        // HELPER
         function formDataValidator(formData) {
             const data = new FormData();
             let hasError = { status: false, message: "" };
@@ -850,6 +773,130 @@
         function alertNoRowClicked() {
             alertify.message('Please click on an item before clicking the button');
         }
+
+        @*
+            // DEV FUNCTIONS
+            // Start Dev Inspection
+//devInspect.addEventListener('click', devInspection);
+
+// Dev Assign (ASSIGN TO USER(FIXED))
+//devAssign.addEventListener('click', devAssignDelivery);
+
+            // DEV-FUNCTIONALITY: Assign to Delivery
+function devAssignDelivery() {
+    console.log('assigned');
+    const dataAvailable = availableTable.data().toArray();
+    const selectedData = dataAvailable.find(item => !item.UserName);
+    if (!selectedData) {
+        alertify.error('DEV Error - No Deliveries Without Inspector');
+    } else {
+        $.ajax({
+            url: '/Inspection/DevAssignInspector',
+            type: 'POST',
+            data: {
+                delDetailID: selectedData.DeliveryDetailID,
+                delDetailVersion: selectedData.DeliveryDetailVersion,
+            },
+            success(res) {
+                if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                else alertify.error(`${res.Status}: ${res.Message}`);
+                refreshTables();
+            },
+            error(err) {
+                alertify.error(`${err}`);
+            }
+        });
+    }
+}
+
+            // DEV-FUNCTIONALITY: Start Inspection
+function devInspection() {
+    const hasPendingData = availableTable.data().toArray().length > 0;
+    if (hasPendingData) {
+        const dataPending = pendingTable.data().toArray();
+        const selectedData = dataPending.find(item => item.StatusID !== 4)
+        const selectedDataIndex = dataPending.findIndex(item => item.StatusID !== 4);
+        if (!selectedData) {
+            const dataAvailable = availableTable.data().toArray();
+            const selectedData = dataAvailable.find(item => item.StatusID === 1)
+            if (selectedData.InspectionID !== null) {
+                console.log('get scheduled item and execute');
+                $.ajax({
+                    url: '/Inspection/DevAssignInspector',
+                    type: 'POST',
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                        window.location.href = url;
+                        refreshTables();
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            } else {
+                console.log('open inspection modal');
+                console.log('deldetVer 1: ', selectedData.DeliveryDetailVersion);
+                $.ajax({
+                    url: '/Inspection/DevAssignInspector',
+                    type: 'POST',
+                    data: {
+                        delDetailID: selectedData.DeliveryDetailID,
+                        delDetailVersion: selectedData.DeliveryDetailVersion,
+                    },
+                    success(res) {
+                        if (res.Success) alertify.success(`${res.Status}: ${res.Message}`);
+                        else alertify.error(`${res.Status}: ${res.Message}`);
+                        refreshTables();
+                        // TODO: Make retrieving data async
+                        setTimeout(() => {
+                            const dataPending = pendingTable.data().toArray();
+                            const newData = dataPending.find(item => item.StatusID !== 4);
+                            console.log('new: ', dataPending);
+                            console.log('deldetVer 2: ', newData.DeliveryDetailVersion);
+                            inspectionForm.dataset.user = newData.UserID == 0 ? 4 : newData.UserID;
+                            inspectionForm.dataset.detail = newData.DeliveryDetailID;
+                            inspectionForm.dataset.detailversion = newData.DeliveryDetailVersion;
+                            inspectionModal.show();
+                        }, 100);
+
+                    },
+                    error(err) {
+                        alertify.error(`${err}`);
+                    }
+                });
+            }
+            console.log(selectedData);
+        } else {
+            if (!selectedData.LotNumber || selectedData.LotNumber === " " || selectedData.LotNumber === "") {
+                console.log('modal here');
+                addLotBtn.dataset.index = selectedDataIndex;
+                drNumber.innerText = selectedData.DRNumber;
+                lotModal.show();
+            } else if (selectedData.InspectionID !== null) {
+                const url = `/Inspection/Details/${selectedData.InspectionID}`;
+                window.location.href = url;
+            } else {
+                console.log(selectedData, selectedDataIndex);
+                inspectionForm.dataset.user = selectedData.UserID;
+                inspectionForm.dataset.detail = selectedData.DeliveryDetailID;
+                inspectionForm.dataset.detailversion = selectedData.DeliveryDetailVersion;
+                inspectionModal.show();
+            }
+        }
+    } else {
+        const dataAvailable = availableTable.data().toArray();
+        const selectedData = dataAvailable.find(item => item.StatusID === 1)
+        console.log(selectedData);
+    }
+}
+
+        *@
     </script>
 }
 

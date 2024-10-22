@@ -1,5 +1,9 @@
 ﻿@model PartsIq.Models.InspectionViewModel
 
+@{
+    ViewBag.Title = $"Inspection {Model.DeliveryDetail.LotNumber}";
+}
+
 @section styles{
     <style>
         .divider {
@@ -374,7 +378,7 @@
                     attribute = measurement;
                     origMeasurement = null;
                 }
-              
+
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
@@ -566,7 +570,7 @@
 
                 toggleEditItems(true);
             }
-           
+
     } else {
         let ajaxReload = false;
         // Switch to save mode

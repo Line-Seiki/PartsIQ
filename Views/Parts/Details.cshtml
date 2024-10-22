@@ -1,7 +1,7 @@
 ﻿@model PartsIq.Models.Part
 
 @{
-    ViewBag.Title = "Details";
+    ViewBag.Title = $"Part - {Model.Name}";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var Status = Model.IsActive ? "Inactive" : "Active";
@@ -321,12 +321,12 @@
             pageLength: 10,
             columns: [
                 { data: 'Code' },
-                { data: 'InspectionPart', orderable: !1, },
+                { data: 'InspectionPart'},
                 { data: 'VariableType' },
-                { data: 'Specification', orderable: !1, },
+                { data: 'Specification'},
                 { data: 'LimitUpper' },
                 { data: 'LimitLower' },
-                { data: 'SamplingMethod', orderable: !1, },
+                { data: 'SamplingMethod'},
                 {
                     data: 'Tools',
                     orderable: !1,

@@ -37,7 +37,7 @@ function convertDateStringToFormattedString(date) {
 }
 
 function convertIntToTimeFormat(intTime) {
-    let ms = Math.floor(intTime / 1000);
+    let ms = Math.floor(intTime);
     const days = String(Math.floor(ms / (24 * 3600)));
     ms %= (24 * 3600);
     const hours = String(Math.floor(ms / 3600));
@@ -45,5 +45,5 @@ function convertIntToTimeFormat(intTime) {
     const minutes = String(Math.floor(ms / 60));
     const seconds = String(ms % 60);
 
-    return `${days.padStart(2, '0')}:${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`;
+    return `${hours.padStart(2, '0')}h ${minutes.padStart(2, '0')}m ${seconds.padStart(2, '0')}s`;
 }

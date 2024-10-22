@@ -16,7 +16,7 @@
     <!-- page content -->
     <div class="page-content-wrapper mt--45">
         <div class="container-fluid">
-            <div>@ViewBag.UserData.Email</div>
+            <div>@(ViewBag.UserData == null ? "" : ViewBag.UserData.Email)</div>
             <!-- Widget  -->
             <div class="row">
                 <div class="col-md-6 col-xl-3">
