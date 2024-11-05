@@ -41,6 +41,9 @@
                                                 <tr>
                                                     <th>In Charge</th>
                                                     <th>Supplier</th>
+                                                    <th>Contact No.</th>
+                                                    <th>Address</th>
+                                                    <th>Email</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -62,6 +65,18 @@
                                         <div class="mb-3">
                                             <label for="Name" class="form-label">Supplier</label>
                                             <input type="text" class="form-control" id="Name" name="Name" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="ContactNumber" class="form-label">Contact no.</label>
+                                            <input type="tel" class="form-control" id="ContactNumber" name="ContactNumber" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Address" class="form-label">Address</label>
+                                            <input type="text" class="form-control" id="Address" name="Address" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="Email" name="Email" />
                                         </div>
                                         <div id="supplierBtns" class="d-flex justify-content-end gap-2 mt-4">
                                             <button type="reset" class="btn btn-secondary">Reset</button>
@@ -105,9 +120,25 @@
                     url: '/Suppliers/GetAll',
                     dataSrc: 'data'
                 },
+                responsive: true,
                 columns: [
                     { data: "InCharge" },
                     { data: "Name" },
+                    {
+                        data: "ContactNumber", render(data, type, row, meta) {
+                            return data ? data : "";
+                        }
+                    },
+                    {
+                        data: "Address", render(data, type, row, meta) {
+                            return data ? data : "";
+                        }
+                    },
+                    {
+                        data: "Email", render(data, type, row, meta) {
+                            return data ? data : "";
+                        }
+                    },
                     {
                         data: "SupplierID", orderable: false, render(data, type, row, meta) {
                             return `
@@ -193,13 +224,17 @@
             const data = new FormData();
             let hasError = { status: false, message: "" };
             formData.forEach((value, key) => {
-                if (typeof value === "string") {
-                    value = value.trim();
-                    if (value === '') {
-                        hasError.status = true;
-                        hasError.message = "Avoid the use of white spaces"
+                if (key === "ContactNumber" || key === "Address" || key === "Email") {
+                    data.append(key, value ? value : " ");
+                } else {
+                    if (typeof value === "string") {
+                        value = value.trim();
+                        if (value === '') {
+                            hasError.status = true;
+                            hasError.message = "Avoid the use of white spaces"
+                        }
+                        data.append(key, value);
                     }
-                    data.append(key, value);
                 }
             });
 
@@ -213,6 +248,9 @@
             document.getElementById('formBtn').innerText = "Edit Supplier"
             document.getElementById('Name').value = supplierObj.Name;
             document.getElementById('InCharge').value = supplierObj.InCharge;
+            document.getElementById('ContactNumber').value = supplierObj.ContactNumber;
+            document.getElementById('Address').value = supplierObj.Address;
+            document.getElementById('Email').value = supplierObj.Email;
             supplierForm.dataset.type = "edit";
             supplierForm.dataset.id = id;
             supplierForm.dataset.version = supplierObj.Version;

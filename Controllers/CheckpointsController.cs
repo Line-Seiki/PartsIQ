@@ -169,6 +169,8 @@ namespace PartsIq.Controllers
                 c.SamplingMethod,
                 c.Tools,
                 c.IsActive,
+                c.LevelNumber,
+                c.LevelText,
                 Status = c.IsActive ? "Active" : "Inactive",
             }).ToList();
 
@@ -422,6 +424,8 @@ namespace PartsIq.Controllers
                     SamplingMethod = data.MethodSampling,
                     Specification = Specification,
                     Tools = data.Tool,
+                    LevelText = data.Level,
+                    LevelNumber = data.LevelNum,
                 };
                 db.Checkpoints.Add(checkpoint);
                 db.SaveChanges();
