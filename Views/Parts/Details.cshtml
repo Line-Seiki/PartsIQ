@@ -104,6 +104,7 @@
                                                                 <th>Sampling Method</th>
                                                                 <th>Tool</th>
                                                                 <th>Status</th>
+                                                                <th>Level</th>
                                                                 <th>Action</th>
                                                             </tr>
                                                         </thead>
@@ -332,6 +333,11 @@
                     orderable: !1,
                 },
                 { data: 'Status' },
+                {
+                    data: 'LevelText', render: function (data, type, row) {
+                        return data ? `${data} | ${row.LevelNumber.toFixed(1)}` : ""
+                    }
+                },
                 {
                     data: "CheckpointId",
                     orderable: false,

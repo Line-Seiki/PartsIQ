@@ -80,6 +80,9 @@ namespace PartsIq.Models
         public int SupplierID { get; set; }
         public string InCharge { get; set; }
         public string Name { get; set; }
+        public string ContactNumber { get; set; }
+        public string Address { get; set; }
+        public string Email { get; set; }
         public int Version { get; set; }
     }
     #endregion

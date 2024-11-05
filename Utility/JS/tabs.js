@@ -296,14 +296,14 @@ class DynamicTabs {
 
 
                             <div class="mb-3">
-                                <p class="form-label">Measurement?</p>
+                                <p class="form-label">Type: </p>
                                 <div class="form-check custom-radio">
                                     <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementT" value="true" checked/>
-                                    <label class="form-check-label" for="IsMeasurementT">True</label>
+                                    <label class="form-check-label" for="IsMeasurementT">Measurement</label>
                                 </div>
                                 <div class="form-check custom-radio">
                                     <input class="form-check-input" type="radio" name="IsMeasurement" id="IsMeasurementF" value="false"/>
-                                    <label class="form-check-label" for="IsMeasurementF">False</label>
+                                    <label class="form-check-label" for="IsMeasurementF">Attribute</label>
                                 </div>
                             </div>
 
@@ -625,12 +625,14 @@ class DynamicTabs {
                 data.append(key, value)
             }
 
-            if (typeof value === "string") {
+            if (typeof value === "string" && key !== "Note" && key !== "Level" && key !=="LevelNum") {
                 value = value.trim();
                 if (value === '') {
                     hasError.status = true;
                     hasError.message = "Avoid the use of white spaces ";
                 }
+                data.append(key, value);
+            } else {
                 data.append(key, value);
             }
         });
