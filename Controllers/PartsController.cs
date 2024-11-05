@@ -139,7 +139,7 @@ namespace PartsIq.Controllers
                                              .ToList();
 
                 // Projecting the result
-                var parts = partsWithCheckpoints.Select(s => new
+                var parts = partsWithCheckpoints.Where(s => s.IsActive).Select(s => new
                 {
                     s.PartID,
                     s.Code,
@@ -397,16 +397,14 @@ namespace PartsIq.Controllers
                     return Json(new { success = false, message = "Failed to find Part" });
                 }
 
-                // Archive -- REMOVE COMMENT TO IMPLEMENT ON DATABASE
-                //part.IsActive = false;
-                //part.IsSearchable = false;
-                //part.IsMonitored = false;
-                //db.Entry(part).Property(p => p.IsActive).IsModified = true;
-                //db.Entry(part).Property(p => p.IsSearchable).IsModified = true;
-                //db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
-                //db.SaveChanges();
-                //return Json(new { success = "true", message = "Successfully Archived Part" });
-                return Json(new { success = "true", message = "DEV: Action SUCCESS, transaction not modified in DB" });
+                part.IsActive = false;
+                part.IsSearchable = false;
+                part.IsMonitored = false;
+                db.Entry(part).Property(p => p.IsActive).IsModified = true;
+                db.Entry(part).Property(p => p.IsSearchable).IsModified = true;
+                db.Entry(part).Property(p => p.IsMonitored).IsModified = true;
+                db.SaveChanges();
+                return Json(new { success = "true", message = "Successfully Archived Part" });
 
             }
             catch (Exception ex)

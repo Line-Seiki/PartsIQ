@@ -356,6 +356,9 @@ namespace PartsIq.Models
                 SupplierID = s.SupplierID,
                 InCharge = s.InCharge,
                 Name = s.Name,
+                ContactNumber = s.ContactNumber,
+                Address = s.Address,
+                Email = s.Email,
                 Version = s.VERSION
             }).ToList();
         }
@@ -379,6 +382,21 @@ namespace PartsIq.Models
                 {
                     supplier.Name = formData.Name;
                     db.Entry(supplier).Property(s => s.Name).IsModified = true;
+                }
+                if (supplier.Email != formData.Email)
+                {
+                    supplier.Email = formData.Email;
+                    db.Entry(supplier).Property(s => s.Email).IsModified = true;
+                }
+                if (supplier.Address != formData.Address)
+                {
+                    supplier.Address = formData.Address;
+                    db.Entry(supplier).Property(s => s.Address).IsModified = true;
+                }
+                if (supplier.ContactNumber != formData.ContactNumber)
+                {
+                    supplier.ContactNumber = formData.ContactNumber;
+                    db.Entry(supplier).Property(s => s.ContactNumber).IsModified = true;
                 }
                 supplier.VERSION++;
                 db.SaveChanges();
@@ -410,6 +428,9 @@ namespace PartsIq.Models
                 {
                     Name = formData.Name,
                     InCharge = formData.InCharge,
+                    ContactNumber = formData.ContactNumber,
+                    Address = formData.Address,
+                    Email = formData.Email,
                     VERSION = 1,
                 });
                 db.SaveChanges();
