@@ -189,12 +189,12 @@
                             </button>
                             <button type="submit" data-id="@Model.PartID" class="btn btn-success" id="partEditBtn" data-effect="wave">Save changes</button>
                         </div>
-                        
+
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                
+
             </div>
         </div>
     </div>
@@ -212,6 +212,35 @@
                     <button type="button" class="btn btn-light my-2 confirm-status-btn" data-bs-dismiss="modal">Continue</button>
                     <button type="button" class="btn btn-secondary my-2" data-bs-dismiss="modal">Cancel</button>
                 </form>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="add-drawing-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div class="text-center mt-2 mb-4">
+                    <a href="index.html" class="text-success">
+                        <span><img src="assets/images/logo.png" alt="Lettstart Admin" height="24"></span>
+                    </a>
+                </div>
+
+                <form class="px-3" action="#" enctype="multipart/form-data">
+
+                    <div class="form-group">
+                        <label for="fileDrawing">File</label>
+                        <input class="form-control" type="file" id="fileDrawing"
+                               accept="application/pdf">
+                    </div>
+
+
+                    <button type="button" class="btn btn-primary my-2" id="drawing-submit">Submit</button>
+                    <button type="button" class="btn btn-secondary my-2" data-bs-dismiss="modal">Cancel</button>
+                </form>
+
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -259,6 +288,33 @@
             modal.modal('show'); // Show modal
         });
 
+        $(document).on('click', '#drawing-submit', function () {
+
+            var form = new FormData();
+            var fileInput = $('#fileDrawing')[0].files[0];
+            form.append("File", fileInput);
+            form.append("PartID", partId);
+
+            $.ajax({
+                url: '@Url.Action("AddDrawing", "Parts")',
+                method: "POST",
+                data: form,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    if (res.success) {
+                        alertify.success("Drawing added. Please refresh the page");
+                    }
+                }
+            });
+
+            $('#add-drawing-modal').modal('hide');
+        });
+
+        $(document).on('click', '#add-drawing-btn', function () {
+            $('#add-drawing-modal').modal('show');
+        });
+
        $(document).on('click', '.confirm-status-btn', function () {
             let partID = $(this).data('id');
 
@@ -281,7 +337,30 @@
                 }
             });
 
-        });
+       });
+
+        $(document).on('click', '#view-drawing-btn', function () {
+                $.ajax({
+                    url: '@Url.Action("GetDrawing","Parts")',
+                    data: { PartID: partId },
+                    method: "GET",
+                    xhrFields: {
+                        responseType: 'blob' // Expect a binary response
+                    },
+                    success: function (blob, status, xhr) {
+                        if (xhr.status === 200) {
+                            var url = window.URL.createObjectURL(blob);
+                            window.open(url, "_blank"); // Open the file in a new tab
+                        } else {
+                            alert("Failed to load drawing.");
+                        }
+                    },
+                    error: function () {
+                        alert("Error occurred while fetching the drawing.");
+                    }
+                });
+            });
+
 
             editPart.addEventListener('submit', function (e) {
                 e.preventDefault();

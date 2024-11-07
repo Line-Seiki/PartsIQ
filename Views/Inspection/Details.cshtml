@@ -101,6 +101,62 @@
     </div>
 </div>
 
+<!-- Modal -->
+
+<div id="control-number-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <div class="text-center mt-2 mb-4">
+                    <a href="index.html" class="text-success">
+                        <span><img src="assets/images/logo.png" alt="Lettstart Admin" height="24"></span>
+                    </a>
+                </div>
+
+                <form class="px-3" action="#">
+
+                    <div class="form-group">
+                        <label for="controlNumber">Enter Control Number</label>
+                        <input class="form-control" type="text" id="controlNumber" name="controlNumber"
+                               placeholder="Michael Zenaty">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emailaddress">Email address</label>
+                        <input class="form-control" type="email" id="emailaddress" required=""
+                               placeholder="john@deo.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input class="form-control" type="password" required="" id="password"
+                               placeholder="Enter your password">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="customCheck1">
+                            <label class="custom-control-label" for="customCheck1">
+                                I accept <a href="#">
+                                    Terms and
+                                    Conditions
+                                </a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <button class="btn btn-primary" id="control-number-btn" type="submit">Enter</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 @section scripts{
     <script>
         const infoContainer = document.getElementById('general-info-container');
@@ -669,7 +725,8 @@
                                          text: "Inspection ended.",
                                          type: "success",
                                      }).then(() => {
-                            window.location.href = "@Url.Action("Index", "Inspection")";
+                                         insertControlNumber(inspectionID);
+                            @*window.location.href = "@Url.Action("Index", "Inspection")";*@
                         });
                                  } else {
                                      alertify.error(`Error ${response.message} occured.`);
@@ -689,6 +746,45 @@
 
             });
 
+            function insertControlNumber(inspectionID) {
+                Swal.fire({
+                    title: "Control Number",
+                    type: "question",
+                    text: "Enter control number?",
+                    showCancelButton: !0,
+                    confirmButtonText: "Yes!",
+                    cancelButtonText: "No, cancel!",
+                    confirmButtonClass: "btn btn-success mt-2",
+                    cancelButtonClass: "btn btn-danger ms-2 mt-2",
+                    buttonsStyling: !1,
+                }).then(function (s) {
+                    s.value ?
+                        $.ajax({
+                            url: '@Url.Action("GetControlNumber", "Inspection")',
+                            data: { InspectionID: inspectionID },
+                            type: "POST",
+                            success: function (res) {
+                                if (res.success) {
+                                    alertify.success(`Control Number saved ${res.ControlNumber}`);
+                                    setTimeout(() => {
+                                        window.location.href = "@Url.Action("Index", "Inspection")";
+                                    }, 2000)
+
+                                } else {
+                                    alertify.error("Error occured");
+                                }
+                            }
+                        })
+                        :
+                        s.dismiss === Swal.DismissReason.cancel &&
+                        Swal.fire({
+                            title: "Not Saved",
+                            text: "Your imaginary file is safe :)",
+                            type: "error",
+                        });
+
+                });
+            }
 
 
         });
