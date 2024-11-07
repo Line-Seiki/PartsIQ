@@ -1,4 +1,5 @@
-﻿using PartsIq.Filters;
+﻿using Antlr.Runtime.Tree;
+using PartsIq.Filters;
 using PartsIq.Models;
 using PartsIq.Utility;
 using System;
@@ -198,7 +199,7 @@ namespace PartsIq.Controllers
         //POST End inspection
         [HttpPost]
         public ActionResult EndInspection(int inspectionID)
-        {
+        {     
             if (inspectionID < 0)
             {
                 return Json(new { message = "ID Cannot be null", success = false }, JsonRequestBehavior.AllowGet);
@@ -210,12 +211,16 @@ namespace PartsIq.Controllers
                 return Json(new { message = "Inspection cannot be found", success = false }, JsonRequestBehavior.AllowGet);
             }
 
+            int decision = db.InspectionItems
+                   .Where(item => item.InspectionID == inspectionID)
+                   .All(item => item.IsGood) ? 2 : 1;
+
             // Set the Status to 5 for the first DeliveryDetail with a Status value
             var deliveryDetail = inspection.DeliveryDetails.FirstOrDefault();
             if (deliveryDetail != null)
             {
                 deliveryDetail.StatusID = 5;
-                deliveryDetail.DecisionID = 1;
+                deliveryDetail.DecisionID = decision;
             }
 
             // End the inspection by setting the end date
@@ -269,6 +274,49 @@ namespace PartsIq.Controllers
             }
             return cavities;
         }
+        [HttpPost]
+        public ActionResult GetControlNumber(int inspectionID)
+        {
+            // Get the latest Inspection Item based on ControlNumber in descending order
+            var latestInspection = db.Inspections
+                                     .OrderByDescending(i => i.ControlNumber)
+                                     .FirstOrDefault();
+
+            // Get the current date for the control number format
+            var currentDate = DateTime.Now;
+            string yearMonth = $"{currentDate:yyyy-MM}";
+
+            // Initialize the running number (RN) based on the last inspection item
+            int runningNumber = 1;
+            if (latestInspection != null && latestInspection.ControlNumber != null)
+            {
+                // Extract the running number from the latest control number
+                var lastControlNumber = latestInspection.ControlNumber;
+                var lastDatePart = lastControlNumber.Substring(5, 7); // Extract YYYY-MM
+                var lastRunningNumberPart = lastControlNumber.Substring(13);
+
+                // Check if the last date part matches the current YYYY-MM format
+                if (lastDatePart == yearMonth && int.TryParse(lastRunningNumberPart, out int parsedRunningNumber))
+                {
+                    // Increment the last running number
+                    runningNumber = parsedRunningNumber + 1;
+                }
+            }
+
+            // Generate the new control number
+            var newControlNumber = $"INSP-{yearMonth}-{runningNumber:D3}";
+
+            var inspection = db.Inspections.Find(inspectionID);
+            if (inspection != null) 
+            {
+                inspection.ControlNumber = newControlNumber;
+            }
+            db.SaveChanges();
+
+            // Return the control number as JSON
+            return Json(new { success= true, ControlNumber = newControlNumber }, JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
     }
 }

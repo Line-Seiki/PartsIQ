@@ -10,6 +10,7 @@ using PartsIq.Models;
 using System.Runtime.InteropServices;
 using Microsoft.SqlServer.Server;
 using PartsIq.Filters;
+using System.IO;
 //Commenting 10/14/2024
 //using System.Web.UI.WebControls.WebParts;
 
@@ -413,6 +414,71 @@ namespace PartsIq.Controllers
                 return Json(new { success = false, message = $"{ex.Message}" });
             }
         }
+
+        [HttpPost]
+        public ActionResult AddDrawing(int PartID, HttpPostedFileBase File)
+        {
+            try
+            {
+                var part = db.Parts.Find(PartID);
+                if (part == null)
+                {
+                    return Json(new { success = false, message = "No part found." }, JsonRequestBehavior.AllowGet);
+                }
+
+                if (File != null && File.ContentLength > 0 && File.ContentType == "application/pdf")
+                {
+                    string fileName = Path.GetFileName(File.FileName);
+                    string directoryPath = Server.MapPath("~/assets/pdf/drawing");
+
+                    // Ensure the directory exists
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    string path = Path.Combine(directoryPath, fileName);
+
+                    // Save the file
+                    File.SaveAs(path);
+
+                    var fileAttachment = new FileAttachment
+                    {
+                        FilePath = path,
+                        FileName = fileName
+                    };
+                    db.FileAttachments.Add(fileAttachment);
+                    db.SaveChanges();
+
+                    part.FileAtttachment_ID = fileAttachment.FileID;
+                    db.SaveChanges();
+                    return Json(new { success = true, message = "Drawing uploaded successfully." }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Invalid file. Only PDF files are allowed." }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error occurred while uploading drawing.", error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult GetDrawing(int PartID)
+        {
+            var part = db.Parts.Find(PartID);
+            if (part == null || part.FileAttachment == null)
+            {
+                return Json(new { success = false, message = "No part or attachment found." }, JsonRequestBehavior.AllowGet);
+            }
+
+            var filePath = part.FileAttachment.FilePath;
+            var fileName = part.FileAttachment.FileName;
+
+            return File(filePath, "application/pdf", fileName); // Specify content type and file name
+        }
+
     }
 }
 
