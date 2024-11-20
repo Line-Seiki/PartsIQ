@@ -286,11 +286,11 @@ class DynamicTabs {
                                 </div>
                                 <div>
                                     <label for="UpperLimit-${id}" class="form-label">Upper Limit</label>
-                                    <input type="number" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit ? rowData.UpperLimit : ``}">
+                                    <input type="text" class="form-control" id="UpperLimit-${id}" name="UpperLimit" value="${rowData.UpperLimit ? rowData.UpperLimit : ``}">
                                 </div>
                                 <div>
                                     <label for="LowerLimit-${id}" class="form-label">Lower Limit</label>
-                                    <input type="number" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit ? rowData.LowerLimit : ``}">
+                                    <input type="text" class="form-control" id="LowerLimit-${id}" name="LowerLimit" value="${rowData.LowerLimit ? rowData.LowerLimit : ``}">
                                 </div>
                             </div>
 
