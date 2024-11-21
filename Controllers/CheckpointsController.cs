@@ -410,7 +410,9 @@ namespace PartsIq.Controllers
                     return Json(new { success = false, message = "No parts found." }, JsonRequestBehavior.AllowGet);
                 }
 
-                var Specification = data.IsMeasurement  ? data.SpecificationRange : data.Specification;
+                var Specification = data.IsMeasurement ? 
+                    (string.IsNullOrEmpty(data.SpecificationRange) || data.SpecificationRange == "none" ? 
+                    data.Specification : data.SpecificationRange) : data.Specification;
                 var checkpoint = new Checkpoint()
                 {
                     Part_ID = data.PartID,
