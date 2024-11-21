@@ -72,20 +72,28 @@
                 <div class="row align-items-center mb-3">
                     <form id="createPartForm">
                         <div class="mb-3">
-                            <label for="Code" class="form-label">Code</label>
+                            <label for="Code" class="form-label">Part Code</label>
                             <input type="text" class="form-control" id="Code" name="Code" recquired>
                         </div>
                         <div class="mb-3">
-                            <label for="DocNumber" class="form-label">Doc Number</label>
-                            <input type="text" class="form-control" id="DocNumber" name="DocNumber" required>
+                            <label for="Name" class="form-label">Part Name</label>
+                            <input type="text" class="form-control" id="Name" name="Name" required>
                         </div>
                         <div class="mb-3">
                             <label for="Model" class="form-label">Model</label>
                             <input type="text" class="form-control" id="Model" name="Model" required>
                         </div>
                         <div class="mb-3">
-                            <label for="Name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="Name" name="Name" required>
+                            <label for="DocNumber" class="form-label">Document No.</label>
+                            <input type="text" class="form-control" id="DocNumber" name="DocNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Type" class="form-label">Type</label>
+                            <select type="text" class="form-control" id="Type" name="Type">
+                                <option value="Metal">Metal</option>
+                                <option value="Plastic">Plastic</option>
+                                <option value="Others">Others</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="Priority" class="form-label">Priority Level</label>
@@ -95,14 +103,12 @@
                                 <option value="3">High Priority</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="Type" class="form-label">Type</label>
-                            <input type="text" class="form-control" id="Type" name="Type" required>
-                        </div>
                         <!--TODO: Add file attachment if possible-->
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" id="addDelivery" class="btn btn-success">Save</button>
+                            <button type="submit" id="addDelivery" class="btn btn-primary">
+                                Save
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -216,13 +222,13 @@
                         render: function (data, type, row) {
                             let searchIcon = row.IsSearchable ? 'mdi-magnify-remove-outline' : 'mdi-magnify';
                             let searchTitle = row.IsSearchable ? 'Hide in Search' : 'Allow Search';
-                            let searchClass = row.IsSearchable ? 'btn-warning' : 'btn-success';
+                            let searchClass = row.IsSearchable ? 'btn-dark' : 'btn-info';
                             let monitorIcon = row.IsMonitored ? 'mdi-stop-circle' : 'mdi-information';
                             let monitorTitle = row.IsMonitored ? 'Stop Monitoring' : 'Monitor Part';
-                            let monitorClass = row.IsMonitored ? 'btn-secondary' : 'btn-primary';
+                            let monitorClass = row.IsMonitored ? 'btn-dark' : 'btn-primary';
                             return `
                                             <div class="d-flex gap-1">
-                                                <button data-id="${data}" class="btn btn-sm btn-info waves-effect waves-light viewPartBtn" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                                <button data-id="${data}" class="btn btn-sm btn-primary waves-effect waves-light viewPartBtn" title="Edit"><i class="mdi mdi-pencil"></i></button>
                                                 <button class="btn btn-sm btn-danger waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#archiveModal"><i class="mdi mdi-archive-arrow-down" onclick="sendPartIdToForm(${data})" title="Archive Part"></i></button>
                                                 <button class="btn btn-sm ${monitorClass} waves-effect waves-light" data-bs-toggle="tooltip" data-bs-placement="top" title="${monitorTitle}" onclick="monitorPart(${data})"><i class="mdi ${monitorIcon}"></i></button>
                                                 <button class="btn btn-sm ${searchClass} waves-effect waves-light" data-bs-toggle="tooltip" data-bs-placement="top" title="${searchTitle}" onclick="searchVisibility(${data})"><i class="mdi ${searchIcon}"></i></button>
