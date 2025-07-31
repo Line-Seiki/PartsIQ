@@ -12,19 +12,19 @@ namespace PartsIq.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class FileAttachment
+    public partial class Status
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public FileAttachment()
+        public Status()
         {
-            this.Parts = new HashSet<Part>();
+            this.DeliveryDetails = new HashSet<DeliveryDetail>();
         }
     
-        public int FileID { get; set; }
-        public string FilePath { get; set; }
-        public string FileName { get; set; }
+        public int StatusID { get; set; }
+        public string StatusName { get; set; }
+        public string StatusColor { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Part> Parts { get; set; }
+        public virtual ICollection<DeliveryDetail> DeliveryDetails { get; set; }
     }
 }

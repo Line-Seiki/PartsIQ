@@ -19,11 +19,12 @@ namespace PartsIq.Models
         {
             this.DeliveryDetails = new HashSet<DeliveryDetail>();
             this.Inspections = new HashSet<Inspection>();
+            this.Inspections1 = new HashSet<Inspection>();
         }
     
         public string Email { get; set; }
         public bool IsActive { get; set; }
-        public byte IsLoggedIN { get; set; }
+        public bool IsLoggedIN { get; set; }
         public Nullable<System.DateTime> LastUpdate { get; set; }
         public string FirstName { get; set; }
         public string Password { get; set; }
@@ -31,11 +32,14 @@ namespace PartsIq.Models
         public int UserID { get; set; }
         public Nullable<int> UserGroup_ID { get; set; }
         public string LastName { get; set; }
+        public string Salt { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DeliveryDetail> DeliveryDetails { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Inspection> Inspections { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Inspection> Inspections1 { get; set; }
         public virtual UserGroupPermission UserGroupPermission { get; set; }
     }
 }

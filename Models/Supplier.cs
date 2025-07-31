@@ -12,33 +12,23 @@ namespace PartsIq.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Part
+    public partial class Supplier
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Part()
+        public Supplier()
         {
-            this.Checkpoints = new HashSet<Checkpoint>();
             this.Deliveries = new HashSet<Delivery>();
         }
     
-        public int PartID { get; set; }
-        public string Code { get; set; }
-        public System.DateTime DateMonitored { get; set; }
-        public string DocNumber { get; set; }
-        public bool IsMonitored { get; set; }
-        public string Model { get; set; }
+        public int SupplierID { get; set; }
+        public string InCharge { get; set; }
         public string Name { get; set; }
-        public Nullable<int> Priority { get; set; }
-        public Nullable<int> Version { get; set; }
-        public Nullable<int> FileAtttachment_ID { get; set; }
-        public string Type { get; set; }
-        public bool IsActive { get; set; }
-        public bool IsSearchable { get; set; }
+        public int VERSION { get; set; }
+        public string ContactNumber { get; set; }
+        public string Address { get; set; }
+        public string Email { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Checkpoint> Checkpoints { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Delivery> Deliveries { get; set; }
-        public virtual FileAttachment FileAttachment { get; set; }
     }
 }

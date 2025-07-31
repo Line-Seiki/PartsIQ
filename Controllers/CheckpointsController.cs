@@ -15,7 +15,6 @@ using Microsoft.Ajax.Utilities;
 using System.Reflection;
 using System.ComponentModel.Design;
 using System.IO;
-using Microsoft.SqlServer.Server;
 using System.Runtime.CompilerServices;
 using PartsIq.Filters;
 

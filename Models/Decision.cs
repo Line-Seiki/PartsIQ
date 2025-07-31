@@ -12,19 +12,20 @@ namespace PartsIq.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class FileAttachment
+    public partial class Decision
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public FileAttachment()
+        public Decision()
         {
-            this.Parts = new HashSet<Part>();
+            this.DeliveryDetails = new HashSet<DeliveryDetail>();
         }
     
-        public int FileID { get; set; }
-        public string FilePath { get; set; }
-        public string FileName { get; set; }
+        public int DecisionID { get; set; }
+        public string Name { get; set; }
+        public bool IsArchived { get; set; }
+        public int VERSION { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Part> Parts { get; set; }
+        public virtual ICollection<DeliveryDetail> DeliveryDetails { get; set; }
     }
 }

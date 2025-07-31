@@ -12,19 +12,21 @@ namespace PartsIq.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class FileAttachment
+    public partial class Ncr
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public FileAttachment()
+        public Ncr()
         {
-            this.Parts = new HashSet<Part>();
+            this.Inspections = new HashSet<Inspection>();
         }
     
-        public int FileID { get; set; }
-        public string FilePath { get; set; }
-        public string FileName { get; set; }
+        public int NcrID { get; set; }
+        public bool IsCompleted { get; set; }
+        public string NcrNumber { get; set; }
+        public string Remarks { get; set; }
+        public int Version { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Part> Parts { get; set; }
+        public virtual ICollection<Inspection> Inspections { get; set; }
     }
 }

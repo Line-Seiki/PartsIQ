@@ -12,30 +12,21 @@ namespace PartsIq.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Checkpoint
+    public partial class Cavity
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Checkpoint()
+        public Cavity()
         {
             this.InspectionItems = new HashSet<InspectionItem>();
         }
     
-        public int CheckpointId { get; set; }
-        public int Part_ID { get; set; }
-        public string Code { get; set; }
-        public string InspectionPart { get; set; }
-        public bool IsActive { get; set; }
-        public bool IsMeasurement { get; set; }
-        public Nullable<double> LimitLower { get; set; }
-        public Nullable<double> LimitUpper { get; set; }
-        public string Note { get; set; }
-        public string SamplingMethod { get; set; }
-        public string Specification { get; set; }
-        public string Tools { get; set; }
-        public string LevelText { get; set; }
-        public Nullable<double> LevelNumber { get; set; }
+        public int CavityID { get; set; }
+        public string Name { get; set; }
+        public int Size { get; set; }
+        public int Version { get; set; }
+        public int InspectionID { get; set; }
     
-        public virtual Part Part { get; set; }
+        public virtual Inspection Inspection { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<InspectionItem> InspectionItems { get; set; }
     }
