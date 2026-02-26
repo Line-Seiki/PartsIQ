@@ -19,7 +19,10 @@ namespace PartsIq.Models
         {
             this.DeliveryDetails = new HashSet<DeliveryDetail>();
             this.Inspections = new HashSet<Inspection>();
+<<<<<<< HEAD
             this.Inspections1 = new HashSet<Inspection>();
+=======
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         }
     
         public string Email { get; set; }
@@ -37,8 +40,11 @@ namespace PartsIq.Models
         public virtual ICollection<DeliveryDetail> DeliveryDetails { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Inspection> Inspections { get; set; }
+<<<<<<< HEAD
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Inspection> Inspections1 { get; set; }
+=======
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         public virtual UserGroupPermission UserGroupPermission { get; set; }
     }
 }

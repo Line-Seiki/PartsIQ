@@ -27,11 +27,29 @@ namespace PartsIq.Controllers
         // GET: /Evaluation/Details/id
         public ActionResult Details(int id)
         {
+<<<<<<< HEAD
             var detail = dbContext.GetEvaluationDataById(id);
+=======
+            var find = db.DeliveryDetails.Find(id);
+            if (find == null)
+            {
+                return HttpNotFound();
+            }
+            var detail = dbContext.GetEvaluationDataById(id);
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             if (detail == null)
             {
                 return HttpNotFound();
             }
+<<<<<<< HEAD
+=======
+            if (detail.DecisionID != 1)
+            {
+                return Json("Already evaluated or not yet inspected", JsonRequestBehavior.AllowGet);
+            }
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             var decisions = DecisionListItem();
             decisions.RemoveAt(0);
             var defaultUserID = 5; // Change this to Session ID
@@ -40,8 +58,21 @@ namespace PartsIq.Controllers
             {
                 detail.EvaluatorName = defaultUser.Name;
                 detail.EvaluatorID = defaultUser.UserId;
+<<<<<<< HEAD
             } 
             
+=======
+            }
+
+            var part = db.Parts.Find(detail.PartID);
+            if (part == null)
+            {
+                return HttpNotFound();
+            }
+            var checkpoints = part.Checkpoints.ToList();
+
+            ViewBag.Checkpoints = checkpoints;
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             ViewBag.DecisionList = decisions;
             return View("Details", detail);
         }
@@ -50,12 +81,30 @@ namespace PartsIq.Controllers
         public JsonResult GetEvaluationData()
         {
             var delivery = db.DeliveryDetails.Include(drs => drs.Delivery)
+<<<<<<< HEAD
             .Include(dr => dr.Inspection) // Eagerly load related Inspection
             .Select(s => new EvaluationData {
                 DecisionID = s.DecisionID,
                 DecisionName = s.Decision.Name, // Accessing related Decision entity
                 EvaluatorID = s.Inspection.EvaluatorID, // Accessing related Inspection fields
                 EvaluatorName = s.Inspection.User.FirstName + " " + s.Inspection.User.LastName,
+=======
+            .Include(dr => dr.Inspection)
+            .Include(u => u.User)// Eagerly load related Inspection
+            .Select(s => new EvaluationData
+            {
+
+                DeliveryDetailID = s.DeliveryDetailID,
+                DecisionID = s.DecisionID,
+                DecisionName = s.Decision.Name, // Accessing related Decision entity
+                EvaluatorID = s.Inspection.EvaluatorID, // Accessing related Inspection fields
+                EvaluatorName = s.Inspection.EvaluatorID.HasValue
+                        ? s.Inspection.User.FirstName + " " + s.Inspection.User.LastName
+                        : " ",
+                InspectorName = s.Inspection.UserID.HasValue
+                        ? s.Inspection.User.FirstName + " " + s.Inspection.User.LastName
+                        : "No Inspector",
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 //InspectorID = s.Inspection.UserID,
                 //Inspector = s.Inspection.User.FirstName + " " + s.Inspection.User.LastName,
                 ControlNumber = s.Inspection.ControlNumber,
@@ -72,8 +121,11 @@ namespace PartsIq.Controllers
             return Json(new { message = "success", data = delivery.ToList() }, JsonRequestBehavior.AllowGet);
         }
 
+<<<<<<< HEAD
 
         //POST /Evaluation/Create/
+=======
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CreateEvaluation()
@@ -93,7 +145,11 @@ namespace PartsIq.Controllers
                 var comment = form.Get("Comments");
 
                 var deliveryDetail = db.DeliveryDetails.Find(Convert.ToInt32(detailID));
+<<<<<<< HEAD
                 if (deliveryDetail == null) 
+=======
+                if (deliveryDetail == null)
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 {
                     return HttpNotFound();
                 }
@@ -108,6 +164,7 @@ namespace PartsIq.Controllers
 
                 db.SaveChanges();
 
+<<<<<<< HEAD
                 return Json(new {message="Success", success=true}, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex) 
@@ -115,6 +172,15 @@ namespace PartsIq.Controllers
                 return Json(new { message = $"Error ${ex.Message} occured.", success = false }, JsonRequestBehavior.AllowGet);
             }
            
+=======
+                return Json(new { message = "Success", success = true }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { message = $"Error ${ex.Message} occured.", success = false }, JsonRequestBehavior.AllowGet);
+            }
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         }
 
         #region HELPERS

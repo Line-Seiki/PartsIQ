@@ -91,8 +91,13 @@
                                         </div>
                                     </div>
                                     <div>
+<<<<<<< HEAD
                                         <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i> Search</button>
                                         <button type="reset" class="btn btn-secondary">Reset</button>
+=======
+                                        <button type="submit" class="btn btn-primary" disabled><i class="mdi mdi-magnify"></i> Search</button>
+                                        <button type="reset" class="btn btn-secondary" disabled>Reset</button>
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                                     </div>
                                 </div>
                             </div>
@@ -128,6 +133,7 @@
 @section scripts {
     <script src="~/Utility/JS/helpers.js"></script>
     <script>
+<<<<<<< HEAD
         $(document).ready(function () {
             var evaluationTable;
 
@@ -186,6 +192,57 @@
       
            
         
+=======
+        let evaluationTable;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            evaluationTable = $('#evaluation-table').DataTable({
+                ajax: {
+                    url: '/Evaluation/GetEvaluationData',
+                    dataSrc: 'data'
+                },
+                lengthChange: false,
+                responsive: false,
+                columns: [
+                    {
+                        data: "DeliveryDetailID",
+                        render: function (data, type, row, meta) {
+                            return `
+                            <div class="d-flex gap-1 flex-lg-row flex-md-column">
+                                <button class="btn btn-sm btn-secondary waves-effect waves-light mb-1" onclick="evaluateItem(${meta.row})" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class="mdi mdi-clipboard-check-outline"></i></button>
+                            </div>`;
+                        }
+                    },
+                    { data: 'DecisionName' },
+                    { data: 'EvaluatorName' },
+                    { data: 'InspectorName' },
+                    { data: 'ControlNumber' },
+                    { data: 'InspectorComments'},
+                    {
+                        data: 'DateFinished',
+                        render: function (data, type, row) {
+                            return `${convertDateStringToFormattedString(data)}`
+                        }
+                    },
+                    { data: 'PartCode' },
+                    { data: 'PartName' },
+                    { data: 'LotNumber' },
+                    { data: 'LotQuantity' },
+                    { data: 'DRNumber' },
+                    {
+                        data: 'Time',
+                        render: function (data, type, row)
+                        {
+                            return `${convertIntToTimeFormat(data)}`
+                        }
+                    },
+                    { data: 'Comments' },
+                    { data: 'NCRNumber' },
+                    { data: 'Purpose' },
+                ],
+            });
+        });
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
 
         function evaluateItem(rowIndex) {
             const { DeliveryDetailID } = evaluationTable.row(rowIndex).data();

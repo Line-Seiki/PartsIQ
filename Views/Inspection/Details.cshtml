@@ -102,10 +102,17 @@
         $(document).ready(function () {
 
             let cavities = @Html.Raw(Json.Encode(ViewBag.JsonCavities));
+<<<<<<< HEAD
   
 
             function calculate(obj) {
                
+=======
+
+
+            function calculate(obj) {
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 let judgement = "Good";
                 let judgementColor = "success";
                 let minMeasurement = Infinity; // Start with max value
@@ -129,7 +136,10 @@
                         Judgement: ob.Judgement
                     }));
 
+<<<<<<< HEAD
                 console.log(data);
+=======
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
 
                 // Check if there's valid measurement data
                 if (data.length === 0) {
@@ -144,7 +154,11 @@
                 }
 
                 // Calculate min, max, and judgement
+<<<<<<< HEAD
                
+=======
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
 
                 data.forEach((measurement) => {
                     if (measurement.Measurement < minMeasurement) {
@@ -198,7 +212,11 @@
                 }
                 if ($('.submit-inspection-item').length) {
                     $('.submit-inspection-item').attr('data-checkpointid', checkpointID);
+<<<<<<< HEAD
                     
+=======
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 }
                 // Update the data and reload the table
                 inspectionTable.ajax.reload();
@@ -248,9 +266,15 @@
                     </button>`;
 
                 // Toggle button content based on isMeasurement value
+<<<<<<< HEAD
                 if (isMeasurement == 1) {
                     buttonDiv.html(measurementBtn);
                 } else if (isMeasurement == 0) {
+=======
+                if (isMeasurement == "True") {
+                    buttonDiv.html(measurementBtn);
+                } else if (isMeasurement == "False") {
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                     buttonDiv.html(attrBtn);
                 }
             }
@@ -318,7 +342,11 @@
                 // Check if this logs the correct cavityID
                 let upperLimit = $('#UpperLimit').val();
                 let lowerLimit = $('#LowerLimit').val();
+<<<<<<< HEAD
                 if (isMeasurement == "1") {
+=======
+                if (isMeasurement == "True") {
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                     measurement = Number(measurement);
                     if (measurement <= upperLimit && measurement >= lowerLimit) {
                         Judgement = 1;
@@ -326,7 +354,11 @@
                 } else {
                     Judgement = $(this).data("judgement");
                     attribute = measurement;
+<<<<<<< HEAD
                 } 
+=======
+                }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
 
 
                 //If IsMeasurement, validate to Lower and Upperlimit if it is GOOD or NOT GOOD
@@ -381,7 +413,11 @@
                     let button = $('.submit-inspection-item');
                     d.CheckpointID = $('#CheckpointInfo').val();
                     d.InspectionID = $(button).data('inspectionid');
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 },
                 dataSrc: 'data'
             },
@@ -412,7 +448,11 @@
                 {
                     data: "OrigMeasurement",
                     sortable: false,
+<<<<<<< HEAD
                    
+=======
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 },
                 {
                     data: "Judgement",
@@ -424,6 +464,17 @@
                 },
             ],
             order: [[0, 'asc']],
+<<<<<<< HEAD
+=======
+            rowCallback: function (row, data, index) {
+                // Check the judgment value and apply the class to the entire row
+                if (data.Judgement == "0") {
+                    $('td', row).addClass('text-danger'); // Apply class to all <td> in the row
+                } else if (data.Judgement == "1") {
+                    $('td', row).addClass(''); // Apply class to all <td> in the row
+                }
+            },
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             drawCallback: function (settings) {
                 var api = this.api();
 
@@ -431,7 +482,10 @@
                 var data = api.rows({ page: 'current' }).data().toArray();
 
                 if (data.length > 0 && data) {
+<<<<<<< HEAD
                    
+=======
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
 
                     var sampleItemsArray = data.map(function (item) {
                         return item.SampleNumber;
@@ -441,19 +495,34 @@
                     var maxSampleItem = Math.max(...sampleItemsArray);
 
                     if ($('#SampleSize').val() > maxSampleItem) {
+<<<<<<< HEAD
                         $('#SampleNumber').val(maxSampleItem + 1);
                         enableDisableToggle(false);
                         
+=======
+
+                        $('#SampleNumber').val(maxSampleItem + 1);
+                        enableDisableToggle(false);
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                     } else {
                         $('#SampleNumber').val(maxSampleItem);
                         enableDisableToggle(true);
 
                     }
                     // Log the next sample number
+<<<<<<< HEAD
                    
 
                 } else {
                     $('#SampleNumber').val(1);
+=======
+
+
+                } else {
+                    $('#SampleNumber').val(1);
+                    enableDisableToggle(false);
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                 }
                 let flags = calculate(data);
                 console.log(flags);
@@ -492,7 +561,13 @@
                                          title: "Success!",
                                          text: "Inspection ended.",
                                          type: "success",
+<<<<<<< HEAD
                                      })
+=======
+                                     }).then(() => {
+                            window.location.href = "@Url.Action("Index", "Inspection")";
+                        });
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                                  } else {
                                      alertify.error(`Error ${response.message} occured.`);
                                  }
@@ -508,7 +583,11 @@
                             type: "error",
                         });
                 });
+<<<<<<< HEAD
                
+=======
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             });
 
 

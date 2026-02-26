@@ -75,7 +75,11 @@
             </div>
             <div class="d-flex flex-column align-items-start w-100">
                 <div class="d-flex justify-content-center w-100" id="inspection-buttons">
+<<<<<<< HEAD
                     @if (Model.CheckpointInfo.IsMeasurement == 1)
+=======
+                    @if (Model.CheckpointInfo.IsMeasurement)
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
                     {
                         <button class="submit-inspection-item btn btn-success" data-measurement="@Model.CheckpointInfo.Checkpoints.FirstOrDefault().IsMeasurement" data-checkpointID="@Model.CheckpointID" data-inspectionID="@Model.InspectionID" data-cavityID="@Model.CavityID" type="button">
                             <i class="mdi mdi-check-bold"></i> Submit
@@ -110,7 +114,11 @@
 
         </form>
         <div class="d-flex flex-column mt-3 gap-2">
+<<<<<<< HEAD
             <p class="mb-0">Overall Judgement: <span class="fs-1 text-success" id="overallJudgement">Good</span></p>
+=======
+            <p class="mb-0">Overall Judgement: <span id="overallJudgement" class="fs-1 text-success">Good</span></p>
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             <div class="divider"></div>
             <div class="row">
                 <div class="col-lg-4 col-sm-12"><button class="btn btn-danger" data-id="@Model.InspectionID" id="end-inspection-btn">End Inspection</button></div>

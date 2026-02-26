@@ -24,6 +24,10 @@ namespace PartsIq.Models
         public int StatusID { get; set; }
         public DateTime DateDelivered { get; set; }
         public DateTime Deadline { get; set; }
+<<<<<<< HEAD
+=======
+        public int PartID { get; set; }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         public string PartCode { get; set; }
         public string PartName { get; set; }
         public int? UserID { get; set; }
@@ -112,7 +116,11 @@ namespace PartsIq.Models
         public string Name { get; set; }
     }
     #endregion
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
     #region Inspection
     public class InspectionData : SchedulingData
     {
@@ -170,7 +178,11 @@ namespace PartsIq.Models
         public string CavityNumber { get; set; }
         public int InspectionID { get; set; }
         public int CavityID { get; set; }
+<<<<<<< HEAD
         public int CheckpointID {  get; set; }
+=======
+        public int CheckpointID { get; set; }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
 
 
 
@@ -193,7 +205,11 @@ namespace PartsIq.Models
 
         public int SampleSize { get; set; }
 
+<<<<<<< HEAD
         public bool IsMeasurement { get; set; }  
+=======
+        public bool IsMeasurement { get; set; }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
     }
 
     public class FormCheckpoint
@@ -201,7 +217,11 @@ namespace PartsIq.Models
         public string Code { get; set; }
         public string InspectionPart { get; set; }
         public string Specification { get; set; }
+<<<<<<< HEAD
         public string SpecificationRange {  get; set; } 
+=======
+        public string SpecificationRange { get; set; }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         public double UpperLimit { get; set; }
         public double LowerLimit { get; set; }
         public bool IsMeasurement { get; set; }
@@ -231,7 +251,11 @@ namespace PartsIq.Models
     #region Cavity
     public class CavityMaxSample : Cavity
     {
+<<<<<<< HEAD
         public int? MaxSampleNumber {  get; set; }
+=======
+        public int? MaxSampleNumber { get; set; }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
     }
     #endregion
 
@@ -242,14 +266,24 @@ namespace PartsIq.Models
         public int? DecisionID { get; set; }
         public string DecisionName { get; set; }
         public int? EvaluatorID { get; set; }
+<<<<<<< HEAD
+=======
+        public string InspectorName { get; set; }  
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         public string EvaluatorName { get; set; }
         public int? Time { get; set; }
         public string NCRNumber { get; set; }
         public int NCRID { get; set; }
         public string Purpose { get; set; }
         public int CavityNum { get; set; }
+<<<<<<< HEAD
         public string TimeString 
         { get 
+=======
+        public string TimeString
+        {
+            get
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
             {
                 if (Time.HasValue)
                 {
@@ -260,7 +294,11 @@ namespace PartsIq.Models
                 {
                     return "";
                 }
+<<<<<<< HEAD
             } 
+=======
+            }
+>>>>>>> c3cc2e3e7fb7bafaa5d039b9ca65295f38187ce4
         }
 
     }
