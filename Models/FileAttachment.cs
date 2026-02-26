@@ -20,9 +20,9 @@ namespace PartsIq.Models
             this.Parts = new HashSet<Part>();
         }
     
-        public int FileId { get; set; }
+        public int FileID { get; set; }
         public string FilePath { get; set; }
-        public byte[] FileName { get; set; }
+        public string FileName { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Part> Parts { get; set; }

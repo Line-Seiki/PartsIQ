@@ -32,6 +32,8 @@ namespace PartsIq.Models
         public string SamplingMethod { get; set; }
         public string Specification { get; set; }
         public string Tools { get; set; }
+        public string LevelText { get; set; }
+        public Nullable<double> LevelNumber { get; set; }
     
         public virtual Part Part { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

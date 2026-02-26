@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace PartsIq.Controllers
 {
-    [CustomAuthorize]
+    
     public class HomeController : Controller
     {
         public ActionResult Index()
